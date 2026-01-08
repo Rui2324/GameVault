@@ -1,0 +1,29 @@
+# Node / JS
+node_modules/
+npm-debug.log*
+yarn.lock
+pnpm-lock.yaml
+
+# Builds
+dist/
+build/
+
+# Ambiente
+.env
+.env.local
+.env.*.local
+
+# Vite
+.vite/
+
+# VSCode / IDE
+.vscode/
+.idea/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
