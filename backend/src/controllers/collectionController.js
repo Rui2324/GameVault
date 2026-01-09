@@ -24,7 +24,8 @@ async function listMyCollection(req, res) {
       titulo: e.title,
       plataforma: e.platform,
       genero: e.genre,
-      url_capa: e.cover_url,
+      // 👇 aqui o nome tem de bater com o que o frontend espera (capa_url)
+      capa_url: e.cover_url,
     }));
 
     return res.json({ colecao });
@@ -73,7 +74,8 @@ async function addToMyCollection(req, res) {
       titulo: entry.title,
       plataforma: entry.platform,
       genero: entry.genre,
-      url_capa: entry.cover_url,
+      // 👇 aqui igual
+      capa_url: entry.cover_url,
     };
 
     return res.status(201).json({ entrada: resposta });
@@ -121,7 +123,8 @@ async function updateMyCollectionEntry(req, res) {
       titulo: updated.title,
       plataforma: updated.platform,
       genero: updated.genre,
-      url_capa: updated.cover_url,
+      // 👇 igual
+      capa_url: updated.cover_url,
     };
 
     return res.json({ entrada: resposta });

@@ -10,6 +10,7 @@ const collectionRoutes = require("./src/routes/collectionRoutes");
 const statsRoutes = require("./src/routes/statsRoutes");
 const wishlistRoutes = require("./src/routes/wishlistRoutes");
 const authMiddleware = require("./src/middleware/authMiddleware");
+const externalGamesRoutes = require("./src/routes/externalGamesRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -28,15 +29,18 @@ app.get("/api/health", async (req, res) => {
   }
 });
 
-// públicas
+// rotas públicas
 app.use("/api/auth", authRoutes);
+// rotas externas já vêm com authMiddleware lá dentro
+app.use("/api/external-games", externalGamesRoutes);
 
-// protegidas
+// rotas protegidas
 app.use("/api/games", authMiddleware, gameRoutes);
 app.use("/api/collection", authMiddleware, collectionRoutes);
 app.use("/api/stats", authMiddleware, statsRoutes);
 app.use("/api/wishlist", authMiddleware, wishlistRoutes);
 
+// 404
 app.use((req, res) => {
   res.status(404).json({ mensagem: "Rota não encontrada." });
 });
