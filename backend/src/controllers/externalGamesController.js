@@ -27,17 +27,44 @@ async function searchExternalGames(req, res) {
   }
 }
 
+// Helper: garante que existe jogo em `games` para um external_id.
+// Devolve o game_id local.
+async function ensureGameInLocalDb(conn, external_id) {
+  const [existing] = await conn.query(
+    "SELECT id FROM games WHERE external_id = ?",
+    [external_id]
+  );
+
+  if (existing.length > 0) {
+    return existing[0].id;
+  }
+
+  // Buscar detalhes à RAWG
+  const jogoExt = await externalService.getGameDetails(external_id);
+
+  const [insertResult] = await conn.query(
+    `INSERT INTO games
+      (external_id, title, slug, platform, genre, release_date, cover_url, description, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+    [
+      jogoExt.external_id,
+      jogoExt.title,
+      jogoExt.slug,
+      jogoExt.platforms,
+      jogoExt.genres,
+      jogoExt.release_date,
+      jogoExt.cover_url,
+      jogoExt.description,
+    ]
+  );
+
+  return insertResult.insertId;
+}
+
 // POST /api/external-games/import/collection
 // Body: { external_id, rating, hours_played, status, notes }
 async function importExternalToCollection(req, res) {
-  // ✅ Defesa extra: se por algum motivo o middleware não meter o user, não rebenta o servidor
-  if (!req.user || !req.user.id) {
-    return res
-      .status(401)
-      .json({ mensagem: "Utilizador não autenticado." });
-  }
-
-  const userId = req.user.id;
+  const userId = req.userId;
   const { external_id, rating, hours_played, status, notes } = req.body;
 
   if (!external_id) {
@@ -46,46 +73,12 @@ async function importExternalToCollection(req, res) {
       .json({ mensagem: "Campo 'external_id' é obrigatório." });
   }
 
-  let conn;
+  const conn = await pool.getConnection();
   try {
-    conn = await pool.getConnection();
     await conn.beginTransaction();
 
-    // 1) Ver se já existe jogo com esse external_id
-    const [existing] = await conn.query(
-      "SELECT id FROM games WHERE external_id = ?",
-      [external_id]
-    );
+    const gameId = await ensureGameInLocalDb(conn, external_id);
 
-    let gameId;
-
-    if (existing.length > 0) {
-      // Já existe, reutilizamos
-      gameId = existing[0].id;
-    } else {
-      // 2) Buscar detalhes ao RAWG e inserir na tabela games
-      const jogoExt = await externalService.getGameDetails(external_id);
-
-      const [insertResult] = await conn.query(
-        `INSERT INTO games
-          (external_id, title, slug, platform, genre, release_date, cover_url, description, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
-        [
-          jogoExt.external_id,
-          jogoExt.title,
-          jogoExt.slug,
-          jogoExt.platforms,
-          jogoExt.genres,
-          jogoExt.release_date,
-          jogoExt.cover_url,
-          jogoExt.description,
-        ]
-      );
-
-      gameId = insertResult.insertId;
-    }
-
-    // 3) Criar entrada na collection_entries para este utilizador
     const [insertCollection] = await conn.query(
       `INSERT INTO collection_entries
         (user_id, game_id, rating, hours_played, status, notes, created_at, updated_at)
@@ -108,21 +101,74 @@ async function importExternalToCollection(req, res) {
       game_id: gameId,
     });
   } catch (err) {
-    if (conn) {
-      try {
-        await conn.rollback();
-      } catch (_) {}
+    await conn.rollback();
+    if (err.code === "ER_DUP_ENTRY") {
+      return res.status(409).json({
+        mensagem: "Este jogo já existe na tua coleção.",
+      });
     }
-    console.error("Erro ao importar jogo externo:", err.message);
+
+    console.error("Erro ao importar jogo externo (coleção):", err.message);
     return res
       .status(500)
       .json({ mensagem: "Erro ao importar jogo para a coleção." });
   } finally {
-    if (conn) conn.release();
+    conn.release();
+  }
+}
+
+// POST /api/external-games/import/wishlist
+// Body: { external_id }
+async function importExternalToWishlist(req, res) {
+  const userId = req.userId;
+  const { external_id } = req.body;
+
+  if (!external_id) {
+    return res
+      .status(400)
+      .json({ mensagem: "Campo 'external_id' é obrigatório." });
+  }
+
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+
+    const gameId = await ensureGameInLocalDb(conn, external_id);
+
+    const [insertWishlist] = await conn.query(
+      `INSERT INTO wishlist_entries
+        (user_id, game_id, created_at, updated_at)
+       VALUES (?, ?, NOW(), NOW())`,
+      [userId, gameId]
+    );
+
+    await conn.commit();
+
+    return res.status(201).json({
+      mensagem: "Jogo adicionado à wishlist com sucesso.",
+      wishlist_entry_id: insertWishlist.insertId,
+      game_id: gameId,
+    });
+  } catch (err) {
+    await conn.rollback();
+
+    if (err.code === "ER_DUP_ENTRY") {
+      return res.status(409).json({
+        mensagem: "Este jogo já está na tua wishlist.",
+      });
+    }
+
+    console.error("Erro ao importar jogo externo (wishlist):", err.message);
+    return res
+      .status(500)
+      .json({ mensagem: "Erro ao adicionar jogo à wishlist." });
+  } finally {
+    conn.release();
   }
 }
 
 module.exports = {
   searchExternalGames,
   importExternalToCollection,
+  importExternalToWishlist,
 };

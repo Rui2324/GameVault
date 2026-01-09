@@ -6,16 +6,12 @@ const authMiddleware = require("../middleware/authMiddleware");
 const {
   searchExternalGames,
   importExternalToCollection,
+  importExternalToWishlist,
 } = require("../controllers/externalGamesController");
 
-// se quiseres a pesquisa protegida, mete também o middleware aqui
+// Todas estas rotas são protegidas (precisam de token)
 router.get("/search", authMiddleware, searchExternalGames);
-
-// importar para a coleção TEM MESMO de estar protegido
-router.post(
-  "/import/collection",
-  authMiddleware,
-  importExternalToCollection
-);
+router.post("/import/collection", authMiddleware, importExternalToCollection);
+router.post("/import/wishlist", authMiddleware, importExternalToWishlist);
 
 module.exports = router;
