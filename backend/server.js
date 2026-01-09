@@ -1,5 +1,7 @@
+// server.js
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 require("dotenv").config();
 
 const pool = require("./src/config/db");
@@ -18,6 +20,9 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
+// servir ficheiros de imagem
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 // healthcheck
 app.get("/api/health", async (req, res) => {
   try {
@@ -29,18 +34,16 @@ app.get("/api/health", async (req, res) => {
   }
 });
 
-// rotas públicas
+// públicas
 app.use("/api/auth", authRoutes);
-// rotas externas já vêm com authMiddleware lá dentro
 app.use("/api/external-games", externalGamesRoutes);
 
-// rotas protegidas
+// protegidas
 app.use("/api/games", authMiddleware, gameRoutes);
 app.use("/api/collection", authMiddleware, collectionRoutes);
 app.use("/api/stats", authMiddleware, statsRoutes);
 app.use("/api/wishlist", authMiddleware, wishlistRoutes);
 
-// 404
 app.use((req, res) => {
   res.status(404).json({ mensagem: "Rota não encontrada." });
 });
