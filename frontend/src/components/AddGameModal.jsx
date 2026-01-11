@@ -192,13 +192,13 @@ export default function AddGameModal({
       />
 
       {/* modal */}
-      <div className="relative z-10 w-[min(980px,92vw)] max-h-[85vh] overflow-hidden rounded-2xl bg-white shadow-2xl border border-slate-200">
-        <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
+      <div className="relative z-10 w-[min(980px,92vw)] max-h-[85vh] overflow-hidden rounded-2xl bg-white dark:bg-slate-800 shadow-2xl border border-slate-200 dark:border-slate-700">
+        <div className="flex items-start justify-between gap-3 border-b border-slate-100 dark:border-slate-700 px-5 py-4">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
               Adicionar jogo (RAWG)
             </h2>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Pesquisa pelo nome, vê detalhes e importa para a tua coleção.
             </p>
           </div>
@@ -206,7 +206,7 @@ export default function AddGameModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            className="rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600"
           >
             Fechar
           </button>
@@ -218,28 +218,28 @@ export default function AddGameModal({
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Ex.: red dead"
-              className="w-full sm:w-[520px] rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full sm:w-[520px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
-            <div className="text-xs text-slate-500">{totalResultadosTexto}</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">{totalResultadosTexto}</div>
           </div>
 
-          {erro && <div className="mt-3 text-sm text-rose-700">{erro}</div>}
+          {erro && <div className="mt-3 text-sm text-rose-700 dark:text-rose-400">{erro}</div>}
 
-          <div className="mt-4 max-h-[55vh] overflow-auto rounded-xl border border-slate-200">
+          <div className="mt-4 max-h-[55vh] overflow-auto rounded-xl border border-slate-200 dark:border-slate-700">
             {(!podePesquisar && resultados.length === 0) ? (
-              <div className="px-4 py-10 text-center text-sm text-slate-500">
+              <div className="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                 Escreve para começar a pesquisar.
               </div>
             ) : loading && resultados.length === 0 ? (
-              <div className="px-4 py-10 text-center text-sm text-slate-500">
+              <div className="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                 A pesquisar…
               </div>
             ) : resultados.length === 0 ? (
-              <div className="px-4 py-10 text-center text-sm text-slate-500">
+              <div className="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                 Sem resultados.
               </div>
             ) : (
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-slate-100 dark:divide-slate-700">
                 {resultados.map((item) => {
                   const externalId = getExternalId(item);
                   const title = getTitle(item);
@@ -255,7 +255,7 @@ export default function AddGameModal({
 
                   return (
                     <div key={String(externalId ?? title)} className="flex gap-3 px-4 py-3">
-                      <div className="h-16 w-12 overflow-hidden rounded-md bg-slate-200 flex-shrink-0">
+                      <div className="h-16 w-12 overflow-hidden rounded-md bg-slate-200 dark:bg-slate-700 flex-shrink-0">
                         {cover ? (
                           <img
                             src={cover}
@@ -263,7 +263,7 @@ export default function AddGameModal({
                             className="h-full w-full object-cover"
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center text-[10px] text-slate-500">
+                          <div className="flex h-full w-full items-center justify-center text-[10px] text-slate-500 dark:text-slate-400">
                             Sem capa
                           </div>
                         )}
@@ -272,10 +272,10 @@ export default function AddGameModal({
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
-                            <div className="truncate text-sm font-semibold text-slate-900">
+                            <div className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
                               {title}
                             </div>
-                            <div className="mt-0.5 text-[11px] text-slate-500">
+                            <div className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
                               {formatDate(released)}{" "}
                               {platforms ? ` · ${platforms}` : ""}{" "}
                               {genres ? ` · ${genres}` : ""}
@@ -286,7 +286,7 @@ export default function AddGameModal({
                             <button
                               type="button"
                               onClick={() => verDetalhes(item)}
-                              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                              className="rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600"
                             >
                               Detalhes
                             </button>
@@ -326,7 +326,7 @@ export default function AddGameModal({
                 type="button"
                 disabled={page <= 1 || loading}
                 onClick={() => pesquisar(page - 1)}
-                className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+                className="rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 disabled:opacity-60"
               >
                 ◀ Anterior
               </button>
@@ -335,7 +335,7 @@ export default function AddGameModal({
                 type="button"
                 disabled={loading}
                 onClick={() => pesquisar(page + 1)}
-                className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+                className="rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 disabled:opacity-60"
               >
                 Mais resultados ▶
               </button>

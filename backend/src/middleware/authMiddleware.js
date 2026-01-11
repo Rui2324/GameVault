@@ -1,7 +1,8 @@
 // backend/src/middleware/authMiddleware.js
 const jwt = require("jsonwebtoken");
 
-module.exports = function authMiddleware(req, res, next) {
+// Middleware de autenticação obrigatória
+function verifyToken(req, res, next) {
   try {
     const auth = req.headers.authorization || "";
     const [type, token] = auth.split(" ");
@@ -38,4 +39,34 @@ module.exports = function authMiddleware(req, res, next) {
   } catch (err) {
     return res.status(401).json({ message: "Token inválido ou expirado." });
   }
-};
+}
+
+// Middleware de autenticação opcional (não falha se não houver token)
+function optionalAuth(req, res, next) {
+  try {
+    const auth = req.headers.authorization || "";
+    const [type, token] = auth.split(" ");
+
+    if (type === "Bearer" && token) {
+      const secret = process.env.JWT_SECRET;
+      if (secret) {
+        const payload = jwt.verify(token, secret);
+        const userId = payload.id ?? payload.userId ?? payload.sub;
+        req.user = {
+          id: userId,
+          email: payload.email,
+          user_type: payload.user_type,
+        };
+        req.userId = userId;
+      }
+    }
+  } catch {
+    // Token inválido, mas não bloqueamos - apenas não definimos req.userId
+  }
+  return next();
+}
+
+// Exportar ambos os middlewares
+module.exports = verifyToken;
+module.exports.verifyToken = verifyToken;
+module.exports.optionalAuth = optionalAuth;

@@ -14,6 +14,11 @@ const wishlistRoutes = require("./src/routes/wishlistRoutes");
 const authMiddleware = require("./src/middleware/authMiddleware");
 const externalGamesRoutes = require("./src/routes/externalGamesRoutes");
 const dashboardRoutes = require("./src/routes/dashboardRoutes");
+const reviewRoutes = require("./src/routes/reviewRoutes");
+const achievementRoutes = require("./src/routes/achievementRoutes");
+const profileRoutes = require("./src/routes/profileRoutes");
+const followRoutes = require("./src/routes/followRoutes");
+const activityRoutes = require("./src/routes/activityRoutes");
 
 
 const app = express();
@@ -40,6 +45,11 @@ app.get("/api/health", async (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/external-games", externalGamesRoutes);
 app.use("/api", dashboardRoutes);
+app.use("/api/achievements", achievementRoutes);
+app.use("/api/profile", profileRoutes);
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/follows", followRoutes);
+app.use("/api/activity", activityRoutes);
 
 
 // protegidas

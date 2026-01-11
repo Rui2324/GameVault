@@ -5,6 +5,7 @@ const {
   updateCollectionEntry,
   removeFromCollection,
   getCollectionEntryById,
+  getCollectionEntryByGameId,
 } = require("../models/collectionModel");
 const { getGameById } = require("../models/gameModel");
 
@@ -51,6 +52,7 @@ async function getMyCollectionEntry(req, res) {
 
     const resposta = {
       id: entry.id,
+      game_id: entry.game_id,
       jogo_id: entry.game_id,
       rating: entry.rating,
       horas_jogadas: entry.hours_played,
@@ -198,9 +200,49 @@ async function removeMyCollectionEntry(req, res) {
   }
 }
 
+// GET /api/collection/by-game/:gameId - Obter entrada pelo game_id
+async function getMyCollectionEntryByGameId(req, res) {
+  try {
+    const userId = req.userId;
+    const { gameId } = req.params;
+
+    const entry = await getCollectionEntryByGameId(gameId, userId);
+    if (!entry) {
+      return res
+        .status(404)
+        .json({ mensagem: "Jogo não encontrado na tua coleção." });
+    }
+
+    const resposta = {
+      id: entry.id,
+      game_id: entry.game_id,
+      jogo_id: entry.game_id,
+      rating: entry.rating,
+      horas_jogadas: entry.hours_played,
+      estado: entry.status,
+      notas: entry.notes,
+      titulo: entry.title,
+      plataforma: entry.platform,
+      genero: entry.genre,
+      url_capa: entry.cover_url,
+      descricao: entry.description,
+      criado_em: entry.created_at,
+      atualizado_em: entry.updated_at,
+    };
+
+    return res.json({ entrada: resposta });
+  } catch (err) {
+    console.error("Erro ao obter detalhes por game_id:", err);
+    return res.status(500).json({
+      mensagem: "Ocorreu um erro interno ao obter os detalhes do jogo.",
+    });
+  }
+}
+
 module.exports = {
   listMyCollection,
   getMyCollectionEntry,
+  getMyCollectionEntryByGameId,
   addToMyCollection,
   updateMyCollectionEntry,
   removeMyCollectionEntry,

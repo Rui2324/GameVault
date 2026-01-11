@@ -71,15 +71,64 @@ async function searchGames(query, page = 1) {
   return results.map(mapRawgGame);
 }
 
+// Buscar screenshots de um jogo específico
+async function getGameScreenshots(externalId) {
+  try {
+    const res = await axios.get(`${RAWG_BASE_URL}/games/${externalId}/screenshots`, {
+      params: {
+        key: RAWG_API_KEY,
+        page_size: 10,
+      },
+    });
+
+    const results = res.data.results || [];
+    return results.map((s) => s.image).filter(Boolean);
+  } catch (error) {
+    console.error(`[RAWG] Erro ao buscar screenshots para ${externalId}:`, error.message);
+    return [];
+  }
+}
+
+// Buscar links das lojas de um jogo específico
+async function getGameStores(externalId) {
+  try {
+    const res = await axios.get(`${RAWG_BASE_URL}/games/${externalId}/stores`, {
+      params: {
+        key: RAWG_API_KEY,
+      },
+    });
+
+    const results = res.data.results || [];
+    return results.map((s) => ({
+      store_id: s.store_id,
+      url: s.url,
+    })).filter((s) => s.url);
+  } catch (error) {
+    console.error(`[RAWG] Erro ao buscar stores para ${externalId}:`, error.message);
+    return [];
+  }
+}
+
 // Buscar detalhes completos de um jogo específico
 async function getGameDetails(externalId) {
-  const res = await axios.get(`${RAWG_BASE_URL}/games/${externalId}`, {
-    params: {
-      key: RAWG_API_KEY,
-    },
-  });
+  // Buscar detalhes e screenshots em paralelo
+  const [detailsRes, screenshots, stores] = await Promise.all([
+    axios.get(`${RAWG_BASE_URL}/games/${externalId}`, {
+      params: {
+        key: RAWG_API_KEY,
+      },
+    }),
+    getGameScreenshots(externalId),
+    getGameStores(externalId),
+  ]);
 
-  return mapRawgGame(res.data);
+  const game = mapRawgGame(detailsRes.data);
+  
+  // Adicionar screenshots e stores ao resultado
+  game.screenshots = screenshots.length > 0 ? screenshots : game.screenshots;
+  game.stores = stores;
+  
+  return game;
 }
 
 // ✅ Destaques (ex: ordering=-metacritic)
@@ -121,6 +170,8 @@ async function getUpcomingGames(page = 1, pageSize = 6) {
 module.exports = {
   searchGames,
   getGameDetails,
+  getGameScreenshots,
+  getGameStores,
   getFeaturedGames,
   getUpcomingGames,
 };

@@ -11,6 +11,8 @@ import StatsPage from "./pages/StatsPage";
 import SettingsPage from "./pages/SettingsPage";
 import GameDetailsPage from "./pages/GameDetailsPage";
 import ExternalGameDetailsPage from "./pages/ExternalGameDetailsPage";
+import AchievementsPage from "./pages/AchievementsPage";
+import PublicProfilePage from "./pages/PublicProfilePage";
 import AppLayout from "./layout/AppLayout";
 
 function RotaProtegida({ children }) {
@@ -49,7 +51,9 @@ export default function App() {
         <Route path="colecao" element={<CollectionPage />} />
         <Route path="wishlist" element={<WishlistPage />} />
         <Route path="estatisticas" element={<StatsPage />} />
+        <Route path="conquistas" element={<AchievementsPage />} />
         <Route path="settings" element={<SettingsPage />} />
+        <Route path="perfil/:identifier" element={<PublicProfilePage />} />
 
         {/* Detalhe da tua entrada na coleção */}
         <Route path="jogo/:id" element={<GameDetailsPage />} />

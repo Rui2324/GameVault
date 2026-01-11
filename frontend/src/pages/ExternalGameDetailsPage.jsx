@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../services/api";
 import { rawgImage, rawgOriginal } from "../utils/rawgImages";
+import { useToast } from "../components/Toast";
 
 function formatDate(v) {
   if (!v) return "—";
@@ -11,17 +12,23 @@ function formatDate(v) {
   return d.toLocaleDateString("pt-PT");
 }
 
-function Chip({ children }) {
+function Chip({ children, color = "slate" }) {
+  const colors = {
+    slate: "border-slate-200/50 dark:border-slate-600/50 bg-slate-50 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300",
+    indigo: "border-indigo-200/50 dark:border-indigo-800/50 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300",
+    emerald: "border-emerald-200/50 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300",
+  };
   return (
-    <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] text-slate-700">
+    <span className={`inline-flex items-center rounded-xl border ${colors[color]} px-2.5 py-1 text-[11px] font-medium`}>
       {children}
     </span>
   );
 }
 
-function SectionTitle({ children }) {
+function SectionTitle({ children, icon }) {
   return (
-    <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+    <div className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 flex items-center gap-2">
+      {icon && <span>{icon}</span>}
       {children}
     </div>
   );
@@ -43,6 +50,7 @@ function splitList(v) {
 export default function ExternalGameDetailsPage() {
   const { externalId } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
@@ -50,17 +58,11 @@ export default function ExternalGameDetailsPage() {
 
   const [aImportar, setAImportar] = useState(false);
   const [aWishlist, setAWishlist] = useState(false);
-  const [msg, setMsg] = useState("");
 
   const [descricaoExpandida, setDescricaoExpandida] = useState(false);
 
   const [jaNaColecao, setJaNaColecao] = useState(false);
   const [jaNaWishlist, setJaNaWishlist] = useState(false);
-
-  function showMsg(texto) {
-    setMsg(texto);
-    setTimeout(() => setMsg(""), 2500);
-  }
 
   async function carregar() {
     try {
@@ -227,7 +229,7 @@ export default function ExternalGameDetailsPage() {
       });
 
       setJaNaColecao(true);
-      showMsg("Adicionado à coleção ✅");
+      toast.game(`${title} adicionado à coleção!`);
 
       const entryId = res.data?.collection_entry_id;
       if (entryId) navigate(`/app/jogo/${entryId}`);
@@ -235,9 +237,9 @@ export default function ExternalGameDetailsPage() {
       console.error(e);
       if (e?.response?.status === 409) {
         setJaNaColecao(true);
-        showMsg("Já está na tua coleção.");
+        toast.info("Este jogo já está na tua coleção.");
       } else {
-        showMsg("Falhou ao adicionar à coleção.");
+        toast.error("Falhou ao adicionar à coleção.");
       }
     } finally {
       setAImportar(false);
@@ -256,44 +258,63 @@ export default function ExternalGameDetailsPage() {
       });
 
       setJaNaWishlist(true);
-      showMsg("Adicionado à wishlist ✅");
+      toast.success(`${title} adicionado à wishlist!`);
     } catch (e) {
       console.error(e);
       if (e?.response?.status === 409) {
         setJaNaWishlist(true);
-        showMsg("Já está na tua wishlist.");
+        toast.info("Este jogo já está na tua wishlist.");
       } else {
-        showMsg("Falhou ao adicionar à wishlist.");
+        toast.error("Falhou ao adicionar à wishlist.");
       }
     } finally {
       setAWishlist(false);
     }
   }
 
-  if (loading) return <div className="text-sm text-slate-500">A carregar…</div>;
-  if (erro) return <div className="text-sm text-red-600">{erro}</div>;
-  if (!jogo) return <div className="text-sm text-slate-500">Sem dados.</div>;
+  if (loading) return (
+    <div className="space-y-5">
+      <div className="animate-pulse h-[220px] rounded-2xl bg-slate-200 dark:bg-slate-700" />
+      <div className="grid gap-6 md:grid-cols-[360px,1fr]">
+        <div className="space-y-4">
+          <div className="animate-pulse h-80 rounded-2xl bg-slate-200 dark:bg-slate-700" />
+          <div className="animate-pulse h-40 rounded-2xl bg-slate-200 dark:bg-slate-700" />
+        </div>
+        <div className="space-y-4">
+          <div className="animate-pulse h-60 rounded-2xl bg-slate-200 dark:bg-slate-700" />
+        </div>
+      </div>
+    </div>
+  );
+  if (erro) return (
+    <div className="flex items-center justify-center py-16 text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-200 dark:border-red-800">
+      <span className="mr-2">⚠️</span> {erro}
+    </div>
+  );
+  if (!jogo) return (
+    <div className="flex items-center justify-center py-16 text-slate-500 dark:text-slate-400">
+      <span className="mr-2">📭</span> Sem dados.
+    </div>
+  );
 
   return (
     <div className="space-y-5">
-      {/* HERO: blur a partir da CAPA (sem imagem da frente) */}
-      <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm h-[180px] md:h-[220px]">
+      {/* HERO: blur a partir da CAPA */}
+      <div className="relative overflow-hidden rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white dark:bg-slate-800 shadow-xl h-[200px] md:h-[240px]">
         {(cover || bg) && (
           <img
             src={cover || bg}
             alt=""
             aria-hidden="true"
             referrerPolicy="no-referrer"
-            className="absolute inset-0 h-full w-full object-cover"
+            className="absolute inset-0 h-full w-full object-cover scale-110"
             onError={(e) => {
-              // fallback 1: original da capa
               const fb1 = rawgOriginal(coverOriginal);
               if (!e.currentTarget.dataset.fallback && fb1) {
                 e.currentTarget.dataset.fallback = "1";
                 e.currentTarget.src = fb1;
                 return;
               }
-              // fallback 2: bg original (se a capa não existir)
               const fb2 = rawgOriginal(bgOriginal);
               if (!e.currentTarget.dataset.fallback2 && fb2) {
                 e.currentTarget.dataset.fallback2 = "1";
@@ -303,26 +324,42 @@ export default function ExternalGameDetailsPage() {
           />
         )}
 
-        {/* Blur + escurecer */}
-        <div className="absolute inset-0 backdrop-blur-xl bg-slate-950/45" />
+        {/* Overlay gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-slate-900/30 backdrop-blur-xl" />
 
-        <div className="relative z-10 p-5 h-full">
+        <div className="relative z-10 p-6 h-full">
           <div className="flex h-full flex-col justify-between gap-3 md:flex-row md:items-start md:justify-between">
             <div className="min-w-0">
               <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-sm ring-1 ring-slate-200 hover:bg-white"
+                className="inline-flex items-center gap-2 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 px-4 py-2 text-xs font-semibold text-white hover:bg-white/30 transition-all"
               >
-                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-white">
-                  ←
-                </span>
+                <span>←</span>
                 Voltar
               </button>
 
-              <h1 className="mt-3 text-2xl font-semibold text-white drop-shadow-sm truncate">
+              <h1 className="mt-4 text-3xl font-bold text-white drop-shadow-lg">
                 {title}
               </h1>
+              
+              {/* Meta info */}
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                {released && (
+                  <span className="text-xs text-white/80 bg-white/10 rounded-lg px-2 py-1">
+                    📅 {formatDate(released)}
+                  </span>
+                )}
+                {metacritic && (
+                  <span className={`text-xs font-bold rounded-lg px-2 py-1 ${
+                    metacritic >= 75 ? 'bg-emerald-500/80 text-white' :
+                    metacritic >= 50 ? 'bg-amber-500/80 text-white' :
+                    'bg-red-500/80 text-white'
+                  }`}>
+                    🎯 {metacritic}
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
@@ -330,39 +367,29 @@ export default function ExternalGameDetailsPage() {
                 type="button"
                 onClick={adicionarWishlist}
                 disabled={aWishlist || jaNaWishlist}
-                className={
-                  "inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium " +
-                  (jaNaWishlist
-                    ? "bg-white/60 text-slate-700 cursor-not-allowed"
-                    : "bg-white text-slate-800 hover:bg-white/90") +
-                  (aWishlist ? " opacity-60" : "")
-                }
+                className={`inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all ${
+                  jaNaWishlist
+                    ? "bg-white/30 text-white/70 cursor-not-allowed"
+                    : "bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 hover:scale-105"
+                } ${aWishlist ? " opacity-60" : ""}`}
               >
-                {jaNaWishlist ? "Já na wishlist" : aWishlist ? "A adicionar…" : "Wishlist"}
+                {jaNaWishlist ? "💝 Na wishlist" : aWishlist ? "⏳ A adicionar..." : "💝 Wishlist"}
               </button>
 
               <button
                 type="button"
                 onClick={importarParaColecao}
                 disabled={aImportar || jaNaColecao}
-                className={
-                  "inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white " +
-                  (jaNaColecao
-                    ? "bg-white/40 cursor-not-allowed"
-                    : "bg-indigo-600 hover:bg-indigo-500") +
-                  (aImportar ? " opacity-60" : "")
-                }
+                className={`inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition-all ${
+                  jaNaColecao
+                    ? "bg-emerald-500/50 cursor-not-allowed"
+                    : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:shadow-xl hover:scale-105"
+                } ${aImportar ? " opacity-60" : ""}`}
               >
-                {jaNaColecao ? "Já na coleção" : aImportar ? "A adicionar…" : "Adicionar à coleção"}
+                {jaNaColecao ? "✅ Na coleção" : aImportar ? "⏳ A adicionar..." : "➕ Adicionar à coleção"}
               </button>
             </div>
           </div>
-
-          {msg && (
-            <div className="mt-3 rounded-lg bg-white/90 px-3 py-2 text-sm text-slate-800 shadow-sm ring-1 ring-slate-200">
-              {msg}
-            </div>
-          )}
         </div>
       </div>
       {/* CONTEÚDO */}
@@ -370,14 +397,14 @@ export default function ExternalGameDetailsPage() {
         {/* Sidebar */}
         <div className="space-y-4">
           {/* Capa */}
-          <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-            <div className="w-full overflow-hidden rounded-lg bg-slate-200">
+          <div className="rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-4 shadow-xl">
+            <div className="w-full overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-700">
               {cover ? (
                 <img
                   src={cover}
                   alt={title}
                   referrerPolicy="no-referrer"
-                  className="w-full h-auto object-contain"
+                  className="w-full h-auto object-contain hover:scale-105 transition-transform duration-500"
                   onError={(e) => {
                     const fallback = rawgOriginal(coverOriginal);
                     if (!e.currentTarget.dataset.fallback && fallback) {
@@ -387,16 +414,16 @@ export default function ExternalGameDetailsPage() {
                   }}
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-xs text-slate-500">
-                  Sem capa
+                <div className="flex h-60 w-full items-center justify-center text-4xl">
+                  🎮
                 </div>
               )}
             </div>
           </div>
 
           {/* Resumo */}
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <SectionTitle>Resumo</SectionTitle>
+          <div className="rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-5 shadow-xl">
+            <SectionTitle icon="📋">Resumo</SectionTitle>
 
             <div className="flex flex-wrap gap-2">
               {released && <Chip>Lançamento: {formatDate(released)}</Chip>}
@@ -411,7 +438,7 @@ export default function ExternalGameDetailsPage() {
                 {generos.length ? (
                   generos.slice(0, 10).map((g) => <Chip key={g}>{g}</Chip>)
                 ) : (
-                  <span className="text-xs text-slate-400">—</span>
+                  <span className="text-xs text-slate-400 dark:text-slate-500">—</span>
                 )}
               </div>
             </div>
@@ -422,7 +449,7 @@ export default function ExternalGameDetailsPage() {
                 {plataformas.length ? (
                   plataformas.slice(0, 12).map((p) => <Chip key={p}>{p}</Chip>)
                 ) : (
-                  <span className="text-xs text-slate-400">—</span>
+                  <span className="text-xs text-slate-400 dark:text-slate-500">—</span>
                 )}
               </div>
             </div>
@@ -451,7 +478,7 @@ export default function ExternalGameDetailsPage() {
           </div>
 
           {/* Links */}
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
             <SectionTitle>Links</SectionTitle>
             <div className="space-y-2 text-sm">
               {website ? (
@@ -459,12 +486,12 @@ export default function ExternalGameDetailsPage() {
                   href={website}
                   target="_blank"
                   rel="noreferrer"
-                  className="block rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-indigo-700 hover:bg-slate-50"
+                  className="block rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs text-indigo-700 dark:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-600"
                 >
                   🌐 Website oficial
                 </a>
               ) : (
-                <div className="text-xs text-slate-400">Sem website.</div>
+                <div className="text-xs text-slate-400 dark:text-slate-500">Sem website.</div>
               )}
 
               {reddit ? (
@@ -472,12 +499,12 @@ export default function ExternalGameDetailsPage() {
                   href={reddit}
                   target="_blank"
                   rel="noreferrer"
-                  className="block rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-indigo-700 hover:bg-slate-50"
+                  className="block rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs text-indigo-700 dark:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-600"
                 >
                   💬 Reddit
                 </a>
               ) : (
-                <div className="text-xs text-slate-400">Sem link do Reddit.</div>
+                <div className="text-xs text-slate-400 dark:text-slate-500">Sem link do Reddit.</div>
               )}
             </div>
           </div>
@@ -486,10 +513,10 @@ export default function ExternalGameDetailsPage() {
         {/* Main */}
         <div className="space-y-4">
           {/* Descrição */}
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
             <SectionTitle>Descrição</SectionTitle>
 
-            <p className="text-sm text-slate-700 whitespace-pre-line">
+            <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line">
               {descricaoCurta
                 ? descricaoCurta
                 : "Sem descrição disponível na RAWG para este jogo."}
@@ -499,7 +526,7 @@ export default function ExternalGameDetailsPage() {
               <button
                 type="button"
                 onClick={() => setDescricaoExpandida((v) => !v)}
-                className="mt-3 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                className="mt-3 rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600"
               >
                 {descricaoExpandida ? "Mostrar menos" : "Ler mais"}
               </button>
@@ -507,19 +534,19 @@ export default function ExternalGameDetailsPage() {
           </div>
 
           {/* Tags */}
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
             <SectionTitle>Tags</SectionTitle>
             <div className="flex flex-wrap gap-2">
               {tags.length ? (
                 tags.slice(0, 18).map((t) => <Chip key={t}>{t}</Chip>)
               ) : (
-                <span className="text-xs text-slate-400">Sem tags.</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500">Sem tags.</span>
               )}
             </div>
           </div>
 
           {/* Galeria */}
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
             <SectionTitle>Galeria</SectionTitle>
 
             {screenshots.length ? (
@@ -530,7 +557,7 @@ export default function ExternalGameDetailsPage() {
                     href={shot.original}
                     target="_blank"
                     rel="noreferrer"
-                    className="group block overflow-hidden rounded-lg border border-slate-200 bg-slate-100"
+                    className="group block overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-700"
                     title="Abrir imagem"
                   >
                     <img
@@ -550,7 +577,7 @@ export default function ExternalGameDetailsPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-xs text-slate-400">
+              <div className="text-xs text-slate-400 dark:text-slate-500">
                 Sem screenshots disponíveis.
               </div>
             )}

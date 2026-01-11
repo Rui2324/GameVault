@@ -178,7 +178,7 @@ async function importExternalToCollection(req, res) {
 
     // evitar duplicados
     const [exists] = await conn.query(
-      "SELECT id FROM collection WHERE user_id = ? AND game_id = ? LIMIT 1",
+      "SELECT id FROM collection_entries WHERE user_id = ? AND game_id = ? LIMIT 1",
       [userId, gameId]
     );
     if (exists.length) {
@@ -187,7 +187,7 @@ async function importExternalToCollection(req, res) {
     }
 
     const [ins] = await conn.query(
-      `INSERT INTO collection (user_id, game_id, rating, hours_played, status, notes)
+      `INSERT INTO collection_entries (user_id, game_id, rating, hours_played, status, notes)
        VALUES (?, ?, ?, ?, ?, ?)`,
       [
         userId,
@@ -238,7 +238,7 @@ async function importExternalToWishlist(req, res) {
     const gameId = await ensureGameInLocalDb(conn, external_id);
 
     const [exists] = await conn.query(
-      "SELECT id FROM wishlist WHERE user_id = ? AND game_id = ? LIMIT 1",
+      "SELECT id FROM wishlist_entries WHERE user_id = ? AND game_id = ? LIMIT 1",
       [userId, gameId]
     );
     if (exists.length) {
@@ -247,7 +247,7 @@ async function importExternalToWishlist(req, res) {
     }
 
     await conn.query(
-      "INSERT INTO wishlist (user_id, game_id) VALUES (?, ?)",
+      "INSERT INTO wishlist_entries (user_id, game_id) VALUES (?, ?)",
       [userId, gameId]
     );
 

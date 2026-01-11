@@ -1,21 +1,27 @@
 // src/layout/AppLayout.jsx
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
+import { useToast } from "../components/Toast";
 import api from "../services/api";
 import AddGameModal from "../components/AddGameModal";
 
 export default function AppLayout() {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const inicial = (user?.name || user?.email || "?")[0].toUpperCase();
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef(null);
 
   const navLinks = [
-    { to: "/app/dashboard", label: "Dashboard" },
-    { to: "/app/colecao", label: "Minha Coleção" },
-    { to: "/app/wishlist", label: "Wishlist" },
-    { to: "/app/estatisticas", label: "Estatísticas" },
+    { to: "/app/dashboard", label: "Dashboard", icon: "🏠" },
+    { to: "/app/colecao", label: "Coleção", icon: "🎮" },
+    { to: "/app/wishlist", label: "Wishlist", icon: "❤️" },
+    { to: "/app/estatisticas", label: "Estatísticas", icon: "📊" },
+    { to: "/app/conquistas", label: "Conquistas", icon: "🏆" },
   ];
 
   function handleAvatarClick() {
@@ -26,6 +32,17 @@ export default function AppLayout() {
     logout();
     navigate("/login");
   }
+
+  // Fechar menu do utilizador ao clicar fora
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Resolver URL do avatar: se vier como "/uploads/..." juntar o backend
   let avatarSrc = null;
@@ -46,13 +63,7 @@ export default function AppLayout() {
   // -------------------------
   const [openSearch, setOpenSearch] = useState(false);
   const [collectionExternalIds, setCollectionExternalIds] = useState(new Set());
-  const [toast, setToast] = useState({ show: false, text: "" });
-
-
-  function showToast(text) {
-    setToast({ show: true, text });
-    setTimeout(() => setToast({ show: false, text: "" }), 2500);
-  }
+  const toast = useToast();
 
   async function refreshCollectionExternalIds() {
     try {
@@ -92,7 +103,9 @@ export default function AppLayout() {
 
   // Quando algo é importado, avisar e atualizar ids
   async function onAddedToCollection(item) {
-    showToast(`Adicionado à coleção: ${item?.title || "jogo"}`);
+    toast.game(`Adicionado à coleção: ${item?.title || "jogo"}`, {
+      title: "Jogo Adicionado! 🎉",
+    });
     await refreshCollectionExternalIds();
 
     // opcional: se quiseres ir logo para a coleção, descomenta
@@ -101,14 +114,7 @@ export default function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-100 text-slate-900">
-      {/* Toast simples */}
-      {toast.show && (
-        <div className="fixed right-4 top-4 z-[60] rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800 shadow-md">
-          {toast.text}
-        </div>
-      )}
-
+    <div className="min-h-screen flex flex-col bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors">
       {/* Modal global RAWG */}
       <AddGameModal
         open={openSearch}
@@ -118,59 +124,76 @@ export default function AppLayout() {
       />
 
       {/* TOP BAR */}
-      <header className="border-b border-indigo-700/60 bg-indigo-700 shadow-md">
+      <header className="relative border-b border-indigo-600/50 dark:border-indigo-900/50 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 dark:from-indigo-950 dark:via-purple-950 dark:to-indigo-950 shadow-lg shadow-indigo-500/20">
+        {/* Efeito de brilho animado */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_3s_infinite]" />
+        </div>
         <div className="flex items-center justify-between px-6 py-3">
           {/* Logo + nav */}
           <div className="flex items-center gap-8">
             <button
               type="button"
               onClick={() => navigate("/app/dashboard")}
-              className="flex items-center gap-2 focus:outline-none"
+              className="group flex items-center gap-3 focus:outline-none transition-transform duration-300 hover:scale-105"
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/20 text-xl text-white">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm text-xl text-white shadow-lg border border-white/20 group-hover:bg-white/30 group-hover:shadow-white/20 transition-all duration-300">
                 🎮
               </div>
               <div className="leading-tight text-left text-white">
-                <div className="text-sm font-semibold tracking-wide">GameVault</div>
-                <div className="text-[11px] text-indigo-100/90">
+                <div className="text-base font-bold tracking-wide group-hover:tracking-wider transition-all duration-300">GameVault</div>
+                <div className="text-[11px] text-white/70">
                   A tua coleção de videojogos
                 </div>
               </div>
             </button>
 
-            <nav className="hidden items-center gap-2 text-sm md:flex">
+            <nav className="hidden items-center gap-1.5 text-sm md:flex">
               {navLinks.map((link) => (
                 <NavLink
                   key={link.to}
                   to={link.to}
                   className={({ isActive }) =>
                     [
-                      "rounded-md px-3 py-1.5 transition-colors",
+                      "group flex items-center gap-2 rounded-xl px-3 py-2 transition-all duration-300",
                       isActive
-                        ? "bg-white text-indigo-700 font-medium shadow-sm"
-                        : "text-indigo-100/90 hover:bg-indigo-600 hover:text-white",
+                        ? "bg-white/95 text-indigo-700 font-semibold shadow-lg shadow-white/20 scale-105"
+                        : "text-white/80 hover:bg-white/15 hover:text-white hover:scale-105",
                     ].join(" ")
                   }
                 >
-                  {link.label}
+                  <span className="text-sm transition-transform duration-300 group-hover:scale-110">{link.icon}</span>
+                  <span>{link.label}</span>
                 </NavLink>
               ))}
             </nav>
           </div>
 
-          {/* Search + user */}
+          {/* Search + theme toggle + user */}
           <div className="flex items-center gap-4">
             {/* Pesquisa global (abre modal) */}
             <button
               type="button"
               onClick={handleOpenGlobalSearch}
-              className="hidden items-center gap-2 rounded-full bg-indigo-600/80 px-3 py-2 text-xs text-indigo-100 shadow-sm hover:bg-indigo-600 focus:outline-none sm:flex"
+              className="group hidden items-center gap-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2.5 text-sm text-white shadow-lg hover:bg-white/20 hover:border-white/30 hover:shadow-white/10 focus:outline-none sm:flex transition-all duration-300"
               title="Pesquisar e importar jogos (Ctrl+K)"
             >
-              <span className="opacity-90">🔍</span>
-              <span className="text-indigo-50/95">Pesquisar jogos…</span>
-              <span className="ml-2 rounded-md bg-white/15 px-2 py-0.5 text-[10px] text-indigo-100/90">
+              <span className="text-base transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">🔍</span>
+              <span className="text-white/90">Pesquisar jogos…</span>
+              <span className="ml-2 rounded-lg bg-white/20 px-2 py-1 text-[10px] font-medium text-white/80">
                 Ctrl K
+              </span>
+            </button>
+
+            {/* Toggle Tema */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="group flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-lg text-white shadow-lg hover:bg-white/20 hover:scale-110 hover:rotate-12 transition-all duration-300"
+              title={theme === "dark" ? "Mudar para modo claro" : "Mudar para modo escuro"}
+            >
+              <span className="transition-transform duration-300 group-hover:scale-110">
+                {theme === "dark" ? "☀️" : "🌙"}
               </span>
             </button>
 
@@ -182,64 +205,128 @@ export default function AppLayout() {
                 <div className="text-[11px] text-indigo-100/90">Coleção de jogos</div>
               </div>
 
-              {/* Avatar */}
-              <button
-                type="button"
-                onClick={handleAvatarClick}
-                title="Ver / editar perfil"
-                className="relative h-9 w-9 overflow-hidden rounded-full bg-indigo-100 text-xs font-semibold text-indigo-700 shadow-sm ring-2 ring-white/60 hover:ring-sky-300 transition-all"
-              >
-                {avatarSrc ? (
-                  <img
-                    src={avatarSrc}
-                    alt={user?.name || user?.email || "Avatar"}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <span className="inline-flex h-full w-full items-center justify-center">
-                    {inicial}
-                  </span>
-                )}
-              </button>
+              {/* Avatar com dropdown */}
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  title="Menu do utilizador"
+                  className="group relative h-10 w-10 overflow-hidden rounded-xl bg-gradient-to-br from-indigo-400 to-purple-400 text-sm font-bold text-white shadow-lg ring-2 ring-white/40 hover:ring-white/60 hover:scale-110 transition-all duration-300"
+                >
+                  {avatarSrc ? (
+                    <img
+                      src={avatarSrc}
+                      alt={user?.name || user?.email || "Avatar"}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="inline-flex h-full w-full items-center justify-center">
+                      {inicial}
+                    </span>
+                  )}
+                  {/* Indicador online */}
+                  <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-400 border-2 border-white shadow-lg"></span>
+                </button>
 
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="rounded-md bg-white text-xs font-medium text-indigo-700 px-3 py-1.5 shadow-sm hover:bg-slate-50 transition-colors"
-              >
-                Sair
-              </button>
+                {/* Dropdown Menu */}
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-3 w-56 rounded-2xl bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl shadow-xl shadow-black/10 ring-1 ring-black/5 dark:ring-white/10 z-50 overflow-hidden animate-fadeIn">
+                    {/* Header do dropdown */}
+                    <div className="bg-gradient-to-r from-indigo-500 to-purple-500 p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white font-bold overflow-hidden">
+                          {avatarSrc ? (
+                            <img src={avatarSrc} alt="" className="h-full w-full object-cover" />
+                          ) : inicial}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-white text-sm">{user?.name || "Utilizador"}</p>
+                          <p className="text-xs text-white/70">{user?.email}</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="p-2">
+                      <button
+                        onClick={() => {
+                          navigate(`/app/perfil/${user?.id}`);
+                          setShowUserMenu(false);
+                        }}
+                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-xl transition-colors"
+                      >
+                        <span className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">👤</span>
+                        O Meu Perfil
+                      </button>
+                      <button
+                        onClick={() => {
+                          navigate("/app/conquistas");
+                          setShowUserMenu(false);
+                        }}
+                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-xl transition-colors"
+                      >
+                        <span className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">🏆</span>
+                        Conquistas
+                      </button>
+                      <button
+                        onClick={() => {
+                          navigate("/app/settings");
+                          setShowUserMenu(false);
+                        }}
+                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-xl transition-colors"
+                      >
+                        <span className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">⚙️</span>
+                        Definições
+                      </button>
+                      <hr className="my-2 border-slate-200 dark:border-slate-700" />
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          setShowUserMenu(false);
+                        }}
+                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl transition-colors"
+                      >
+                        <span className="w-8 h-8 rounded-lg bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center">🚪</span>
+                        Sair
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </header>
 
       {/* CONTEÚDO PRINCIPAL */}
-      <main className="flex-1 px-6 py-6 bg-slate-100">
-        <div className="w-full rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_14px_30px_rgba(15,23,42,0.12)]">
+      <main className="flex-1 px-4 sm:px-6 py-6 bg-gradient-to-br from-slate-100 via-slate-50 to-indigo-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-indigo-950/20">
+        <div className="w-full rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-5 shadow-xl shadow-slate-200/50 dark:shadow-black/20">
           <Outlet />
         </div>
       </main>
 
       {/* FOOTER */}
       <footer className="mt-2">
-        <div className="h-1 bg-gradient-to-r from-indigo-500 via-sky-400 to-emerald-400" />
-        <div className="bg-slate-100 border-t border-slate-200">
-          <div className="flex flex-col gap-3 px-6 py-3 text-[11px] text-slate-500 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-slate-700 font-semibold">GameVault</span>
-              <span className="text-slate-400">·</span>
+        <div className="h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 animate-gradient" />
+        <div className="bg-slate-50 dark:bg-slate-900/95 border-t border-slate-200/50 dark:border-slate-800">
+          <div className="flex flex-col gap-3 px-6 py-4 text-xs text-slate-500 dark:text-slate-400 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <span className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-sm shadow-lg">🎮</span>
+                <span className="text-slate-800 dark:text-slate-200 font-bold">GameVault</span>
+              </div>
+              <span className="text-slate-300 dark:text-slate-600">|</span>
               <span>Gestor da tua biblioteca de videojogos</span>
             </div>
 
-            <div className="flex flex-wrap gap-4">
-              <span>Projeto Final — Desenvolvimento de Software</span>
-              <span className="hidden md:inline text-slate-300">|</span>
-              <span className="flex items-center gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            <div className="flex flex-wrap items-center gap-4">
+              <span className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full">
+                <span>🎓</span> Projeto Final — ISTEC
+              </span>
+              <span className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 px-3 py-1.5 rounded-full">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span>API online</span>
               </span>
-              <span className="hidden sm:inline">
+              <span className="hidden sm:inline text-slate-400">
                 {new Date().getFullYear()} © Todos os direitos reservados
               </span>
             </div>

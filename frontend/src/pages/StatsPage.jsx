@@ -95,88 +95,118 @@ export default function StatsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Cabeçalho */}
-      <section>
-        <h2 className="text-xl font-semibold text-slate-900">
-          Estatísticas da coleção
-        </h2>
-        <p className="text-sm text-slate-600">
-          Visão geral da tua biblioteca de jogos: distribuição por estado, género e plataforma.
-        </p>
+      {/* Header com gradiente */}
+      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 p-6 shadow-xl">
+        <div className="absolute inset-0 bg-black/10" />
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+        
+        <div className="relative">
+          <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+            <span className="text-3xl">📊</span>
+            Estatísticas da coleção
+          </h2>
+          <p className="text-purple-100 text-sm mt-1">
+            Visão geral da tua biblioteca de jogos: distribuição por estado, género e plataforma.
+          </p>
+        </div>
       </section>
 
       {loading && (
-        <p className="text-sm text-slate-600">A carregar estatísticas...</p>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800 h-24" />
+            ))}
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {[1, 2].map((i) => (
+              <div key={i} className="animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800 h-80" />
+            ))}
+          </div>
+        </div>
       )}
 
       {erro && !loading && (
-        <p className="text-sm text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded">
-          {erro}
-        </p>
+        <div className="flex items-center justify-center py-8 text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-200 dark:border-red-800">
+          <span className="mr-2">⚠️</span> {erro}
+        </div>
       )}
 
       {!loading && !erro && (
         <>
           {/* KPIs principais */}
           <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card titulo="Total de jogos">
-              <span className="text-2xl font-semibold text-slate-900">
-                {totalJogos}
-              </span>
-            </Card>
-            <Card titulo="Horas jogadas (total)">
-              <span className="text-2xl font-semibold text-slate-900">
-                {totalHoras}
-              </span>
-            </Card>
-            <Card titulo="Taxa de conclusão">
-              <span className="text-2xl font-semibold text-slate-900">
-                {taxaConclusao}%
-              </span>
-            </Card>
-            <Card titulo="Jogos em progresso">
-              <span className="text-2xl font-semibold text-slate-900">
-                {jogosPorEstado?.a_jogar ?? 0}
-              </span>
-            </Card>
+            <StatCard 
+              titulo="Total de jogos" 
+              valor={totalJogos} 
+              icone="🎮"
+              cor="from-blue-500 to-cyan-500"
+            />
+            <StatCard 
+              titulo="Horas jogadas" 
+              valor={totalHoras}
+              sufixo="h"
+              icone="⏱️"
+              cor="from-emerald-500 to-teal-500"
+            />
+            <StatCard 
+              titulo="Taxa de conclusão" 
+              valor={taxaConclusao}
+              sufixo="%"
+              icone="🏆"
+              cor="from-amber-500 to-orange-500"
+            />
+            <StatCard 
+              titulo="Em progresso" 
+              valor={jogosPorEstado?.a_jogar ?? 0}
+              icone="🎯"
+              cor="from-pink-500 to-rose-500"
+            />
           </section>
 
           {/* Gráfico de barras: jogos por estado */}
           <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
-            <div className="rounded-xl bg-white border border-slate-200 shadow-sm p-4">
-              <h3 className="text-sm font-semibold text-slate-900 mb-2">
-                Jogos por estado
-              </h3>
-              <p className="text-xs text-slate-500 mb-4">
+            <div className="rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl">📈</span>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  Jogos por estado
+                </h3>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
                 Distribuição dos jogos que estão por jogar, em progresso, concluídos ou abandonados.
               </p>
               {dataEstado.length === 0 ? (
-                <p className="text-xs text-slate-500">
-                  Ainda não há dados suficientes para este gráfico.
-                </p>
+                <div className="flex flex-col items-center justify-center h-48 text-slate-500 dark:text-slate-400">
+                  <span className="text-4xl mb-2">📭</span>
+                  <p className="text-sm">Ainda não há dados suficientes</p>
+                </div>
               ) : (
                 <div className="w-full h-64">
                   <ResponsiveContainer>
                     <BarChart data={dataEstado}>
                       <XAxis
                         dataKey="estado"
-                        tick={{ fontSize: 11 }}
+                        tick={{ fontSize: 11, fill: 'currentColor' }}
                         axisLine={false}
                         tickLine={false}
                       />
                       <YAxis
                         allowDecimals={false}
-                        tick={{ fontSize: 11 }}
+                        tick={{ fontSize: 11, fill: 'currentColor' }}
                         axisLine={false}
                         tickLine={false}
                       />
                       <Tooltip
                         contentStyle={{
                           fontSize: 12,
-                          borderRadius: 8,
+                          borderRadius: 12,
+                          border: 'none',
+                          boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
                         }}
                       />
-                      <Bar dataKey="quantidade" radius={[6, 6, 0, 0]}>
+                      <Bar dataKey="quantidade" radius={[8, 8, 0, 0]}>
                         {dataEstado.map((_, index) => (
                           <Cell
                             key={`cell-estado-${index}`}
@@ -191,17 +221,21 @@ export default function StatsPage() {
             </div>
 
             {/* Pizza: jogos por género */}
-            <div className="rounded-xl bg-white border border-slate-200 shadow-sm p-4">
-              <h3 className="text-sm font-semibold text-slate-900 mb-2">
-                Jogos por género
-              </h3>
-              <p className="text-xs text-slate-500 mb-4">
+            <div className="rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl">🥧</span>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  Jogos por género
+                </h3>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
                 Que tipos de jogos jogas mais? RPG, ação, estratégia... vê a distribuição aqui.
               </p>
               {dataGenero.length === 0 ? (
-                <p className="text-xs text-slate-500">
-                  Ainda não há dados suficientes para este gráfico.
-                </p>
+                <div className="flex flex-col items-center justify-center h-48 text-slate-500 dark:text-slate-400">
+                  <span className="text-4xl mb-2">📭</span>
+                  <p className="text-sm">Ainda não há dados suficientes</p>
+                </div>
               ) : (
                 <div className="w-full h-64">
                   <ResponsiveContainer>
@@ -211,8 +245,9 @@ export default function StatsPage() {
                         dataKey="quantidade"
                         nameKey="nome"
                         outerRadius={80}
-                        innerRadius={40}
-                        paddingAngle={2}
+                        innerRadius={45}
+                        paddingAngle={3}
+                        stroke="none"
                       >
                         {dataGenero.map((_, index) => (
                           <Cell
@@ -224,7 +259,9 @@ export default function StatsPage() {
                       <Tooltip
                         contentStyle={{
                           fontSize: 12,
-                          borderRadius: 8,
+                          borderRadius: 12,
+                          border: 'none',
+                          boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
                         }}
                       />
                       <Legend
@@ -241,17 +278,21 @@ export default function StatsPage() {
           </section>
 
           {/* Gráfico barras horizontais: jogos por plataforma */}
-          <section className="rounded-xl bg-white border border-slate-200 shadow-sm p-4">
-            <h3 className="text-sm font-semibold text-slate-900 mb-2">
-              Jogos por plataforma
-            </h3>
-            <p className="text-xs text-slate-500 mb-4">
+          <section className="rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl p-5">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xl">🖥️</span>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                Jogos por plataforma
+              </h3>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
               Em que plataformas tens mais jogos registados (PC, PS5, Switch, etc.).
             </p>
             {dataPlataforma.length === 0 ? (
-              <p className="text-xs text-slate-500">
-                Ainda não há dados suficientes para este gráfico.
-              </p>
+              <div className="flex flex-col items-center justify-center h-48 text-slate-500 dark:text-slate-400">
+                <span className="text-4xl mb-2">📭</span>
+                <p className="text-sm">Ainda não há dados suficientes</p>
+              </div>
             ) : (
               <div className="w-full h-72">
                 <ResponsiveContainer>
@@ -263,24 +304,26 @@ export default function StatsPage() {
                     <XAxis
                       type="number"
                       allowDecimals={false}
-                      tick={{ fontSize: 11 }}
+                      tick={{ fontSize: 11, fill: 'currentColor' }}
                       axisLine={false}
                       tickLine={false}
                     />
                     <YAxis
                       type="category"
                       dataKey="nome"
-                      tick={{ fontSize: 11 }}
+                      tick={{ fontSize: 11, fill: 'currentColor' }}
                       axisLine={false}
                       tickLine={false}
                     />
                     <Tooltip
                       contentStyle={{
                         fontSize: 12,
-                        borderRadius: 8,
+                        borderRadius: 12,
+                        border: 'none',
+                        boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
                       }}
                     />
-                    <Bar dataKey="quantidade" radius={[0, 6, 6, 0]}>
+                    <Bar dataKey="quantidade" radius={[0, 8, 8, 0]}>
                       {dataPlataforma.map((_, index) => (
                         <Cell
                           key={`cell-plat-${index}`}
@@ -301,11 +344,21 @@ export default function StatsPage() {
   );
 }
 
-function Card({ titulo, children }) {
+function StatCard({ titulo, valor, sufixo = "", icone, cor }) {
   return (
-    <div className="rounded-xl bg-white border border-slate-200 shadow-sm p-4">
-      <p className="text-xs text-slate-500 mb-1">{titulo}</p>
-      {children}
+    <div className="relative overflow-hidden rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl p-5 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300">
+      {/* Background gradient accent */}
+      <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${cor} opacity-20 rounded-full blur-2xl`} />
+      
+      <div className="relative flex items-center justify-between">
+        <div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">{titulo}</p>
+          <span className={`text-3xl font-bold bg-gradient-to-r ${cor} bg-clip-text text-transparent`}>
+            {valor}{sufixo}
+          </span>
+        </div>
+        <div className="text-3xl">{icone}</div>
+      </div>
     </div>
   );
 }

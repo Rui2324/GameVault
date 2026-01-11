@@ -7,7 +7,8 @@ async function listarWishlistPorUtilizador(userId) {
     `
     SELECT 
       w.id,
-      w.game_id,
+      w.game_id AS jogo_id,
+      g.external_id,
       g.title      AS titulo,
       g.platform   AS plataforma,
       g.genre      AS genero,

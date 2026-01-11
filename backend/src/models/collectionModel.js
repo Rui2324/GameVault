@@ -137,10 +137,35 @@ async function getCollectionEntryById(id, userId) {
   return rows[0];
 }
 
+// NOVO: obter entrada pelo game_id (para o ranking global)
+async function getCollectionEntryByGameId(gameId, userId) {
+  const [rows] = await pool.query(
+    `
+    SELECT 
+      c.*,
+      g.title,
+      g.platform,
+      g.genre,
+      g.cover_url,
+      g.description
+    FROM collection_entries c
+    JOIN games g ON c.game_id = g.id
+    WHERE c.game_id = ? AND c.user_id = ?
+    `,
+    [gameId, userId]
+  );
+
+  if (rows.length === 0) {
+    return null;
+  }
+  return rows[0];
+}
+
 module.exports = {
   listCollectionForUser,
   addToCollection,
   updateCollectionEntry,
   removeFromCollection,
   getCollectionEntryById,
+  getCollectionEntryByGameId,
 };

@@ -2,6 +2,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../services/api";
+import ReviewSection from "../components/ReviewSection";
+import { useToast } from "../components/Toast";
 
 function EstadoBadge({ estado }) {
   if (!estado) return null;
@@ -9,35 +11,40 @@ function EstadoBadge({ estado }) {
   const map = {
     por_jogar: {
       label: "Por jogar",
-      classes: "bg-slate-100 text-slate-700 border-slate-200",
+      icon: "⏳",
+      classes: "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600",
     },
     a_jogar: {
       label: "A jogar",
-      classes: "bg-sky-100 text-sky-800 border-sky-200",
+      icon: "🎮",
+      classes: "bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:border-sky-700",
     },
     concluido: {
       label: "Concluído",
-      classes: "bg-emerald-100 text-emerald-800 border-emerald-200",
+      icon: "✅",
+      classes: "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700",
     },
     abandonado: {
       label: "Abandonado",
-      classes: "bg-rose-100 text-rose-800 border-rose-200",
+      icon: "❌",
+      classes: "bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-700",
     },
   };
 
   const cfg = map[estado] || {
     label: estado,
-    classes: "bg-slate-100 text-slate-700 border-slate-200",
+    icon: "📋",
+    classes: "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600",
   };
 
   return (
     <span
       className={
-        "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium " +
+        "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold shadow-sm " +
         cfg.classes
       }
     >
-      {cfg.label}
+      <span>{cfg.icon}</span> {cfg.label}
     </span>
   );
 }
@@ -45,22 +52,22 @@ function EstadoBadge({ estado }) {
 function RatingChip({ rating }) {
   if (rating == null) {
     return (
-      <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-500">
-        Sem rating
+      <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 dark:bg-slate-700 px-2.5 py-1 text-xs text-slate-500 dark:text-slate-400 shadow-sm">
+        <span>⭐</span> Sem rating
       </span>
     );
   }
 
   const valor = Number(rating);
-  let cor = "bg-emerald-100 text-emerald-800";
-  if (valor <= 4) cor = "bg-rose-100 text-rose-800";
-  else if (valor <= 7) cor = "bg-amber-100 text-amber-800";
+  let cor = "bg-gradient-to-r from-emerald-400 to-teal-400 text-white shadow-emerald-500/25";
+  if (valor <= 4) cor = "bg-gradient-to-r from-rose-400 to-pink-400 text-white shadow-rose-500/25";
+  else if (valor <= 7) cor = "bg-gradient-to-r from-amber-400 to-orange-400 text-white shadow-amber-500/25";
 
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${cor}`}
+      className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold shadow-lg ${cor}`}
     >
-      ⭐ {valor.toFixed(1)}
+      ⭐ {valor.toFixed(1)}/10
     </span>
   );
 }
@@ -80,6 +87,7 @@ function safeNum(v, fallback = 0) {
 export default function GameDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [entrada, setEntrada] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -93,7 +101,6 @@ export default function GameDetailsPage() {
   });
 
   const [aGravar, setAGravar] = useState(false);
-  const [msg, setMsg] = useState({ type: "", text: "" });
 
   const fetchDetalhes = useCallback(async () => {
     try {
@@ -180,16 +187,8 @@ export default function GameDetailsPage() {
     setForm((f) => ({ ...f, horas_jogadas: "0" }));
   }
 
-  function limparMsgDepois() {
-    // limpa passado 3s
-    setTimeout(() => {
-      setMsg((m) => (m.text ? { type: "", text: "" } : m));
-    }, 3000);
-  }
-
   async function handleGuardar(e) {
     if (e?.preventDefault) e.preventDefault();
-    setMsg({ type: "", text: "" });
 
     if (!entrada) return;
 
@@ -211,12 +210,14 @@ export default function GameDetailsPage() {
       // refresca para trazer updated_at real + garantir campos completos
       await fetchDetalhes();
 
-      setMsg({ type: "success", text: "Guardado ✅" });
-      limparMsgDepois();
+      toast.success("Progresso guardado com sucesso!", {
+        title: "Guardado! 💾",
+      });
     } catch (err) {
       console.error(err);
-      setMsg({ type: "error", text: "Falhou ao guardar. Vê a consola/network." });
-      limparMsgDepois();
+      toast.error("Falhou ao guardar. Tenta novamente.", {
+        title: "Erro ao guardar",
+      });
     } finally {
       setAGravar(false);
     }
@@ -228,144 +229,225 @@ export default function GameDetailsPage() {
 
     try {
       await api.delete(`/collection/${id}`);
+      toast.success("Jogo removido da coleção.", {
+        title: "Removido! 🗑️",
+      });
       navigate("/app/colecao");
     } catch (err) {
       console.error(err);
-      setMsg({ type: "error", text: "Falhou ao remover o jogo." });
-      limparMsgDepois();
+      toast.error("Falhou ao remover o jogo.", {
+        title: "Erro",
+      });
     }
   }
 
   if (loading) {
-    return <div className="text-sm text-slate-500">A carregar detalhes...</div>;
+    return (
+      <div className="space-y-6">
+        {/* Skeleton Header */}
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 skeleton rounded-lg"></div>
+          <div className="flex-1 space-y-2">
+            <div className="h-8 skeleton rounded-lg w-1/3"></div>
+            <div className="h-4 skeleton rounded-lg w-1/4"></div>
+          </div>
+        </div>
+        
+        <div className="grid gap-6 md:grid-cols-[260px,1fr]">
+          {/* Skeleton Cover */}
+          <div className="rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-4">
+            <div className="aspect-[3/4] skeleton rounded-xl"></div>
+            <div className="mt-4 space-y-2">
+              <div className="h-3 skeleton rounded w-2/3"></div>
+              <div className="h-3 skeleton rounded w-1/2"></div>
+              <div className="h-3 skeleton rounded w-3/4"></div>
+            </div>
+          </div>
+          
+          {/* Skeleton Content */}
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6">
+              <div className="h-6 skeleton rounded-lg w-1/4 mb-4"></div>
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="h-10 skeleton rounded-lg"></div>
+                <div className="h-10 skeleton rounded-lg"></div>
+                <div className="h-10 skeleton rounded-lg"></div>
+              </div>
+              <div className="h-32 skeleton rounded-lg mt-4"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (erro) {
-    return <div className="text-sm text-red-600">{erro}</div>;
+    return (
+      <div className="rounded-2xl border border-rose-200/50 dark:border-rose-700/50 bg-rose-50/80 dark:bg-rose-900/20 backdrop-blur-sm p-6 text-center">
+        <span className="text-4xl mb-3 block">😕</span>
+        <p className="text-rose-700 dark:text-rose-400 font-medium">{erro}</p>
+        <button
+          onClick={() => navigate(-1)}
+          className="mt-4 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-sm font-medium transition"
+        >
+          Voltar
+        </button>
+      </div>
+    );
   }
 
   if (!entrada) {
     return (
-      <div className="text-sm text-slate-500">
+      <div className="text-sm text-slate-500 dark:text-slate-400">
         Jogo não encontrado na tua coleção.
       </div>
     );
   }
 
   return (
-    <div className="space-y-5">
-      {/* Topo */}
-      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-        <div>
+    <div className="space-y-6 animate-fadeIn">
+      {/* Header com Banner */}
+      <div className="relative rounded-2xl overflow-hidden">
+        {/* Background Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 animate-gradient opacity-90"></div>
+        {/* Overlay com imagem */}
+        {capa && (
+          <div 
+            className="absolute inset-0 bg-cover bg-center opacity-20 mix-blend-overlay"
+            style={{ backgroundImage: `url(${capa})` }}
+          ></div>
+        )}
+        
+        <div className="relative z-10 p-6 md:p-8">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="mb-2 inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 hover:bg-slate-50"
+            className="mb-4 inline-flex items-center gap-2 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 px-3 py-1.5 text-sm text-white hover:bg-white/30 transition-all duration-300"
           >
-            ◀ Voltar
+            <span>←</span> Voltar
           </button>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-semibold text-slate-900">{entrada.titulo}</h1>
-            <EstadoBadge estado={entrada.estado} />
-            <RatingChip rating={entrada.rating} />
-            <span className="text-[11px] text-slate-500">
-              {safeNum(entrada.horas_jogadas, 0)}h jogadas
-            </span>
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-white mb-3 drop-shadow-lg">{entrada.titulo}</h1>
+              <div className="flex flex-wrap items-center gap-2">
+                <EstadoBadge estado={entrada.estado} />
+                <RatingChip rating={entrada.rating} />
+                <span className="inline-flex items-center gap-1 rounded-full bg-white/20 backdrop-blur-sm px-3 py-1 text-xs font-medium text-white border border-white/30">
+                  🕐 {safeNum(entrada.horas_jogadas, 0)}h jogadas
+                </span>
 
-            {temAlteracoes && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-800 border border-amber-200">
-                ● alterações por guardar
-              </span>
-            )}
+                {temAlteracoes && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/90 px-3 py-1 text-xs font-semibold text-white shadow-lg animate-pulse">
+                    <span className="w-2 h-2 rounded-full bg-white animate-ping"></span>
+                    Alterações por guardar
+                  </span>
+                )}
+              </div>
+
+              <p className="mt-3 text-sm text-white/80">
+                💡 Dica: <span className="font-medium">Ctrl+S</span> para guardar rapidamente.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleRemover}
+              className="inline-flex items-center gap-2 rounded-xl bg-rose-500/90 hover:bg-rose-600 backdrop-blur-sm px-4 py-2.5 text-sm font-medium text-white shadow-lg transition-all duration-300 hover:scale-105"
+            >
+              <span>🗑️</span> Remover da coleção
+            </button>
           </div>
-
-          <p className="mt-1 text-sm text-slate-500">
-            Dica: <span className="font-medium">Ctrl+S</span> para guardar.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={handleRemover}
-            className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700 hover:bg-rose-100"
-          >
-            Remover da coleção
-          </button>
         </div>
       </div>
 
-      {/* Msg */}
-      {msg.text && (
-        <div
-          className={
-            "rounded-lg border px-3 py-2 text-sm " +
-            (msg.type === "success"
-              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-              : "border-rose-200 bg-rose-50 text-rose-700")
-          }
-        >
-          {msg.text}
-        </div>
-      )}
-
-      <div className="grid gap-6 md:grid-cols-[260px,1fr]">
+      <div className="grid gap-6 md:grid-cols-[280px,1fr]">
         {/* Capa */}
-        <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-          <div className="aspect-[3/4] w-full overflow-hidden rounded-lg bg-slate-200">
+        <div className="card-3d rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-4 shadow-lg">
+          <div className="aspect-[3/4] w-full overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-700 shadow-lg group">
             {capa ? (
-              <img src={capa} alt={entrada.titulo} className="h-full w-full object-cover" />
+              <img 
+                src={capa} 
+                alt={entrada.titulo} 
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" 
+              />
             ) : (
-              <div className="flex h-full w-full items-center justify-center text-xs text-slate-500">
-                Sem capa
+              <div className="flex h-full w-full flex-col items-center justify-center text-slate-500 dark:text-slate-400 bg-gradient-to-br from-indigo-500/20 to-purple-500/20">
+                <span className="text-5xl mb-2">🎮</span>
+                <span className="text-xs">Sem capa</span>
               </div>
             )}
           </div>
 
-          <div className="mt-3 text-xs text-slate-600 space-y-1">
-            <div>
-              <span className="text-slate-400">Plataforma:</span>{" "}
-              {entrada.plataforma || "—"}
+          <div className="mt-4 space-y-2">
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 dark:bg-slate-700/50">
+              <span className="text-base">🎯</span>
+              <div>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide">Plataforma</p>
+                <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{entrada.plataforma || "—"}</p>
+              </div>
             </div>
-            <div>
-              <span className="text-slate-400">Género:</span> {entrada.genero || "—"}
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 dark:bg-slate-700/50">
+              <span className="text-base">🏷️</span>
+              <div>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide">Género</p>
+                <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{entrada.genero || "—"}</p>
+              </div>
             </div>
-            <div>
-              <span className="text-slate-400">Criado em:</span>{" "}
-              {toDateTimePT(entrada.criado_em)}
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 dark:bg-slate-700/50">
+              <span className="text-base">📅</span>
+              <div>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide">Adicionado em</p>
+                <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{toDateTimePT(entrada.criado_em)}</p>
+              </div>
             </div>
-            <div>
-              <span className="text-slate-400">Atualizado em:</span>{" "}
-              {toDateTimePT(entrada.atualizado_em)}
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 dark:bg-slate-700/50">
+              <span className="text-base">🔄</span>
+              <div>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide">Última atualização</p>
+                <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{toDateTimePT(entrada.atualizado_em)}</p>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-5">
           {/* Form */}
           <form
             onSubmit={handleGuardar}
-            className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm space-y-4"
+            className="rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 shadow-lg space-y-5"
           >
-            <div className="flex items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold text-slate-900">
-                Atualizar progresso e notas
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-sm shadow-md">📊</span>
+                Atualizar progresso
               </h2>
 
               <button
                 type="submit"
                 disabled={aGravar || !temAlteracoes}
-                className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-105 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
-                {aGravar ? "A guardar..." : "Guardar"}
+                {aGravar ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    A guardar...
+                  </>
+                ) : (
+                  <>
+                    <span>💾</span> Guardar
+                  </>
+                )}
               </button>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-slate-700">
-                  Rating (0 a 10)
+            <div className="grid gap-5 md:grid-cols-3">
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                  <span>⭐</span> Rating (0 a 10)
                 </label>
                 <input
                   type="number"
@@ -374,14 +456,14 @@ export default function GameDetailsPage() {
                   step="0.5"
                   value={form.rating}
                   onChange={(e) => setForm((f) => ({ ...f, rating: e.target.value }))}
-                  className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full rounded-xl border border-slate-200/50 dark:border-slate-600/50 bg-white/50 dark:bg-slate-700/50 px-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   placeholder="Ex.: 8.5"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-slate-700">
-                  Horas jogadas
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                  <span>🕐</span> Horas jogadas
                 </label>
                 <input
                   type="number"
@@ -391,90 +473,85 @@ export default function GameDetailsPage() {
                   onChange={(e) =>
                     setForm((f) => ({ ...f, horas_jogadas: e.target.value }))
                   }
-                  className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full rounded-xl border border-slate-200/50 dark:border-slate-600/50 bg-white/50 dark:bg-slate-700/50 px-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   placeholder="Ex.: 42"
                 />
 
                 {/* Botões rápidos */}
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setHorasDelta(0.5)}
-                    className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50"
-                  >
-                    +0.5h
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setHorasDelta(1)}
-                    className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50"
-                  >
-                    +1h
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setHorasDelta(2)}
-                    className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50"
-                  >
-                    +2h
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setHorasDelta(5)}
-                    className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50"
-                  >
-                    +5h
-                  </button>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {[0.5, 1, 2, 5].map((h) => (
+                    <button
+                      key={h}
+                      type="button"
+                      onClick={() => setHorasDelta(h)}
+                      className="rounded-lg bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200/50 dark:border-indigo-700/50 px-2.5 py-1 text-[11px] font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all"
+                    >
+                      +{h}h
+                    </button>
+                  ))}
                   <button
                     type="button"
                     onClick={resetHoras}
-                    className="rounded-md border border-rose-200 bg-rose-50 px-2 py-1 text-[11px] text-rose-700 hover:bg-rose-100"
+                    className="rounded-lg bg-rose-50 dark:bg-rose-900/30 border border-rose-200/50 dark:border-rose-700/50 px-2.5 py-1 text-[11px] font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-all"
                   >
-                    Repor
+                    🔄 Repor
                   </button>
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-slate-700">Estado</label>
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                  <span>📋</span> Estado
+                </label>
                 <select
                   value={form.estado}
                   onChange={(e) => setForm((f) => ({ ...f, estado: e.target.value }))}
-                  className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full rounded-xl border border-slate-200/50 dark:border-slate-600/50 bg-white/50 dark:bg-slate-700/50 px-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all cursor-pointer"
                 >
-                  <option value="por_jogar">Por jogar</option>
-                  <option value="a_jogar">A jogar</option>
-                  <option value="concluido">Concluído</option>
-                  <option value="abandonado">Abandonado</option>
+                  <option value="por_jogar">⏳ Por jogar</option>
+                  <option value="a_jogar">🎮 A jogar</option>
+                  <option value="concluido">✅ Concluído</option>
+                  <option value="abandonado">❌ Abandonado</option>
                 </select>
               </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-700">
-                Notas pessoais / análise do jogo
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <span>📝</span> Notas pessoais / análise do jogo
               </label>
               <textarea
                 rows={5}
                 value={form.notas}
                 onChange={(e) => setForm((f) => ({ ...f, notas: e.target.value }))}
-                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-xl border border-slate-200/50 dark:border-slate-600/50 bg-white/50 dark:bg-slate-700/50 px-4 py-3 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"
                 placeholder="O que achaste do jogo? O que gostaste mais, pontos fracos, etc."
               />
             </div>
           </form>
 
           {/* Descrição */}
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <div className="text-[11px] uppercase tracking-wide text-slate-500 mb-1.5">
+          <div className="rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 shadow-lg">
+            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
+              <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-sm shadow-md">📖</span>
               Descrição do jogo
-            </div>
-            <p className="text-sm text-slate-700 whitespace-pre-line">
+            </h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400 whitespace-pre-line leading-relaxed">
               {entrada.descricao && String(entrada.descricao).trim().length > 0
                 ? entrada.descricao
                 : "Sem descrição disponível. Este campo poderá ser preenchido a partir da API de jogos no futuro."}
             </p>
           </div>
+
+          {/* Reviews da Comunidade */}
+          {entrada.game_id && (
+            <ReviewSection 
+              gameId={entrada.game_id} 
+              gameTitle={entrada.titulo}
+              userRating={entrada.rating}
+              userHoursPlayed={entrada.horas_jogadas}
+            />
+          )}
         </div>
       </div>
     </div>
