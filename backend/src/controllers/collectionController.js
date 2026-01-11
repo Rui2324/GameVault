@@ -4,6 +4,7 @@ const {
   listCollectionForUser,
   updateCollectionEntry,
   removeFromCollection,
+  getCollectionEntryById,
 } = require("../models/collectionModel");
 const { getGameById } = require("../models/gameModel");
 
@@ -20,12 +21,10 @@ async function listMyCollection(req, res) {
       horas_jogadas: e.hours_played,
       estado: e.status,
       notas: e.notes,
-      // info do jogo
       titulo: e.title,
       plataforma: e.platform,
       genero: e.genre,
-      // 👇 aqui o nome tem de bater com o que o frontend espera (capa_url)
-      capa_url: e.cover_url,
+      url_capa: e.cover_url,
     }));
 
     return res.json({ colecao });
@@ -37,8 +36,45 @@ async function listMyCollection(req, res) {
   }
 }
 
+// GET /api/collection/:id  → detalhes de uma entrada
+async function getMyCollectionEntry(req, res) {
+  try {
+    const userId = req.userId;
+    const { id } = req.params;
+
+    const entry = await getCollectionEntryById(id, userId);
+    if (!entry) {
+      return res
+        .status(404)
+        .json({ mensagem: "Entrada da coleção não encontrada." });
+    }
+
+    const resposta = {
+      id: entry.id,
+      jogo_id: entry.game_id,
+      rating: entry.rating,
+      horas_jogadas: entry.hours_played,
+      estado: entry.status,
+      notas: entry.notes,
+      titulo: entry.title,
+      plataforma: entry.platform,
+      genero: entry.genre,
+      url_capa: entry.cover_url,
+      descricao: entry.description,
+      criado_em: entry.created_at,
+      atualizado_em: entry.updated_at,
+    };
+
+    return res.json({ entrada: resposta });
+  } catch (err) {
+    console.error("Erro ao obter detalhes da coleção:", err);
+    return res.status(500).json({
+      mensagem: "Ocorreu um erro interno ao obter os detalhes do jogo.",
+    });
+  }
+}
+
 // POST /api/collection
-// body: { jogo_id, rating?, horas_jogadas?, estado?, notas? }
 async function addToMyCollection(req, res) {
   try {
     const userId = req.userId;
@@ -60,7 +96,7 @@ async function addToMyCollection(req, res) {
       game_id: jogo_id,
       rating,
       hours_played: horas_jogadas,
-      status: estado,
+      status: estado || "por_jogar",
       notes: notas,
     });
 
@@ -74,8 +110,10 @@ async function addToMyCollection(req, res) {
       titulo: entry.title,
       plataforma: entry.platform,
       genero: entry.genre,
-      // 👇 aqui igual
-      capa_url: entry.cover_url,
+      url_capa: entry.cover_url,
+      descricao: entry.description,
+      criado_em: entry.created_at,
+      atualizado_em: entry.updated_at,
     };
 
     return res.status(201).json({ entrada: resposta });
@@ -123,8 +161,10 @@ async function updateMyCollectionEntry(req, res) {
       titulo: updated.title,
       plataforma: updated.platform,
       genero: updated.genre,
-      // 👇 igual
-      capa_url: updated.cover_url,
+      url_capa: updated.cover_url,
+      descricao: updated.description,
+      criado_em: updated.created_at,
+      atualizado_em: updated.updated_at,
     };
 
     return res.json({ entrada: resposta });
@@ -160,6 +200,7 @@ async function removeMyCollectionEntry(req, res) {
 
 module.exports = {
   listMyCollection,
+  getMyCollectionEntry,
   addToMyCollection,
   updateMyCollectionEntry,
   removeMyCollectionEntry,

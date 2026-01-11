@@ -1,14 +1,9 @@
-// src/routes/statsRoutes.js
 const express = require("express");
-const { getMyStats } = require("../controllers/statsController");
-const authMiddleware = require("../middleware/authMiddleware");
-
 const router = express.Router();
 
-router.use(authMiddleware);
+const authMiddleware = require("../middleware/authMiddleware");
+const { getStats } = require("../controllers/statsController");
 
-router.get("/", getMyStats);
+router.get("/", authMiddleware, getStats);
 
 module.exports = router;
-
-

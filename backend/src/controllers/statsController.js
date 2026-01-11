@@ -1,67 +1,67 @@
-// src/controllers/statsController.js
-const pool = require("../config/db");
+// backend/src/controllers/statsController.js
+const db = require("../db");
 
-// GET /api/stats
-async function getMyStats(req, res) {
-  try {
-    const userId = req.userId;
+const TABLE = process.env.COLLECTION_TABLE || "collection";
 
-    // total de jogos
-    const [totalRows] = await pool.query(
-      "SELECT COUNT(*) AS total_jogos FROM collection_entries WHERE user_id = ?",
-      [userId]
-    );
-    const totalJogos = totalRows[0].total_jogos || 0;
-
-    // total de horas
-    const [horasRows] = await pool.query(
-      "SELECT COALESCE(SUM(hours_played), 0) AS total_horas FROM collection_entries WHERE user_id = ?",
-      [userId]
-    );
-    const totalHoras = horasRows[0].total_horas || 0;
-
-    // jogos por estado
-    const [estadoRows] = await pool.query(
-      `SELECT status, COUNT(*) AS total
-       FROM collection_entries
-       WHERE user_id = ?
-       GROUP BY status`,
-      [userId]
-    );
-
-    const jogosPorEstado = {
-      por_jogar: 0,
-      a_jogar: 0,
-      concluido: 0,
-      abandonado: 0,
-    };
-
-    estadoRows.forEach((row) => {
-      if (jogosPorEstado.hasOwnProperty(row.status)) {
-        jogosPorEstado[row.status] = row.total;
-      }
-    });
-
-    // taxa de conclusão (percentagem de concluídos)
-    const taxaConclusao =
-      totalJogos > 0
-        ? Math.round((jogosPorEstado.concluido / totalJogos) * 100)
-        : 0;
-
-    return res.json({
-      total_jogos: totalJogos,
-      total_horas_jogadas: totalHoras,
-      jogos_por_estado: jogosPorEstado,
-      taxa_conclusao_percent: taxaConclusao,
-    });
-  } catch (err) {
-    console.error("Erro ao obter estatísticas:", err);
-    return res.status(500).json({
-      mensagem: "Ocorreu um erro interno ao calcular as estatísticas.",
-    });
-  }
+async function safeQuery(sql, params) {
+  const [rows] = await db.execute(sql, params);
+  return rows;
 }
 
-module.exports = {
-  getMyStats,
+exports.getStats = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: "Não autenticado." });
+    }
+
+    // 1) total jogos
+    const totalRows = await safeQuery(
+      `SELECT COUNT(*) AS total FROM \`${TABLE}\` WHERE user_id = ?`,
+      [userId]
+    );
+    const total = Number(totalRows?.[0]?.total ?? 0);
+
+    // 2) distribuição por estado
+    const statusRows = await safeQuery(
+      `SELECT status, COUNT(*) AS count
+       FROM \`${TABLE}\`
+       WHERE user_id = ?
+       GROUP BY status
+       ORDER BY count DESC`,
+      [userId]
+    );
+
+    // 3) horas totais
+    const hoursRows = await safeQuery(
+      `SELECT COALESCE(SUM(hours_played), 0) AS hours
+       FROM \`${TABLE}\`
+       WHERE user_id = ?`,
+      [userId]
+    );
+    const totalHours = Number(hoursRows?.[0]?.hours ?? 0);
+
+    // 4) média rating (ignora null)
+    const ratingRows = await safeQuery(
+      `SELECT COALESCE(AVG(rating), NULL) AS avgRating
+       FROM \`${TABLE}\`
+       WHERE user_id = ? AND rating IS NOT NULL`,
+      [userId]
+    );
+    const avgRatingRaw = ratingRows?.[0]?.avgRating;
+    const avgRating = avgRatingRaw == null ? null : Number(avgRatingRaw);
+
+    return res.json({
+      total,
+      totalHours,
+      avgRating,
+      byStatus: statusRows.map((r) => ({
+        status: r.status ?? "—",
+        count: Number(r.count ?? 0),
+      })),
+    });
+  } catch (err) {
+    console.error("getStats error:", err);
+    return res.status(500).json({ message: "Erro interno nas estatísticas." });
+  }
 };

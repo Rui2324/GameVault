@@ -1,12 +1,16 @@
 // src/App.jsx
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
+
 import LoginPage from "./pages/LoginPage";
 import RegistoPage from "./pages/RegistoPage";
 import DashboardPage from "./pages/DashboardPage";
 import CollectionPage from "./pages/CollectionPage";
 import WishlistPage from "./pages/WishlistPage";
 import StatsPage from "./pages/StatsPage";
+import SettingsPage from "./pages/SettingsPage";
+import GameDetailsPage from "./pages/GameDetailsPage";
+import ExternalGameDetailsPage from "./pages/ExternalGameDetailsPage";
 import AppLayout from "./layout/AppLayout";
 
 function RotaProtegida({ children }) {
@@ -45,11 +49,17 @@ export default function App() {
         <Route path="colecao" element={<CollectionPage />} />
         <Route path="wishlist" element={<WishlistPage />} />
         <Route path="estatisticas" element={<StatsPage />} />
-        {/* default: /app → /app/dashboard */}
+        <Route path="settings" element={<SettingsPage />} />
+
+        {/* Detalhe da tua entrada na coleção */}
+        <Route path="jogo/:id" element={<GameDetailsPage />} />
+
+        {/* NOVO: detalhe RAWG (explorar) */}
+        <Route path="explorar/:externalId" element={<ExternalGameDetailsPage />} />
+
         <Route index element={<Navigate to="dashboard" replace />} />
       </Route>
 
-      {/* fallback: qualquer outra rota vai para /login */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );

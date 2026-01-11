@@ -1,48 +1,41 @@
-// src/middleware/authMiddleware.js
+// backend/src/middleware/authMiddleware.js
 const jwt = require("jsonwebtoken");
 
-function authMiddleware(req, res, next) {
-  const authHeader = req.headers["authorization"];
-
-  // Sem header Authorization -> 401
-  if (!authHeader) {
-    return res
-      .status(401)
-      .json({ message: "Token de autenticação em falta." });
-  }
-
-  const [scheme, token] = authHeader.split(" ");
-
-  // Tem de ser "Bearer <token>"
-  if (scheme !== "Bearer" || !token) {
-    return res
-      .status(401)
-      .json({ message: "Token de autenticação inválido." });
-  }
-
+module.exports = function authMiddleware(req, res, next) {
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const auth = req.headers.authorization || "";
+    const [type, token] = auth.split(" ");
 
-    // No login provavelmente fizeste algo tipo:
-    // jwt.sign({ sub: user.id, email: user.email }, ...)
-    const userId = payload.sub || payload.id;
+    if (type !== "Bearer" || !token) {
+      return res.status(401).json({ message: "Token em falta." });
+    }
 
-    // muitos controladores esperam req.userId
-    req.userId = userId;
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      return res.status(500).json({ message: "JWT_SECRET em falta no .env" });
+    }
 
-    // e alguns usam req.user
+    const payload = jwt.verify(token, secret);
+
+    // id pode vir em campos diferentes dependendo de quem gerou o token
+    const userId = payload.id ?? payload.userId ?? payload.sub;
+
+    // mete o que o teu projeto usa (id, email, user_type, etc.)
     req.user = {
       id: userId,
       email: payload.email,
+      user_type: payload.user_type,
     };
+
+    // compatibilidade com controladores que usam req.userId (authController.me, updateProfile, etc.)
+    req.userId = userId;
+
+    if (!req.user.id) {
+      return res.status(401).json({ message: "Token inválido." });
+    }
 
     return next();
   } catch (err) {
-    console.error("Erro a validar token:", err);
-    return res
-      .status(401)
-      .json({ message: "Token de autenticação inválido ou expirado." });
+    return res.status(401).json({ message: "Token inválido ou expirado." });
   }
-}
-
-module.exports = authMiddleware;
+};

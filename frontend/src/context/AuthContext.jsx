@@ -5,16 +5,14 @@ import api from "../services/api";
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  // vê logo se há token no arranque
   const tokenInicial =
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(!!tokenInicial); // só fica "a carregar" se houver token
+  const [loading, setLoading] = useState(!!tokenInicial);
   const [erro, setErro] = useState("");
 
   useEffect(() => {
-    // se não houver token, não fazemos pedidos nenhuns
     if (!tokenInicial) {
       return;
     }
@@ -58,6 +56,12 @@ export function AuthProvider({ children }) {
     setUser(null);
   }
 
+  // 🔧 novo: atualizar dados do perfil
+  async function atualizarPerfil(dados) {
+    const res = await api.put("/auth/profile", dados);
+    setUser(res.data.user); // mantém header/nav sempre em sync
+  }
+
   const value = {
     user,
     loading,
@@ -66,6 +70,7 @@ export function AuthProvider({ children }) {
     login,
     registar,
     logout,
+    atualizarPerfil,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

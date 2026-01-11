@@ -13,6 +13,8 @@ const statsRoutes = require("./src/routes/statsRoutes");
 const wishlistRoutes = require("./src/routes/wishlistRoutes");
 const authMiddleware = require("./src/middleware/authMiddleware");
 const externalGamesRoutes = require("./src/routes/externalGamesRoutes");
+const dashboardRoutes = require("./src/routes/dashboardRoutes");
+
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -37,6 +39,8 @@ app.get("/api/health", async (req, res) => {
 // públicas
 app.use("/api/auth", authRoutes);
 app.use("/api/external-games", externalGamesRoutes);
+app.use("/api", dashboardRoutes);
+
 
 // protegidas
 app.use("/api/games", authMiddleware, gameRoutes);
