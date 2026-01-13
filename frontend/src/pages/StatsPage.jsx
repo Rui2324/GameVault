@@ -14,9 +14,27 @@ import {
   Legend,
 } from "recharts";
 
-const CORES_ESTADO = ["#4F46E5", "#0EA5E9", "#22C55E", "#F97316"];
-const CORES_GENERO = ["#6366F1", "#EC4899", "#10B981", "#F59E0B", "#8B5CF6", "#14B8A6"];
-const CORES_PLATAFORMA = ["#2563EB", "#7C3AED", "#F97316", "#0D9488", "#DC2626"];
+const CORES_ESTADO = ["#D946EF", "#22D3EE", "#4ADE80", "#FACC15"];
+const CORES_GENERO = ["#D946EF", "#22D3EE", "#4ADE80", "#FACC15", "#F472B6", "#2DD4BF"];
+const CORES_PLATAFORMA = ["#22D3EE", "#D946EF", "#FACC15", "#4ADE80", "#F87171"];
+
+// ============ COMPONENTES RETRO ============
+
+function RetroCard({ children, color = "fuchsia", className = "" }) {
+  const colors = {
+    fuchsia: "border-fuchsia-500 shadow-[4px_4px_0px_0px_rgba(217,70,239,0.8)]",
+    cyan: "border-cyan-400 shadow-[4px_4px_0px_0px_rgba(34,211,238,0.8)]",
+    yellow: "border-yellow-400 shadow-[4px_4px_0px_0px_rgba(250,204,21,0.8)]",
+    green: "border-green-400 shadow-[4px_4px_0px_0px_rgba(74,222,128,0.8)]",
+    rose: "border-rose-500 shadow-[4px_4px_0px_0px_rgba(244,63,94,0.8)]",
+  };
+
+  return (
+    <div className={`bg-slate-900 border-2 ${colors[color]} ${className}`}>
+      {children}
+    </div>
+  );
+}
 
 export default function StatsPage() {
   const [stats, setStats] = useState(null);
@@ -95,40 +113,47 @@ export default function StatsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header com gradiente */}
-      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 p-6 shadow-xl">
-        <div className="absolute inset-0 bg-black/10" />
-        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
-        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+      {/* Header Retro */}
+      <RetroCard color="fuchsia" className="p-6 relative overflow-hidden">
+        {/* Grid pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(217,70,239,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(217,70,239,0.1)_1px,transparent_1px)] bg-[size:20px_20px]" />
         
         <div className="relative">
-          <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-            <span className="text-3xl">📊</span>
-            Estatísticas da coleção
+          <div className="flex items-center gap-2 text-fuchsia-400 text-sm font-bold uppercase tracking-widest mb-2">
+            <span className="inline-block w-3 h-3 bg-fuchsia-400 animate-pulse" />
+            Análise
+          </div>
+          <h2 className="text-2xl font-black text-white flex items-center gap-3">
+            📊 Estatísticas da coleção
           </h2>
-          <p className="text-purple-100 text-sm mt-1">
+          <p className="text-slate-400 text-sm mt-1">
             Visão geral da tua biblioteca de jogos: distribuição por estado, género e plataforma.
           </p>
         </div>
-      </section>
+
+        {/* Decorative pixels */}
+        <div className="absolute top-4 right-4 w-4 h-4 bg-cyan-400" />
+        <div className="absolute top-4 right-10 w-2 h-2 bg-yellow-400" />
+        <div className="absolute bottom-4 right-6 w-3 h-3 bg-fuchsia-500" />
+      </RetroCard>
 
       {loading && (
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800 h-24" />
+              <div key={i} className="animate-pulse border-2 border-slate-700 bg-slate-800 h-24" />
             ))}
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {[1, 2].map((i) => (
-              <div key={i} className="animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800 h-80" />
+              <div key={i} className="animate-pulse border-2 border-slate-700 bg-slate-800 h-80" />
             ))}
           </div>
         </div>
       )}
 
       {erro && !loading && (
-        <div className="flex items-center justify-center py-8 text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-200 dark:border-red-800">
+        <div className="flex items-center justify-center py-8 text-rose-400 border-2 border-rose-500/50 bg-rose-500/10">
           <span className="mr-2">⚠️</span> {erro}
         </div>
       )}
@@ -141,44 +166,44 @@ export default function StatsPage() {
               titulo="Total de jogos" 
               valor={totalJogos} 
               icone="🎮"
-              cor="from-blue-500 to-cyan-500"
+              cor="cyan"
             />
             <StatCard 
               titulo="Horas jogadas" 
               valor={totalHoras}
               sufixo="h"
               icone="⏱️"
-              cor="from-emerald-500 to-teal-500"
+              cor="green"
             />
             <StatCard 
               titulo="Taxa de conclusão" 
               valor={taxaConclusao}
               sufixo="%"
               icone="🏆"
-              cor="from-amber-500 to-orange-500"
+              cor="yellow"
             />
             <StatCard 
               titulo="Em progresso" 
               valor={jogosPorEstado?.a_jogar ?? 0}
               icone="🎯"
-              cor="from-pink-500 to-rose-500"
+              cor="fuchsia"
             />
           </section>
 
           {/* Gráfico de barras: jogos por estado */}
           <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
-            <div className="rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl p-5">
+            <RetroCard color="cyan" className="p-5">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xl">📈</span>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                <h3 className="text-sm font-bold text-white">
                   Jogos por estado
                 </h3>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+              <p className="text-xs text-slate-400 mb-4">
                 Distribuição dos jogos que estão por jogar, em progresso, concluídos ou abandonados.
               </p>
               {dataEstado.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-48 text-slate-500 dark:text-slate-400">
+                <div className="flex flex-col items-center justify-center h-48 text-slate-400">
                   <span className="text-4xl mb-2">📭</span>
                   <p className="text-sm">Ainda não há dados suficientes</p>
                 </div>
@@ -188,25 +213,26 @@ export default function StatsPage() {
                     <BarChart data={dataEstado}>
                       <XAxis
                         dataKey="estado"
-                        tick={{ fontSize: 11, fill: 'currentColor' }}
+                        tick={{ fontSize: 11, fill: '#94a3b8' }}
                         axisLine={false}
                         tickLine={false}
                       />
                       <YAxis
                         allowDecimals={false}
-                        tick={{ fontSize: 11, fill: 'currentColor' }}
+                        tick={{ fontSize: 11, fill: '#94a3b8' }}
                         axisLine={false}
                         tickLine={false}
                       />
                       <Tooltip
                         contentStyle={{
                           fontSize: 12,
-                          borderRadius: 12,
-                          border: 'none',
-                          boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
+                          borderRadius: 0,
+                          border: '2px solid #22d3ee',
+                          backgroundColor: '#0f172a',
+                          color: '#fff',
                         }}
                       />
-                      <Bar dataKey="quantidade" radius={[8, 8, 0, 0]}>
+                      <Bar dataKey="quantidade" radius={0}>
                         {dataEstado.map((_, index) => (
                           <Cell
                             key={`cell-estado-${index}`}
@@ -218,21 +244,21 @@ export default function StatsPage() {
                   </ResponsiveContainer>
                 </div>
               )}
-            </div>
+            </RetroCard>
 
             {/* Pizza: jogos por género */}
-            <div className="rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl p-5">
+            <RetroCard color="fuchsia" className="p-5">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xl">🥧</span>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                <h3 className="text-sm font-bold text-white">
                   Jogos por género
                 </h3>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+              <p className="text-xs text-slate-400 mb-4">
                 Que tipos de jogos jogas mais? RPG, ação, estratégia... vê a distribuição aqui.
               </p>
               {dataGenero.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-48 text-slate-500 dark:text-slate-400">
+                <div className="flex flex-col items-center justify-center h-48 text-slate-400">
                   <span className="text-4xl mb-2">📭</span>
                   <p className="text-sm">Ainda não há dados suficientes</p>
                 </div>
@@ -259,37 +285,38 @@ export default function StatsPage() {
                       <Tooltip
                         contentStyle={{
                           fontSize: 12,
-                          borderRadius: 12,
-                          border: 'none',
-                          boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
+                          borderRadius: 0,
+                          border: '2px solid #d946ef',
+                          backgroundColor: '#0f172a',
+                          color: '#fff',
                         }}
                       />
                       <Legend
                         layout="vertical"
                         align="right"
                         verticalAlign="middle"
-                        wrapperStyle={{ fontSize: 11 }}
+                        wrapperStyle={{ fontSize: 11, color: '#94a3b8' }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
               )}
-            </div>
+            </RetroCard>
           </section>
 
           {/* Gráfico barras horizontais: jogos por plataforma */}
-          <section className="rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl p-5">
+          <RetroCard color="yellow" className="p-5">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-xl">🖥️</span>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+              <h3 className="text-sm font-bold text-white">
                 Jogos por plataforma
               </h3>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+            <p className="text-xs text-slate-400 mb-4">
               Em que plataformas tens mais jogos registados (PC, PS5, Switch, etc.).
             </p>
             {dataPlataforma.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-48 text-slate-500 dark:text-slate-400">
+              <div className="flex flex-col items-center justify-center h-48 text-slate-400">
                 <span className="text-4xl mb-2">📭</span>
                 <p className="text-sm">Ainda não há dados suficientes</p>
               </div>
@@ -304,26 +331,27 @@ export default function StatsPage() {
                     <XAxis
                       type="number"
                       allowDecimals={false}
-                      tick={{ fontSize: 11, fill: 'currentColor' }}
+                      tick={{ fontSize: 11, fill: '#94a3b8' }}
                       axisLine={false}
                       tickLine={false}
                     />
                     <YAxis
                       type="category"
                       dataKey="nome"
-                      tick={{ fontSize: 11, fill: 'currentColor' }}
+                      tick={{ fontSize: 11, fill: '#94a3b8' }}
                       axisLine={false}
                       tickLine={false}
                     />
                     <Tooltip
                       contentStyle={{
                         fontSize: 12,
-                        borderRadius: 12,
-                        border: 'none',
-                        boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
+                        borderRadius: 0,
+                        border: '2px solid #facc15',
+                        backgroundColor: '#0f172a',
+                        color: '#fff',
                       }}
                     />
-                    <Bar dataKey="quantidade" radius={[0, 8, 8, 0]}>
+                    <Bar dataKey="quantidade" radius={0}>
                       {dataPlataforma.map((_, index) => (
                         <Cell
                           key={`cell-plat-${index}`}
@@ -337,7 +365,7 @@ export default function StatsPage() {
                 </ResponsiveContainer>
               </div>
             )}
-          </section>
+          </RetroCard>
         </>
       )}
     </div>
@@ -345,15 +373,21 @@ export default function StatsPage() {
 }
 
 function StatCard({ titulo, valor, sufixo = "", icone, cor }) {
+  const colors = {
+    fuchsia: { border: "border-fuchsia-500", shadow: "shadow-[4px_4px_0px_0px_rgba(217,70,239,0.8)]", text: "text-fuchsia-400" },
+    cyan: { border: "border-cyan-400", shadow: "shadow-[4px_4px_0px_0px_rgba(34,211,238,0.8)]", text: "text-cyan-400" },
+    yellow: { border: "border-yellow-400", shadow: "shadow-[4px_4px_0px_0px_rgba(250,204,21,0.8)]", text: "text-yellow-400" },
+    green: { border: "border-green-400", shadow: "shadow-[4px_4px_0px_0px_rgba(74,222,128,0.8)]", text: "text-green-400" },
+  };
+  
+  const style = colors[cor] || colors.fuchsia;
+
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl p-5 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300">
-      {/* Background gradient accent */}
-      <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${cor} opacity-20 rounded-full blur-2xl`} />
-      
+    <div className={`relative overflow-hidden bg-slate-900 border-2 ${style.border} ${style.shadow} p-5 transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none`}>
       <div className="relative flex items-center justify-between">
         <div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">{titulo}</p>
-          <span className={`text-3xl font-bold bg-gradient-to-r ${cor} bg-clip-text text-transparent`}>
+          <p className="text-xs text-slate-400 font-bold uppercase tracking-wide mb-1">{titulo}</p>
+          <span className={`text-3xl font-black ${style.text}`}>
             {valor}{sufixo}
           </span>
         </div>

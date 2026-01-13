@@ -4,6 +4,46 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 
+// Componente RetroCard
+function RetroCard({ children, className = "", color = "fuchsia" }) {
+  const colors = {
+    fuchsia: "border-fuchsia-500 shadow-[4px_4px_0px_0px_rgba(217,70,239,0.8)]",
+    cyan: "border-cyan-400 shadow-[4px_4px_0px_0px_rgba(34,211,238,0.8)]",
+    yellow: "border-yellow-400 shadow-[4px_4px_0px_0px_rgba(250,204,21,0.8)]",
+    green: "border-green-400 shadow-[4px_4px_0px_0px_rgba(74,222,128,0.8)]",
+    rose: "border-rose-500 shadow-[4px_4px_0px_0px_rgba(244,63,94,0.8)]",
+    purple: "border-purple-500 shadow-[4px_4px_0px_0px_rgba(168,85,247,0.8)]",
+    amber: "border-amber-400 shadow-[4px_4px_0px_0px_rgba(251,191,36,0.8)]"
+  };
+
+  return (
+    <div className={`bg-slate-900 border-2 ${colors[color]} ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+// Componente RetroButton
+function RetroButton({ children, onClick, className = "", color = "fuchsia", disabled = false }) {
+  const colors = {
+    fuchsia: "border-fuchsia-500 text-fuchsia-400 hover:bg-fuchsia-500 hover:text-white shadow-[3px_3px_0px_0px_rgba(217,70,239,0.8)]",
+    cyan: "border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-slate-900 shadow-[3px_3px_0px_0px_rgba(34,211,238,0.8)]",
+    yellow: "border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-slate-900 shadow-[3px_3px_0px_0px_rgba(250,204,21,0.8)]",
+    green: "border-green-400 text-green-400 hover:bg-green-400 hover:text-slate-900 shadow-[3px_3px_0px_0px_rgba(74,222,128,0.8)]",
+    rose: "border-rose-500 text-rose-400 hover:bg-rose-500 hover:text-white shadow-[3px_3px_0px_0px_rgba(244,63,94,0.8)]"
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`border-2 bg-slate-900/50 font-bold px-4 py-2 transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none disabled:opacity-50 ${colors[color]} ${className}`}
+    >
+      {children}
+    </button>
+  );
+}
+
 export default function PublicProfilePage() {
   const { identifier } = useParams();
   const navigate = useNavigate();
@@ -122,7 +162,7 @@ export default function PublicProfilePage() {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="relative">
-          <div className="w-16 h-16 rounded-full border-4 border-indigo-500/30 border-t-indigo-500 animate-spin"></div>
+          <div className="w-16 h-16 border-4 border-fuchsia-500/30 border-t-fuchsia-500 animate-spin"></div>
           <div className="absolute inset-0 flex items-center justify-center">
             <span className="text-2xl animate-pulse">🎮</span>
           </div>
@@ -134,44 +174,49 @@ export default function PublicProfilePage() {
   if (error) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="text-center bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 shadow-2xl max-w-md mx-4">
-          <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-red-500/20 to-orange-500/20 flex items-center justify-center">
+        <RetroCard color="rose" className="p-8 max-w-md mx-4 text-center">
+          <div className="w-20 h-20 mx-auto mb-4 border-2 border-rose-500 bg-rose-500/20 flex items-center justify-center">
             <span className="text-4xl">😕</span>
           </div>
-          <h2 className="text-xl font-bold text-slate-200 mb-2">{error}</h2>
-          <p className="text-sm text-slate-400 mb-6">O perfil que procuras pode ser privado ou não existir.</p>
-          <button
-            onClick={() => navigate(-1)}
-            className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-sm font-medium rounded-xl transition-all duration-300 shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-105"
-          >
+          <h2 className="text-xl font-bold text-rose-400 mb-2">{error}</h2>
+          <p className="text-sm text-slate-400 mb-6 font-mono">O perfil que procuras pode ser privado ou não existir.</p>
+          <RetroButton onClick={() => navigate(-1)} color="cyan">
             ← Voltar
-          </button>
-        </div>
+          </RetroButton>
+        </RetroCard>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Header do Perfil - Redesenhado */}
-      <div className="rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm overflow-hidden shadow-xl">
-        {/* Banner com overlay gradient */}
+      {/* Header do Perfil - Estilo Retro */}
+      <RetroCard color="fuchsia" className="overflow-hidden">
+        {/* Banner com padrão retro */}
         <div className="h-32 md:h-40 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 animate-gradient" style={{ backgroundSize: '200% 200%' }} />
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yLjIwOS0xLjc5MS00LTQtNHMtNCAxLjc5MS00IDQgMS43OTEgNCA0IDQgNC0xLjc5MSA0LTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
+          <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-600 via-purple-600 to-cyan-500" />
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.3)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.3)_1px,transparent_1px)] bg-[size:20px_20px]" />
           
-          {/* Floating elements */}
-          <div className="absolute top-4 right-4 w-20 h-20 bg-white/10 rounded-full blur-2xl" />
-          <div className="absolute bottom-4 left-1/4 w-32 h-32 bg-pink-500/20 rounded-full blur-3xl" />
+          {/* Decorative pixels */}
+          <div className="absolute top-4 right-4 flex gap-1">
+            <div className="w-3 h-3 bg-fuchsia-400" />
+            <div className="w-3 h-3 bg-cyan-400" />
+            <div className="w-3 h-3 bg-yellow-400" />
+          </div>
+          <div className="absolute bottom-4 left-4 flex gap-1">
+            <div className="w-2 h-2 bg-white/50" />
+            <div className="w-2 h-2 bg-white/30" />
+            <div className="w-2 h-2 bg-white/20" />
+          </div>
         </div>
         
         {/* Info do Perfil */}
         <div className="px-6 pb-6">
           <div className="flex flex-col md:flex-row md:items-end gap-4 -mt-12 md:-mt-16">
-            {/* Avatar com ring de nível */}
-            <div className="relative">
-              <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-1 shadow-xl shadow-indigo-500/25">
-                <div className="w-full h-full rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center text-4xl font-bold text-indigo-600 overflow-hidden">
+            {/* Avatar com borda retro */}
+            <div className="relative shrink-0">
+              <div className="w-24 h-24 md:w-28 md:h-28 border-4 border-cyan-400 bg-slate-900 p-1 shadow-[4px_4px_0px_0px_rgba(34,211,238,0.8)]">
+                <div className="w-full h-full bg-slate-800 flex items-center justify-center text-4xl font-bold text-cyan-400 overflow-hidden">
                   {profile.avatar_url ? (
                     <img
                       src={
@@ -188,39 +233,39 @@ export default function PublicProfilePage() {
                 </div>
               </div>
               {/* Level badge */}
-              <div className="absolute -bottom-2 -right-2 px-2.5 py-1 bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg text-xs font-bold text-white shadow-lg">
+              <div className="absolute -bottom-2 -right-2 px-2.5 py-1 bg-yellow-400 border-2 border-yellow-500 text-xs font-bold text-slate-900 shadow-[2px_2px_0px_0px_rgba(250,204,21,0.8)]">
                 Nv. {profile.level}
               </div>
             </div>
             
-            <div className="flex-1 pt-2">
+            <div className="flex-1 pt-4 md:pt-6 min-w-0">
               <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-white">{profile.name}</h1>
+                <h1 className="text-2xl md:text-3xl font-bold text-fuchsia-400 truncate uppercase tracking-wide">{profile.name}</h1>
                 {!profile.is_public && (
-                  <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 rounded-lg text-xs font-medium flex items-center gap-1">
+                  <span className="px-2.5 py-1 bg-slate-800 border-2 border-rose-500 text-rose-400 text-xs font-medium flex items-center gap-1 shrink-0">
                     🔒 Privado
                   </span>
                 )}
               </div>
               {profile.bio && (
-                <p className="text-slate-600 dark:text-slate-400 text-sm mt-2 max-w-lg">{profile.bio}</p>
+                <p className="text-slate-400 text-sm mt-2 max-w-lg font-mono">{profile.bio}</p>
               )}
               <div className="flex items-center gap-6 mt-3">
                 <button
                   onClick={() => setActiveTab("followers")}
-                  className="group text-sm text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
+                  className="group text-sm text-slate-400 hover:text-fuchsia-400 transition"
                 >
-                  <span className="font-bold text-slate-800 dark:text-white text-lg group-hover:text-indigo-600 dark:group-hover:text-indigo-400">{followCounts.followers}</span>
+                  <span className="font-bold text-fuchsia-400 text-lg group-hover:text-fuchsia-300">{followCounts.followers}</span>
                   <span className="ml-1">seguidores</span>
                 </button>
                 <button
                   onClick={() => setActiveTab("following")}
-                  className="group text-sm text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
+                  className="group text-sm text-slate-400 hover:text-cyan-400 transition"
                 >
-                  <span className="font-bold text-slate-800 dark:text-white text-lg group-hover:text-indigo-600 dark:group-hover:text-indigo-400">{followCounts.following}</span>
+                  <span className="font-bold text-cyan-400 text-lg group-hover:text-cyan-300">{followCounts.following}</span>
                   <span className="ml-1">a seguir</span>
                 </button>
-                <span className="text-xs text-slate-400 dark:text-slate-500 hidden md:inline">
+                <span className="text-xs text-slate-500 hidden md:inline font-mono">
                   📅 Membro desde {formatDate(profile.member_since)}
                 </span>
               </div>
@@ -229,14 +274,11 @@ export default function PublicProfilePage() {
             <div className="flex gap-2 pt-2 md:pt-0">
               {/* Botão Seguir */}
               {!isOwnProfile && (
-                <button
+                <RetroButton
                   onClick={handleFollow}
                   disabled={followLoading}
-                  className={`px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-300 flex items-center gap-2 ${
-                    isFollowing
-                      ? "bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 hover:border-red-300 dark:hover:border-red-700"
-                      : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-105"
-                  }`}
+                  color={isFollowing ? "rose" : "fuchsia"}
+                  className="flex items-center gap-2"
                 >
                   {followLoading ? (
                     <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
@@ -248,18 +290,15 @@ export default function PublicProfilePage() {
                   ) : (
                     <>➕ Seguir</>
                   )}
-                </button>
+                </RetroButton>
               )}
-              <button
-                onClick={copyProfileLink}
-                className="px-4 py-2 bg-white/80 dark:bg-slate-700/80 backdrop-blur-sm border border-slate-200 dark:border-slate-600 hover:bg-white dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 text-sm font-medium rounded-xl transition-all duration-300 flex items-center gap-2 hover:scale-105"
-              >
+              <RetroButton onClick={copyProfileLink} color="cyan" className="flex items-center gap-2">
                 🔗 Partilhar
-              </button>
+              </RetroButton>
               {isOwnProfile && (
                 <Link
                   to="/app/settings"
-                  className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-sm font-semibold rounded-xl transition-all duration-300 flex items-center gap-2 shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-105"
+                  className="border-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-slate-900 shadow-[3px_3px_0px_0px_rgba(250,204,21,0.8)] bg-slate-900/50 font-bold px-4 py-2 transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none flex items-center gap-2"
                 >
                   ⚙️ Editar
                 </Link>
@@ -267,20 +306,20 @@ export default function PublicProfilePage() {
             </div>
           </div>
         </div>
-      </div>
+      </RetroCard>
 
-      {/* Stats Cards */}
+      {/* Stats Cards - Estilo Retro */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <StatCard icon="🎮" label="Jogos" value={stats.totalGames} tone="blue" />
+        <StatCard icon="🎮" label="Jogos" value={stats.totalGames} tone="cyan" />
         <StatCard icon="✅" label="Concluídos" value={stats.completedGames} tone="green" />
-        <StatCard icon="⏱️" label="Horas" value={`${stats.totalHours.toFixed(0)}h`} tone="orange" />
+        <StatCard icon="⏱️" label="Horas" value={`${stats.totalHours.toFixed(0)}h`} tone="yellow" />
         <StatCard icon="✍️" label="Reviews" value={stats.totalReviews} tone="purple" />
         <StatCard icon="⭐" label="Média" value={stats.averageRating || "-"} tone="amber" />
-        <StatCard icon="🏆" label="Conquistas" value={stats.totalAchievements} tone="indigo" />
+        <StatCard icon="🏆" label="Conquistas" value={stats.totalAchievements} tone="fuchsia" />
       </div>
 
-      {/* Tabs - Design pill moderno */}
-      <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800/50 rounded-2xl overflow-x-auto">
+      {/* Tabs - Estilo Retro */}
+      <div className="flex gap-2 p-2 bg-slate-900 border-2 border-fuchsia-500/30 overflow-x-auto">
         <TabButton active={activeTab === "overview"} onClick={() => setActiveTab("overview")}>
           📊 Visão Geral
         </TabButton>
@@ -305,13 +344,13 @@ export default function PublicProfilePage() {
       {activeTab === "overview" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Jogos Favoritos */}
-          <div className="rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-5 shadow-lg">
-            <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
-              <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-base shadow-md">⭐</span>
+          <RetroCard color="yellow" className="p-5">
+            <h2 className="text-sm font-bold text-yellow-400 mb-4 flex items-center gap-2 uppercase tracking-wide">
+              <span className="w-8 h-8 border-2 border-yellow-400 bg-yellow-400/20 flex items-center justify-center text-base">⭐</span>
               Jogos Favoritos
             </h2>
             {favoriteGames.length === 0 ? (
-              <p className="text-slate-400 dark:text-slate-500 text-sm text-center py-6">Sem jogos favoritos ainda</p>
+              <p className="text-slate-500 text-sm text-center py-6 font-mono">Sem jogos favoritos ainda</p>
             ) : (
               <div className="space-y-2">
                 {favoriteGames.map((game) => (
@@ -319,16 +358,16 @@ export default function PublicProfilePage() {
                 ))}
               </div>
             )}
-          </div>
+          </RetroCard>
 
           {/* Jogos Recentes */}
-          <div className="rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-5 shadow-lg">
-            <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
-              <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-base shadow-md">🕐</span>
+          <RetroCard color="cyan" className="p-5">
+            <h2 className="text-sm font-bold text-cyan-400 mb-4 flex items-center gap-2 uppercase tracking-wide">
+              <span className="w-8 h-8 border-2 border-cyan-400 bg-cyan-400/20 flex items-center justify-center text-base">🕐</span>
               Adicionados Recentemente
             </h2>
             {recentGames.length === 0 ? (
-              <p className="text-slate-400 dark:text-slate-500 text-sm text-center py-6">Sem jogos recentes</p>
+              <p className="text-slate-500 text-sm text-center py-6 font-mono">Sem jogos recentes</p>
             ) : (
               <div className="space-y-2">
                 {recentGames.map((game) => (
@@ -336,75 +375,75 @@ export default function PublicProfilePage() {
                 ))}
               </div>
             )}
-          </div>
+          </RetroCard>
 
           {/* Conquistas Recentes */}
-          <div className="rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-5 shadow-lg">
-            <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
-              <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-base shadow-md">🏆</span>
+          <RetroCard color="fuchsia" className="p-5">
+            <h2 className="text-sm font-bold text-fuchsia-400 mb-4 flex items-center gap-2 uppercase tracking-wide">
+              <span className="w-8 h-8 border-2 border-fuchsia-500 bg-fuchsia-500/20 flex items-center justify-center text-base">🏆</span>
               Conquistas Recentes
             </h2>
             {achievements.length === 0 ? (
-              <p className="text-slate-400 dark:text-slate-500 text-sm text-center py-6">Sem conquistas ainda</p>
+              <p className="text-slate-500 text-sm text-center py-6 font-mono">Sem conquistas ainda</p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {achievements.slice(0, 8).map((achievement) => (
                   <div
                     key={achievement.id}
-                    className="flex items-center gap-2 bg-white/50 dark:bg-slate-700/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50 rounded-xl px-3 py-2 hover:border-indigo-300 dark:hover:border-indigo-600 transition-all duration-300"
+                    className="flex items-center gap-2 bg-slate-800/50 border-2 border-fuchsia-500/30 px-3 py-2 hover:border-fuchsia-500 transition-all"
                     title={achievement.description}
                   >
                     <span className="text-lg">{achievement.icon}</span>
-                    <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{achievement.name}</span>
+                    <span className="text-xs font-medium text-slate-300">{achievement.name}</span>
                   </div>
                 ))}
                 {achievements.length > 8 && (
                   <button
                     onClick={() => setActiveTab("achievements")}
-                    className="px-3 py-2 text-xs text-indigo-600 hover:text-indigo-500 font-semibold bg-indigo-50 dark:bg-indigo-900/30 rounded-xl transition"
+                    className="px-3 py-2 text-xs text-fuchsia-400 hover:text-fuchsia-300 font-bold bg-fuchsia-500/20 border-2 border-fuchsia-500/50 transition"
                   >
                     +{achievements.length - 8} mais
                   </button>
                 )}
               </div>
             )}
-          </div>
+          </RetroCard>
 
           {/* Reviews Recentes */}
-          <div className="rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-5 shadow-lg">
-            <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
-              <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-base shadow-md">✍️</span>
+          <RetroCard color="green" className="p-5">
+            <h2 className="text-sm font-bold text-green-400 mb-4 flex items-center gap-2 uppercase tracking-wide">
+              <span className="w-8 h-8 border-2 border-green-400 bg-green-400/20 flex items-center justify-center text-base">✍️</span>
               Reviews Recentes
             </h2>
             {recentReviews.length === 0 ? (
-              <p className="text-slate-400 dark:text-slate-500 text-sm text-center py-6">Sem reviews ainda</p>
+              <p className="text-slate-500 text-sm text-center py-6 font-mono">Sem reviews ainda</p>
             ) : (
               <div className="space-y-2">
                 {recentReviews.slice(0, 3).map((review) => (
-                  <div key={review.id} className="bg-white/50 dark:bg-slate-700/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50 rounded-xl p-3 hover:border-indigo-300 dark:hover:border-indigo-600 transition-all duration-300">
+                  <div key={review.id} className="bg-slate-800/50 border-2 border-green-400/30 p-3 hover:border-green-400 transition-all">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="font-semibold text-sm text-slate-800 dark:text-slate-200 truncate">{review.game_title}</span>
-                      <span className={`font-bold text-sm px-2 py-0.5 rounded-lg ${
-                        review.rating >= 8 ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600" :
-                        review.rating >= 6 ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600" :
-                        "bg-red-100 dark:bg-red-900/30 text-red-600"
+                      <span className="font-semibold text-sm text-slate-200 truncate">{review.game_title}</span>
+                      <span className={`font-bold text-sm px-2 py-0.5 border-2 ${
+                        review.rating >= 8 ? "border-green-400 bg-green-400/20 text-green-400" :
+                        review.rating >= 6 ? "border-yellow-400 bg-yellow-400/20 text-yellow-400" :
+                        "border-rose-500 bg-rose-500/20 text-rose-400"
                       }`}>
                         {review.rating}/10
                       </span>
                     </div>
                     {review.title && (
-                      <p className="text-xs text-slate-600 dark:text-slate-400">{review.title}</p>
+                      <p className="text-xs text-slate-400">{review.title}</p>
                     )}
                   </div>
                 ))}
               </div>
             )}
-          </div>
+          </RetroCard>
         </div>
       )}
 
       {activeTab === "games" && (
-        <div className="rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 shadow-lg">
+        <RetroCard color="cyan" className="p-6">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {[...favoriteGames, ...recentGames]
               .filter((game, index, self) => 
@@ -414,9 +453,9 @@ export default function PublicProfilePage() {
                 <div
                   key={game.id}
                   onClick={() => navigate(`/app/jogo/${game.id}`)}
-                  className="card-3d cursor-pointer group rounded-xl overflow-hidden bg-white/50 dark:bg-slate-700/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50 hover:border-indigo-300 dark:hover:border-indigo-600 transition-all duration-300"
+                  className="cursor-pointer group overflow-hidden bg-slate-800 border-2 border-cyan-400/30 hover:border-cyan-400 transition-all shadow-[2px_2px_0px_0px_rgba(34,211,238,0.4)] hover:shadow-[4px_4px_0px_0px_rgba(34,211,238,0.8)]"
                 >
-                  <div className="aspect-[3/4] overflow-hidden bg-slate-100 dark:bg-slate-700">
+                  <div className="aspect-[3/4] overflow-hidden bg-slate-700">
                     {game.cover_url ? (
                       <img
                         src={game.cover_url}
@@ -424,16 +463,16 @@ export default function PublicProfilePage() {
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-3xl bg-gradient-to-br from-indigo-500 to-purple-500">🎮</div>
+                      <div className="w-full h-full flex items-center justify-center text-3xl bg-gradient-to-br from-cyan-500 to-fuchsia-500">🎮</div>
                     )}
                   </div>
                   <div className="p-2">
-                    <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">{game.title}</p>
+                    <p className="text-xs font-semibold text-slate-200 truncate">{game.title}</p>
                     {game.rating && (
                       <p className={`text-[10px] font-bold mt-0.5 ${
-                        game.rating >= 8 ? "text-emerald-600" :
-                        game.rating >= 6 ? "text-amber-600" :
-                        "text-red-600"
+                        game.rating >= 8 ? "text-green-400" :
+                        game.rating >= 6 ? "text-yellow-400" :
+                        "text-rose-400"
                       }`}>⭐ {game.rating}/10</p>
                     )}
                   </div>
@@ -441,26 +480,26 @@ export default function PublicProfilePage() {
               ))}
           </div>
           {favoriteGames.length === 0 && recentGames.length === 0 && (
-            <p className="text-slate-400 dark:text-slate-500 text-sm text-center py-8">Este utilizador ainda não tem jogos na coleção.</p>
+            <p className="text-slate-500 text-sm text-center py-8 font-mono">Este utilizador ainda não tem jogos na coleção.</p>
           )}
-        </div>
+        </RetroCard>
       )}
 
       {activeTab === "achievements" && (
-        <div className="rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 shadow-lg">
+        <RetroCard color="fuchsia" className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {achievements.map((achievement) => (
               <div
                 key={achievement.id}
-                className="card-3d flex items-center gap-4 bg-white/50 dark:bg-slate-700/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50 rounded-xl p-4 hover:border-indigo-300 dark:hover:border-indigo-600 transition-all duration-300"
+                className="flex items-center gap-4 bg-slate-800/50 border-2 border-fuchsia-500/30 p-4 hover:border-fuchsia-500 transition-all"
               >
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-xl shadow-lg">
+                <div className="w-12 h-12 border-2 border-fuchsia-500 bg-fuchsia-500/20 flex items-center justify-center text-xl shadow-[2px_2px_0px_0px_rgba(217,70,239,0.8)]">
                   {achievement.icon}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm text-slate-800 dark:text-slate-200">{achievement.name}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{achievement.description}</p>
-                  <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 flex items-center gap-1">
+                  <p className="font-semibold text-sm text-slate-200">{achievement.name}</p>
+                  <p className="text-xs text-slate-500 truncate">{achievement.description}</p>
+                  <p className="text-[10px] text-slate-500 mt-1 flex items-center gap-1 font-mono">
                     <span>🗓️</span> {formatDate(achievement.unlocked_at)}
                   </p>
                 </div>
@@ -468,52 +507,52 @@ export default function PublicProfilePage() {
             ))}
           </div>
           {achievements.length === 0 && (
-            <p className="text-slate-400 dark:text-slate-500 text-sm text-center py-8">Este utilizador ainda não desbloqueou conquistas.</p>
+            <p className="text-slate-500 text-sm text-center py-8 font-mono">Este utilizador ainda não desbloqueou conquistas.</p>
           )}
-        </div>
+        </RetroCard>
       )}
 
       {activeTab === "reviews" && (
-        <div className="rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 shadow-lg">
+        <RetroCard color="green" className="p-6">
           <div className="space-y-4">
             {recentReviews.map((review) => (
-              <div key={review.id} className="card-3d bg-white/50 dark:bg-slate-700/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50 rounded-xl p-5 hover:border-indigo-300 dark:hover:border-indigo-600 transition-all duration-300">
+              <div key={review.id} className="bg-slate-800/50 border-2 border-green-400/30 p-5 hover:border-green-400 transition-all">
                 <div className="flex items-center gap-4 mb-3">
                   {review.game_cover ? (
                     <img
                       src={review.game_cover}
                       alt={review.game_title}
-                      className="w-12 h-16 rounded-lg object-cover shadow-md"
+                      className="w-12 h-16 object-cover border-2 border-cyan-400/50"
                     />
                   ) : (
-                    <div className="w-12 h-16 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-xl">🎮</div>
+                    <div className="w-12 h-16 border-2 border-cyan-400/50 bg-cyan-400/20 flex items-center justify-center text-xl">🎮</div>
                   )}
                   <div className="flex-1">
-                    <h4 className="font-semibold text-sm text-slate-800 dark:text-slate-200">{review.game_title}</h4>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                    <h4 className="font-semibold text-sm text-slate-200">{review.game_title}</h4>
+                    <p className="text-xs text-slate-500 flex items-center gap-1 font-mono">
                       <span>📅</span> {formatDate(review.created_at)}
                     </p>
                   </div>
-                  <div className={`text-xl font-bold px-3 py-1.5 rounded-xl ${
-                    review.rating >= 8 ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600" :
-                    review.rating >= 6 ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600" :
-                    "bg-red-100 dark:bg-red-900/30 text-red-600"
+                  <div className={`text-xl font-bold px-3 py-1.5 border-2 ${
+                    review.rating >= 8 ? "border-green-400 bg-green-400/20 text-green-400" :
+                    review.rating >= 6 ? "border-yellow-400 bg-yellow-400/20 text-yellow-400" :
+                    "border-rose-500 bg-rose-500/20 text-rose-400"
                   }`}>
                     {review.rating}/10
                   </div>
                 </div>
                 {review.title && (
-                  <h5 className="font-semibold text-sm text-slate-800 dark:text-slate-200 mb-2">{review.title}</h5>
+                  <h5 className="font-semibold text-sm text-slate-200 mb-2">{review.title}</h5>
                 )}
                 {review.content && (
-                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{review.content}</p>
+                  <p className="text-sm text-slate-400 leading-relaxed">{review.content}</p>
                 )}
-                <div className="flex items-center gap-4 mt-3 pt-3 border-t border-slate-200/50 dark:border-slate-600/50">
-                  <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                    <span className="text-red-500">❤️</span> {review.likes_count || 0} likes
+                <div className="flex items-center gap-4 mt-3 pt-3 border-t border-green-400/30">
+                  <span className="text-xs text-slate-500 flex items-center gap-1">
+                    <span className="text-rose-500">❤️</span> {review.likes_count || 0} likes
                   </span>
                   {review.spoiler && (
-                    <span className="text-xs text-amber-600 dark:text-amber-500 flex items-center gap-1 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded-full">
+                    <span className="text-xs text-yellow-400 flex items-center gap-1 bg-yellow-400/20 border border-yellow-400/50 px-2 py-0.5">
                       ⚠️ Spoilers
                     </span>
                   )}
@@ -522,9 +561,9 @@ export default function PublicProfilePage() {
             ))}
           </div>
           {recentReviews.length === 0 && (
-            <p className="text-slate-400 dark:text-slate-500 text-sm text-center py-8">Este utilizador ainda não escreveu reviews.</p>
+            <p className="text-slate-500 text-sm text-center py-8 font-mono">Este utilizador ainda não escreveu reviews.</p>
           )}
-        </div>
+        </RetroCard>
       )}
 
       {/* Tab Seguidores */}
@@ -565,29 +604,31 @@ function FollowList({ userId, type, navigate }) {
 
   if (loading) {
     return (
-      <div className="rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 shadow-lg">
+      <RetroCard color="cyan" className="p-6">
         <div className="animate-pulse space-y-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full skeleton" />
+              <div className="w-12 h-12 bg-slate-700" />
               <div className="flex-1 space-y-2">
-                <div className="h-4 skeleton rounded-lg w-1/3" />
-                <div className="h-3 skeleton rounded-lg w-1/2" />
+                <div className="h-4 bg-slate-700 w-1/3" />
+                <div className="h-3 bg-slate-700 w-1/2" />
               </div>
             </div>
           ))}
         </div>
-      </div>
+      </RetroCard>
     );
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 shadow-lg">
-      <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
-        <span className={`w-8 h-8 rounded-lg ${type === "followers" ? "bg-gradient-to-br from-indigo-500 to-purple-500" : "bg-gradient-to-br from-emerald-500 to-teal-500"} flex items-center justify-center text-base shadow-md`}>
+    <RetroCard color={type === "followers" ? "fuchsia" : "green"} className="p-6">
+      <h3 className="text-sm font-bold text-slate-200 mb-4 flex items-center gap-2 uppercase tracking-wide">
+        <span className={`w-8 h-8 border-2 ${type === "followers" ? "border-fuchsia-500 bg-fuchsia-500/20" : "border-green-400 bg-green-400/20"} flex items-center justify-center text-base`}>
           {type === "followers" ? "👥" : "➡️"}
         </span>
-        {type === "followers" ? `${total} Seguidores` : `A seguir ${total}`}
+        <span className={type === "followers" ? "text-fuchsia-400" : "text-green-400"}>
+          {type === "followers" ? `${total} Seguidores` : `A seguir ${total}`}
+        </span>
       </h3>
       
       {users.length > 0 ? (
@@ -596,9 +637,9 @@ function FollowList({ userId, type, navigate }) {
             <div
               key={u.id}
               onClick={() => navigate(`/app/perfil/${u.id}`)}
-              className="card-3d flex items-center gap-4 p-3 rounded-xl bg-white/50 dark:bg-slate-700/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50 hover:border-indigo-300 dark:hover:border-indigo-600 cursor-pointer transition-all duration-300"
+              className={`flex items-center gap-4 p-3 bg-slate-800/50 border-2 ${type === "followers" ? "border-fuchsia-500/30 hover:border-fuchsia-500" : "border-green-400/30 hover:border-green-400"} cursor-pointer transition-all`}
             >
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm overflow-hidden shadow-lg">
+              <div className="w-12 h-12 border-2 border-cyan-400 bg-slate-800 flex items-center justify-center text-cyan-400 font-bold text-sm overflow-hidden">
                 {u.avatar_url ? (
                   <img
                     src={u.avatar_url.startsWith("http") ? u.avatar_url : `http://localhost:4000${u.avatar_url}`}
@@ -610,52 +651,61 @@ function FollowList({ userId, type, navigate }) {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm text-slate-800 dark:text-slate-200 truncate">{u.name}</p>
+                <p className="font-semibold text-sm text-slate-200 truncate">{u.name}</p>
                 {u.bio && (
-                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{u.bio}</p>
+                  <p className="text-xs text-slate-500 truncate font-mono">{u.bio}</p>
                 )}
               </div>
-              <span className="text-slate-400 dark:text-slate-500">→</span>
+              <span className="text-cyan-400">→</span>
             </div>
           ))}
         </div>
       ) : (
         <div className="text-center py-8">
           <span className="text-4xl mb-3 block">👀</span>
-          <p className="text-slate-400 dark:text-slate-500 text-sm">
+          <p className="text-slate-500 text-sm font-mono">
             {type === "followers" ? "Ainda não tem seguidores." : "Ainda não segue ninguém."}
           </p>
         </div>
       )}
-    </div>
+    </RetroCard>
   );
 }
 
-function StatCard({ icon, label, value, tone = "blue" }) {
-  const gradients = {
-    blue: "from-blue-500 to-cyan-500",
-    green: "from-emerald-500 to-teal-500",
-    orange: "from-orange-500 to-amber-500",
-    purple: "from-purple-500 to-pink-500",
-    amber: "from-amber-500 to-yellow-500",
-    indigo: "from-indigo-500 to-violet-500",
+function StatCard({ icon, label, value, tone = "cyan" }) {
+  const borderColors = {
+    cyan: "border-cyan-400",
+    green: "border-green-400",
+    yellow: "border-yellow-400",
+    purple: "border-purple-500",
+    amber: "border-amber-400",
+    fuchsia: "border-fuchsia-500"
   };
-  const bgTones = {
-    blue: "bg-blue-50 dark:bg-blue-900/20",
-    green: "bg-emerald-50 dark:bg-emerald-900/20",
-    orange: "bg-orange-50 dark:bg-orange-900/20",
-    purple: "bg-purple-50 dark:bg-purple-900/20",
-    amber: "bg-amber-50 dark:bg-amber-900/20",
-    indigo: "bg-indigo-50 dark:bg-indigo-900/20",
+  const shadowColors = {
+    cyan: "shadow-[3px_3px_0px_0px_rgba(34,211,238,0.6)]",
+    green: "shadow-[3px_3px_0px_0px_rgba(74,222,128,0.6)]",
+    yellow: "shadow-[3px_3px_0px_0px_rgba(250,204,21,0.6)]",
+    purple: "shadow-[3px_3px_0px_0px_rgba(168,85,247,0.6)]",
+    amber: "shadow-[3px_3px_0px_0px_rgba(251,191,36,0.6)]",
+    fuchsia: "shadow-[3px_3px_0px_0px_rgba(217,70,239,0.6)]"
   };
+  const textColors = {
+    cyan: "text-cyan-400",
+    green: "text-green-400",
+    yellow: "text-yellow-400",
+    purple: "text-purple-400",
+    amber: "text-amber-400",
+    fuchsia: "text-fuchsia-400"
+  };
+  
   return (
-    <div className={`card-3d rounded-xl ${bgTones[tone]} border border-slate-200/50 dark:border-slate-700/50 p-4`}>
+    <div className={`bg-slate-900 border-2 ${borderColors[tone]} ${shadowColors[tone]} p-4`}>
       <div className="flex flex-col items-center text-center">
-        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gradients[tone]} flex items-center justify-center text-lg shadow-lg mb-2`}>
+        <div className={`w-10 h-10 border-2 ${borderColors[tone]} bg-slate-800 flex items-center justify-center text-lg mb-2`}>
           {icon}
         </div>
-        <p className="text-xl font-bold text-slate-800 dark:text-white">{value}</p>
-        <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">{label}</p>
+        <p className={`text-xl font-bold ${textColors[tone]}`}>{value}</p>
+        <p className="text-[10px] font-medium text-slate-500 mt-0.5 uppercase tracking-wide">{label}</p>
       </div>
     </div>
   );
@@ -665,10 +715,10 @@ function TabButton({ children, active, onClick }) {
   return (
     <button
       onClick={onClick}
-      className={`px-4 py-2.5 text-xs font-semibold rounded-xl transition-all duration-300 whitespace-nowrap ${
+      className={`px-4 py-2.5 text-xs font-bold transition-all whitespace-nowrap uppercase tracking-wide ${
         active
-          ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/25"
-          : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50"
+          ? "bg-fuchsia-500 text-white border-2 border-fuchsia-400 shadow-[2px_2px_0px_0px_rgba(217,70,239,0.8)]"
+          : "text-slate-400 border-2 border-transparent hover:text-fuchsia-400 hover:border-fuchsia-500/50 bg-slate-800/50"
       }`}
     >
       {children}
@@ -680,9 +730,9 @@ function GameCard({ game, navigate, showDate }) {
   return (
     <div
       onClick={() => navigate(`/app/jogo/${game.id}`)}
-      className="card-3d flex items-center gap-3 bg-white/50 dark:bg-slate-700/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50 rounded-xl p-3 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-600 transition-all duration-300"
+      className="flex items-center gap-3 bg-slate-800/50 border-2 border-cyan-400/30 p-3 cursor-pointer hover:border-cyan-400 transition-all"
     >
-      <div className="w-12 h-16 rounded-lg overflow-hidden bg-slate-200 dark:bg-slate-600 flex-shrink-0 shadow-md">
+      <div className="w-12 h-16 overflow-hidden bg-slate-700 flex-shrink-0 border-2 border-cyan-400/50">
         {game.cover_url ? (
           <img
             src={game.cover_url}
@@ -694,21 +744,21 @@ function GameCard({ game, navigate, showDate }) {
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-sm text-slate-800 dark:text-slate-200 truncate">{game.title}</p>
+        <p className="font-semibold text-sm text-slate-200 truncate">{game.title}</p>
         {game.rating && (
           <div className="flex items-center gap-1 mt-1">
-            <span className="text-amber-500">★</span>
-            <span className="text-xs font-medium text-amber-600 dark:text-amber-500">{game.rating}/10</span>
+            <span className="text-yellow-400">★</span>
+            <span className="text-xs font-medium text-yellow-400">{game.rating}/10</span>
           </div>
         )}
         {showDate && game.created_at && (
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
+          <p className="text-[10px] text-slate-500 mt-1 font-mono">
             {new Date(game.created_at).toLocaleDateString("pt-PT")}
           </p>
         )}
       </div>
       {game.hours_played > 0 && (
-        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-600 px-2 py-1 rounded-lg">{game.hours_played}h</span>
+        <span className="text-xs font-medium text-cyan-400 bg-cyan-400/20 border border-cyan-400/50 px-2 py-1">{game.hours_played}h</span>
       )}
     </div>
   );

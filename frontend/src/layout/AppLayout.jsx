@@ -17,16 +17,16 @@ export default function AppLayout() {
   const userMenuRef = useRef(null);
 
   const navLinks = [
-    { to: "/app/dashboard", label: "Dashboard", icon: "🏠" },
-    { to: "/app/colecao", label: "Coleção", icon: "🎮" },
-    { to: "/app/wishlist", label: "Wishlist", icon: "❤️" },
-    { to: "/app/estatisticas", label: "Estatísticas", icon: "📊" },
-    { to: "/app/conquistas", label: "Conquistas", icon: "🏆" },
+    { to: "/app/home", label: "Início"},
+    { to: "/app/colecao", label: "Coleção"},
+    { to: "/app/wishlist", label: "Wishlist"},
+    { to: "/app/estatisticas", label: "Estatísticas"},
+    { to: "/app/conquistas", label: "Conquistas"},
   ];
 
-  function handleAvatarClick() {
-    navigate("/app/settings");
-  }
+  //function handleAvatarClick() {
+  //navigate("/app/settings");
+  //}
 
   function handleLogout() {
     logout();
@@ -123,46 +123,45 @@ export default function AppLayout() {
         onAddedToCollection={onAddedToCollection}
       />
 
-      {/* TOP BAR */}
-      <header className="relative border-b border-indigo-600/50 dark:border-indigo-900/50 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 dark:from-indigo-950 dark:via-purple-950 dark:to-indigo-950 shadow-lg shadow-indigo-500/20">
-        {/* Efeito de brilho animado */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_3s_infinite]" />
-        </div>
-        <div className="flex items-center justify-between px-6 py-3">
+      {/* TOP BAR - RETRO STYLE */}
+      <header className="relative border-b-4 border-fuchsia-500 bg-slate-900">
+        {/* Grid pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(217,70,239,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(217,70,239,0.05)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
+        
+        <div className="relative flex items-center justify-between px-6 py-3">
           {/* Logo + nav */}
           <div className="flex items-center gap-8">
             <button
               type="button"
-              onClick={() => navigate("/app/dashboard")}
-              className="group flex items-center gap-3 focus:outline-none transition-transform duration-300 hover:scale-105"
+              onClick={() => navigate("/app/home")}
+              className="group flex items-center gap-3 focus:outline-none"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm text-xl text-white shadow-lg border border-white/20 group-hover:bg-white/30 group-hover:shadow-white/20 transition-all duration-300">
+              <div className="flex h-10 w-10 items-center justify-center border-2 border-cyan-400 bg-cyan-400/20 text-xl text-cyan-400 shadow-[3px_3px_0px_0px_rgba(34,211,238,0.6)] group-hover:bg-cyan-400 group-hover:text-slate-900 transition-all">
                 🎮
               </div>
-              <div className="leading-tight text-left text-white">
-                <div className="text-base font-bold tracking-wide group-hover:tracking-wider transition-all duration-300">GameVault</div>
-                <div className="text-[11px] text-white/70">
-                  A tua coleção de videojogos
+              <div className="leading-tight text-left">
+                <div className="text-base font-black tracking-wider text-white group-hover:text-cyan-400 transition-colors">GAMEVAULT</div>
+                <div className="text-[10px] text-fuchsia-400 font-bold uppercase tracking-widest">
+                  Retro Edition
                 </div>
               </div>
             </button>
 
-            <nav className="hidden items-center gap-1.5 text-sm md:flex">
+            <nav className="hidden items-center gap-2 text-sm md:flex">
               {navLinks.map((link) => (
                 <NavLink
                   key={link.to}
                   to={link.to}
                   className={({ isActive }) =>
                     [
-                      "group flex items-center gap-2 rounded-xl px-3 py-2 transition-all duration-300",
+                      "group flex items-center gap-2 px-4 py-2 border-2 font-bold text-sm uppercase tracking-wide transition-all",
                       isActive
-                        ? "bg-white/95 text-indigo-700 font-semibold shadow-lg shadow-white/20 scale-105"
-                        : "text-white/80 hover:bg-white/15 hover:text-white hover:scale-105",
+                        ? "border-cyan-400 bg-cyan-400 text-slate-900 shadow-[3px_3px_0px_0px_rgba(34,211,238,0.6)]"
+                        : "border-slate-700 text-slate-400 hover:border-fuchsia-500 hover:text-fuchsia-400 hover:bg-fuchsia-500/10",
                     ].join(" ")
                   }
                 >
-                  <span className="text-sm transition-transform duration-300 group-hover:scale-110">{link.icon}</span>
+                  <span className="text-sm">{link.icon}</span>
                   <span>{link.label}</span>
                 </NavLink>
               ))}
@@ -175,12 +174,12 @@ export default function AppLayout() {
             <button
               type="button"
               onClick={handleOpenGlobalSearch}
-              className="group hidden items-center gap-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2.5 text-sm text-white shadow-lg hover:bg-white/20 hover:border-white/30 hover:shadow-white/10 focus:outline-none sm:flex transition-all duration-300"
+              className="group hidden items-center gap-2 border-2 border-yellow-400 bg-yellow-400/10 px-4 py-2 text-sm text-yellow-400 font-bold uppercase tracking-wide shadow-[3px_3px_0px_0px_rgba(250,204,21,0.6)] hover:bg-yellow-400 hover:text-slate-900 transition-all sm:flex"
               title="Pesquisar e importar jogos (Ctrl+K)"
             >
-              <span className="text-base transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">🔍</span>
-              <span className="text-white/90">Pesquisar jogos…</span>
-              <span className="ml-2 rounded-lg bg-white/20 px-2 py-1 text-[10px] font-medium text-white/80">
+              <span className="text-base">🔍</span>
+              <span>Pesquisar</span>
+              <span className="ml-2 border border-yellow-400/50 px-1.5 py-0.5 text-[10px]">
                 Ctrl K
               </span>
             </button>
@@ -189,20 +188,18 @@ export default function AppLayout() {
             <button
               type="button"
               onClick={toggleTheme}
-              className="group flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-lg text-white shadow-lg hover:bg-white/20 hover:scale-110 hover:rotate-12 transition-all duration-300"
+              className="group flex h-10 w-10 items-center justify-center border-2 border-fuchsia-500 bg-fuchsia-500/10 text-lg text-fuchsia-400 shadow-[3px_3px_0px_0px_rgba(217,70,239,0.6)] hover:bg-fuchsia-500 hover:text-white transition-all"
               title={theme === "dark" ? "Mudar para modo claro" : "Mudar para modo escuro"}
             >
-              <span className="transition-transform duration-300 group-hover:scale-110">
-                {theme === "dark" ? "☀️" : "🌙"}
-              </span>
+              {theme === "dark" ? "☀️" : "🌙"}
             </button>
 
             <div className="flex items-center gap-3">
               <div className="text-right leading-tight hidden sm:block">
-                <div className="text-xs font-semibold text-white">
+                <div className="text-xs font-bold text-white uppercase tracking-wide">
                   {user?.name || "Utilizador"}
                 </div>
-                <div className="text-[11px] text-indigo-100/90">Coleção de jogos</div>
+                <div className="text-[10px] text-cyan-400 font-medium">Online</div>
               </div>
 
               {/* Avatar com dropdown */}
@@ -211,7 +208,7 @@ export default function AppLayout() {
                   type="button"
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   title="Menu do utilizador"
-                  className="group relative h-10 w-10 overflow-hidden rounded-xl bg-gradient-to-br from-indigo-400 to-purple-400 text-sm font-bold text-white shadow-lg ring-2 ring-white/40 hover:ring-white/60 hover:scale-110 transition-all duration-300"
+                  className="group relative h-10 w-10 overflow-hidden border-2 border-green-400 bg-green-400/20 text-sm font-bold text-green-400 shadow-[3px_3px_0px_0px_rgba(74,222,128,0.6)] hover:bg-green-400 hover:text-slate-900 transition-all"
                 >
                   {avatarSrc ? (
                     <img
@@ -225,23 +222,23 @@ export default function AppLayout() {
                     </span>
                   )}
                   {/* Indicador online */}
-                  <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-400 border-2 border-white shadow-lg"></span>
+                  <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-green-400 border-2 border-slate-900"></span>
                 </button>
 
                 {/* Dropdown Menu */}
                 {showUserMenu && (
-                  <div className="absolute right-0 mt-3 w-56 rounded-2xl bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl shadow-xl shadow-black/10 ring-1 ring-black/5 dark:ring-white/10 z-50 overflow-hidden animate-fadeIn">
+                  <div className="absolute right-0 mt-3 w-56 border-2 border-fuchsia-500 bg-slate-900 shadow-[4px_4px_0px_0px_rgba(217,70,239,0.8)] z-50 overflow-hidden">
                     {/* Header do dropdown */}
-                    <div className="bg-gradient-to-r from-indigo-500 to-purple-500 p-4">
+                    <div className="bg-fuchsia-500/20 border-b-2 border-fuchsia-500 p-4">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white font-bold overflow-hidden">
+                        <div className="h-10 w-10 border-2 border-cyan-400 bg-cyan-400/20 flex items-center justify-center text-cyan-400 font-bold overflow-hidden">
                           {avatarSrc ? (
                             <img src={avatarSrc} alt="" className="h-full w-full object-cover" />
                           ) : inicial}
                         </div>
                         <div>
-                          <p className="font-semibold text-white text-sm">{user?.name || "Utilizador"}</p>
-                          <p className="text-xs text-white/70">{user?.email}</p>
+                          <p className="font-bold text-white text-sm uppercase">{user?.name || "Utilizador"}</p>
+                          <p className="text-xs text-fuchsia-400">{user?.email}</p>
                         </div>
                       </div>
                     </div>
@@ -252,9 +249,9 @@ export default function AppLayout() {
                           navigate(`/app/perfil/${user?.id}`);
                           setShowUserMenu(false);
                         }}
-                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-xl transition-colors"
+                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-slate-300 hover:bg-cyan-400/20 hover:text-cyan-400 transition-colors font-medium"
                       >
-                        <span className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">👤</span>
+                        <span className="w-8 h-8 border border-slate-700 flex items-center justify-center">👤</span>
                         O Meu Perfil
                       </button>
                       <button
@@ -262,9 +259,9 @@ export default function AppLayout() {
                           navigate("/app/conquistas");
                           setShowUserMenu(false);
                         }}
-                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-xl transition-colors"
+                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-slate-300 hover:bg-yellow-400/20 hover:text-yellow-400 transition-colors font-medium"
                       >
-                        <span className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">🏆</span>
+                        <span className="w-8 h-8 border border-slate-700 flex items-center justify-center">🏆</span>
                         Conquistas
                       </button>
                       <button
@@ -272,20 +269,20 @@ export default function AppLayout() {
                           navigate("/app/settings");
                           setShowUserMenu(false);
                         }}
-                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-xl transition-colors"
+                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-slate-300 hover:bg-fuchsia-400/20 hover:text-fuchsia-400 transition-colors font-medium"
                       >
-                        <span className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">⚙️</span>
+                        <span className="w-8 h-8 border border-slate-700 flex items-center justify-center">⚙️</span>
                         Definições
                       </button>
-                      <hr className="my-2 border-slate-200 dark:border-slate-700" />
+                      <hr className="my-2 border-slate-700" />
                       <button
                         onClick={() => {
                           handleLogout();
                           setShowUserMenu(false);
                         }}
-                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl transition-colors"
+                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-rose-400 hover:bg-rose-500/20 hover:text-rose-300 transition-colors font-medium"
                       >
-                        <span className="w-8 h-8 rounded-lg bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center">🚪</span>
+                        <span className="w-8 h-8 border border-slate-700 flex items-center justify-center">🚪</span>
                         Sair
                       </button>
                     </div>
@@ -297,37 +294,37 @@ export default function AppLayout() {
         </div>
       </header>
 
-      {/* CONTEÚDO PRINCIPAL */}
-      <main className="flex-1 px-4 sm:px-6 py-6 bg-gradient-to-br from-slate-100 via-slate-50 to-indigo-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-indigo-950/20">
-        <div className="w-full rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-5 shadow-xl shadow-slate-200/50 dark:shadow-black/20">
+      {/* CONTEÚDO PRINCIPAL - RETRO */}
+      <main className="flex-1 px-4 sm:px-6 py-6 bg-slate-950">
+        {/* Scanline effect */}
+        <div className="fixed inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.03)_2px,rgba(0,0,0,0.03)_4px)] pointer-events-none z-10" />
+        
+        <div className="relative z-0 w-full border-2 border-cyan-500/30 bg-slate-900 p-5 shadow-[0_0_30px_rgba(34,211,238,0.1)]">
           <Outlet />
         </div>
       </main>
 
-      {/* FOOTER */}
-      <footer className="mt-2">
-        <div className="h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 animate-gradient" />
-        <div className="bg-slate-50 dark:bg-slate-900/95 border-t border-slate-200/50 dark:border-slate-800">
-          <div className="flex flex-col gap-3 px-6 py-4 text-xs text-slate-500 dark:text-slate-400 md:flex-row md:items-center md:justify-between">
+      {/* FOOTER - RETRO */}
+      <footer className="mt-0">
+        <div className="h-1 bg-gradient-to-r from-fuchsia-500 via-cyan-400 to-yellow-400" />
+        <div className="bg-slate-900 border-t-2 border-slate-700">
+          <div className="flex flex-col gap-3 px-6 py-4 text-xs md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
-                <span className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-sm shadow-lg">🎮</span>
-                <span className="text-slate-800 dark:text-slate-200 font-bold">GameVault</span>
+                <span className="h-8 w-8 border-2 border-fuchsia-500 bg-fuchsia-500/20 flex items-center justify-center text-fuchsia-400 text-sm">🎮</span>
+                <span className="text-white font-black uppercase tracking-wider">GameVault</span>
               </div>
-              <span className="text-slate-300 dark:text-slate-600">|</span>
-              <span>Gestor da tua biblioteca de videojogos</span>
+              <span className="text-slate-700">|</span>
+              <span className="text-slate-500">Retro Gaming Collection</span>
             </div>
 
             <div className="flex flex-wrap items-center gap-4">
-              <span className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full">
-                <span>🎓</span> Projeto Final — ISTEC
+              <span className="flex items-center gap-2 border border-slate-700 px-3 py-1.5 text-slate-400">
+                <span>🎓</span> ISTEC 2026
               </span>
-              <span className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 px-3 py-1.5 rounded-full">
-                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span>API online</span>
-              </span>
-              <span className="hidden sm:inline text-slate-400">
-                {new Date().getFullYear()} © Todos os direitos reservados
+              <span className="flex items-center gap-2 border border-green-500/50 bg-green-500/10 text-green-400 px-3 py-1.5">
+                <span className="h-2 w-2 bg-green-400 animate-pulse" />
+                <span>ONLINE</span>
               </span>
             </div>
           </div>

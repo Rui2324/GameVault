@@ -3,6 +3,58 @@ import { useState, useEffect } from "react";
 import api from "../services/api";
 import { useToast } from "../components/Toast";
 
+// ============ COMPONENTES RETRO ============
+
+function RetroCard({ children, color = "fuchsia", className = "" }) {
+  const colors = {
+    fuchsia: "border-fuchsia-500 shadow-[4px_4px_0px_0px_rgba(217,70,239,0.8)]",
+    cyan: "border-cyan-400 shadow-[4px_4px_0px_0px_rgba(34,211,238,0.8)]",
+    yellow: "border-yellow-400 shadow-[4px_4px_0px_0px_rgba(250,204,21,0.8)]",
+    green: "border-green-400 shadow-[4px_4px_0px_0px_rgba(74,222,128,0.8)]",
+    rose: "border-rose-500 shadow-[4px_4px_0px_0px_rgba(244,63,94,0.8)]",
+  };
+
+  return (
+    <div className={`bg-slate-900 border-2 ${colors[color]} ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+function RetroButton({ children, color = "fuchsia", onClick, className = "", disabled = false, active = false }) {
+  const colors = {
+    fuchsia: active 
+      ? "border-fuchsia-500 bg-fuchsia-500 text-white shadow-none translate-x-[2px] translate-y-[2px]"
+      : "border-fuchsia-500 bg-fuchsia-500/20 text-fuchsia-400 hover:bg-fuchsia-500 hover:text-white shadow-[3px_3px_0px_0px_rgba(217,70,239,0.6)]",
+    cyan: active
+      ? "border-cyan-400 bg-cyan-400 text-slate-900 shadow-none translate-x-[2px] translate-y-[2px]"
+      : "border-cyan-400 bg-cyan-400/20 text-cyan-400 hover:bg-cyan-400 hover:text-slate-900 shadow-[3px_3px_0px_0px_rgba(34,211,238,0.6)]",
+    yellow: active
+      ? "border-yellow-400 bg-yellow-400 text-slate-900 shadow-none translate-x-[2px] translate-y-[2px]"
+      : "border-yellow-400 bg-yellow-400/20 text-yellow-400 hover:bg-yellow-400 hover:text-slate-900 shadow-[3px_3px_0px_0px_rgba(250,204,21,0.6)]",
+    green: active
+      ? "border-green-400 bg-green-400 text-slate-900 shadow-none translate-x-[2px] translate-y-[2px]"
+      : "border-green-400 bg-green-400/20 text-green-400 hover:bg-green-400 hover:text-slate-900 shadow-[3px_3px_0px_0px_rgba(74,222,128,0.6)]",
+    rose: active
+      ? "border-rose-500 bg-rose-500 text-white shadow-none translate-x-[2px] translate-y-[2px]"
+      : "border-rose-500 bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white shadow-[3px_3px_0px_0px_rgba(244,63,94,0.6)]",
+    slate: active
+      ? "border-slate-500 bg-slate-500 text-white shadow-none translate-x-[2px] translate-y-[2px]"
+      : "border-slate-500 bg-slate-500/20 text-slate-400 hover:bg-slate-500 hover:text-white shadow-[3px_3px_0px_0px_rgba(100,116,139,0.6)]",
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`px-3 py-1.5 border-2 font-bold text-xs uppercase tracking-wide transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none disabled:opacity-50 disabled:cursor-not-allowed ${colors[color]} ${className}`}
+    >
+      {children}
+    </button>
+  );
+}
+
 export default function AchievementsPage() {
   const toast = useToast();
   const [achievements, setAchievements] = useState([]);
@@ -77,22 +129,22 @@ export default function AchievementsPage() {
 
   function getCategoryColor(category) {
     const colors = {
-      collection: "from-blue-500 to-indigo-500",
-      playtime: "from-orange-400 to-amber-500",
-      social: "from-pink-400 to-rose-500",
-      special: "from-emerald-400 to-teal-500"
+      collection: "cyan",
+      playtime: "yellow",
+      social: "rose",
+      special: "green"
     };
-    return colors[category] || "from-slate-400 to-slate-500";
+    return colors[category] || "fuchsia";
   }
 
-  function getCategoryBg(category) {
+  function getCategoryBorderColor(category) {
     const colors = {
-      collection: "bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800",
-      playtime: "bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800",
-      social: "bg-pink-50 border-pink-200 dark:bg-pink-900/20 dark:border-pink-800",
-      special: "bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800"
+      collection: "border-cyan-400",
+      playtime: "border-yellow-400",
+      social: "border-rose-500",
+      special: "border-green-400"
     };
-    return colors[category] || "bg-slate-50 border-slate-200 dark:bg-slate-700 dark:border-slate-600";
+    return colors[category] || "border-fuchsia-500";
   }
 
   const filteredAchievements = achievements.filter(a => {
@@ -107,132 +159,130 @@ export default function AchievementsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-10 w-10 border-4 border-indigo-500 border-t-transparent"></div>
+        <div className="text-4xl animate-pulse">🏆</div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Header com Stats */}
-      <div className="rounded-xl border border-slate-200 bg-gradient-to-r from-indigo-500 to-purple-600 p-6 text-white shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      {/* Header Retro com Stats */}
+      <RetroCard color="yellow" className="p-6 relative overflow-hidden">
+        {/* Grid pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(250,204,21,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(250,204,21,0.1)_1px,transparent_1px)] bg-[size:20px_20px]" />
+        
+        <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold mb-1">🏆 Conquistas</h1>
-            <p className="text-indigo-100 text-sm">
+            <div className="flex items-center gap-2 text-yellow-400 text-sm font-bold uppercase tracking-widest mb-2">
+              <span className="inline-block w-3 h-3 bg-yellow-400 animate-pulse" />
+              Conquistas
+            </div>
+            <h1 className="text-2xl font-black text-white mb-1">🏆 Conquistas</h1>
+            <p className="text-slate-400 text-sm">
               Desbloqueia conquistas ao jogar e interagir com a comunidade
             </p>
           </div>
-          <button
+          <RetroButton
+            color="cyan"
             onClick={checkForNewAchievements}
             disabled={checking}
-            className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition flex items-center gap-2 self-start border border-white/30"
           >
             {checking ? (
-              <>
-                <span className="animate-spin">🔄</span> A verificar...
-              </>
+              <>🔄 A verificar...</>
             ) : (
               <>🔍 Verificar Novas</>
             )}
-          </button>
+          </RetroButton>
         </div>
 
         {/* Barra de Progresso */}
-        <div className="mt-5 bg-white/10 rounded-lg p-4">
+        <div className="relative mt-5 border-2 border-yellow-400/50 bg-slate-800 p-4">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-xl font-bold">
+              <div className="w-12 h-12 border-2 border-yellow-400 bg-yellow-400/20 flex items-center justify-center text-xl font-black text-yellow-400">
                 {stats.level}
               </div>
               <div>
-                <p className="font-semibold">Nível {stats.level}</p>
-                <p className="text-xs text-indigo-200">{stats.totalXP} XP total</p>
+                <p className="font-bold text-white">Nível {stats.level}</p>
+                <p className="text-xs text-slate-400">{stats.totalXP} XP total</p>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-xl font-bold">{stats.unlockedCount}/{stats.totalCount}</p>
-              <p className="text-xs text-indigo-200">{stats.completionPercentage}% completo</p>
+              <p className="text-xl font-black text-cyan-400">{stats.unlockedCount}/{stats.totalCount}</p>
+              <p className="text-xs text-slate-400">{stats.completionPercentage}% completo</p>
             </div>
           </div>
-          <div className="w-full bg-white/20 rounded-full h-2 mt-3">
+          <div className="w-full bg-slate-700 h-3 mt-3 border border-slate-600">
             <div
-              className="bg-white rounded-full h-2 transition-all duration-500"
+              className="bg-yellow-400 h-full transition-all duration-500"
               style={{ width: `${100 - (stats.xpToNextLevel)}%` }}
             />
           </div>
-          <p className="text-xs text-indigo-200 mt-1 text-center">
+          <p className="text-xs text-slate-400 mt-2 text-center">
             {stats.xpToNextLevel} XP para o próximo nível
           </p>
         </div>
-      </div>
+
+        {/* Decorative pixels */}
+        <div className="absolute top-4 right-4 w-4 h-4 bg-cyan-400" />
+        <div className="absolute top-4 right-10 w-2 h-2 bg-fuchsia-500" />
+        <div className="absolute bottom-4 right-6 w-3 h-3 bg-yellow-400" />
+      </RetroCard>
 
       {/* Notificação de novas conquistas */}
       {newUnlocks.length > 0 && (
-        <div className="rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-4">
+        <RetroCard color="green" className="p-4">
           <div className="flex items-center gap-3 mb-3">
             <span className="text-2xl">🎉</span>
-            <h3 className="font-semibold text-amber-800 dark:text-amber-300">
+            <h3 className="font-bold text-green-400">
               {newUnlocks.length} Nova{newUnlocks.length > 1 ? "s" : ""} Conquista{newUnlocks.length > 1 ? "s" : ""} Desbloqueada{newUnlocks.length > 1 ? "s" : ""}!
             </h3>
           </div>
           <div className="flex flex-wrap gap-2">
             {newUnlocks.map(a => (
-              <div key={a.id} className="flex items-center gap-2 bg-white dark:bg-slate-800 rounded-lg px-3 py-2 border border-amber-200 dark:border-amber-700">
+              <div key={a.id} className="flex items-center gap-2 bg-slate-800 border-2 border-green-400/50 px-3 py-2">
                 <span className="text-lg">{a.icon}</span>
-                <span className="font-medium text-slate-700 dark:text-slate-200">{a.name}</span>
-                <span className="text-amber-600 dark:text-amber-400 text-xs font-medium">+{a.xp_reward} XP</span>
+                <span className="font-bold text-white">{a.name}</span>
+                <span className="text-yellow-400 text-xs font-bold">+{a.xp_reward} XP</span>
               </div>
             ))}
           </div>
-        </div>
+        </RetroCard>
       )}
 
       {/* Filtros */}
       <div className="flex flex-wrap gap-2">
-        <button
+        <RetroButton
+          color="fuchsia"
           onClick={() => setFilter("all")}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition border ${
-            filter === "all"
-              ? "bg-indigo-600 text-white border-indigo-600"
-              : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
-          }`}
+          active={filter === "all"}
         >
           Todas ({achievements.length})
-        </button>
-        <button
+        </RetroButton>
+        <RetroButton
+          color="green"
           onClick={() => setFilter("unlocked")}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition border ${
-            filter === "unlocked"
-              ? "bg-emerald-600 text-white border-emerald-600"
-              : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
-          }`}
+          active={filter === "unlocked"}
         >
           ✅ Desbloqueadas ({achievements.filter(a => a.unlocked_at).length})
-        </button>
-        <button
+        </RetroButton>
+        <RetroButton
+          color="slate"
           onClick={() => setFilter("locked")}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition border ${
-            filter === "locked"
-              ? "bg-slate-600 text-white border-slate-600"
-              : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
-          }`}
+          active={filter === "locked"}
         >
           🔒 Bloqueadas ({achievements.filter(a => !a.unlocked_at).length})
-        </button>
-        <div className="w-px bg-slate-200 dark:bg-slate-700 mx-1 hidden md:block" />
+        </RetroButton>
+        <div className="w-px bg-slate-700 mx-1 hidden md:block" />
         {categories.map(cat => (
-          <button
+          <RetroButton
             key={cat}
+            color={getCategoryColor(cat)}
             onClick={() => setFilter(cat)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition border ${
-              filter === cat
-                ? `bg-gradient-to-r ${getCategoryColor(cat)} text-white border-transparent`
-                : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
-            }`}
+            active={filter === cat}
           >
             {getCategoryLabel(cat)}
-          </button>
+          </RetroButton>
         ))}
       </div>
 
@@ -240,49 +290,50 @@ export default function AchievementsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredAchievements.map((achievement) => {
           const isUnlocked = achievement.unlocked_at !== null;
+          const catColor = getCategoryBorderColor(achievement.category);
           
           return (
             <div
               key={achievement.id}
-              className={`relative rounded-xl p-4 border transition-all ${
+              className={`relative p-4 border-2 transition-all bg-slate-900 ${
                 isUnlocked
-                  ? getCategoryBg(achievement.category)
-                  : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 opacity-60"
+                  ? `${catColor} shadow-[4px_4px_0px_0px_rgba(34,211,238,0.5)]`
+                  : "border-slate-700 opacity-60"
               }`}
             >
               {/* Badge de XP */}
-              <div className="absolute top-3 right-3 text-[10px] font-medium px-2 py-0.5 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-300">
+              <div className="absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 border-2 border-yellow-400/50 bg-yellow-400/20 text-yellow-400">
                 +{achievement.xp_reward} XP
               </div>
               
               <div className="flex items-start gap-3">
                 <div
-                  className={`w-12 h-12 rounded-lg flex items-center justify-center text-xl ${
+                  className={`w-12 h-12 border-2 flex items-center justify-center text-xl ${
                     isUnlocked
-                      ? `bg-gradient-to-br ${getCategoryColor(achievement.category)} text-white`
-                      : "bg-slate-200 dark:bg-slate-700 grayscale"
+                      ? `${catColor} bg-slate-800`
+                      : "border-slate-600 bg-slate-800 grayscale"
                   }`}
                 >
                   {achievement.icon}
                 </div>
                 
                 <div className="flex-1 min-w-0">
-                  <h3 className={`font-semibold text-sm ${isUnlocked ? "text-slate-800 dark:text-slate-200" : "text-slate-500 dark:text-slate-400"}`}>
+                  <h3 className={`font-bold text-sm ${isUnlocked ? "text-white" : "text-slate-500"}`}>
                     {achievement.name}
                   </h3>
-                  <p className={`text-xs mt-0.5 ${isUnlocked ? "text-slate-600 dark:text-slate-400" : "text-slate-400 dark:text-slate-500"}`}>
+                  <p className={`text-xs mt-0.5 ${isUnlocked ? "text-slate-400" : "text-slate-500"}`}>
                     {achievement.description}
                   </p>
                   
                   <div className="flex items-center gap-2 mt-2">
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full border ${
-                      isUnlocked ? "bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300" : "bg-slate-100 dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-400"
+                    <span className={`text-[10px] px-2 py-0.5 border ${
+                      isUnlocked ? `${catColor} text-slate-300` : "border-slate-600 text-slate-500"
                     }`}>
                       {getCategoryLabel(achievement.category)}
                     </span>
                     
                     {isUnlocked && (
-                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+                      <span className="text-[10px] text-green-400 font-bold">
                         ✓ {new Date(achievement.unlocked_at).toLocaleDateString("pt-PT")}
                       </span>
                     )}
@@ -292,9 +343,7 @@ export default function AchievementsPage() {
               
               {/* Indicador de status */}
               {isUnlocked && (
-                <div 
-                  className={`absolute top-0 left-0 w-full h-1 rounded-t-xl bg-gradient-to-r ${getCategoryColor(achievement.category)}`}
-                />
+                <div className={`absolute top-0 left-0 w-full h-1 ${catColor.replace('border-', 'bg-')}`} />
               )}
             </div>
           );
@@ -302,7 +351,7 @@ export default function AchievementsPage() {
       </div>
 
       {filteredAchievements.length === 0 && (
-        <div className="text-center py-12 text-slate-500 dark:text-slate-400">
+        <div className="text-center py-12 text-slate-400">
           <p className="text-4xl mb-2">🔍</p>
           <p className="text-sm">Nenhuma conquista encontrada com este filtro.</p>
         </div>

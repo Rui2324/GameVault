@@ -4,7 +4,7 @@ import { useAuth } from "./context/AuthContext";
 
 import LoginPage from "./pages/LoginPage";
 import RegistoPage from "./pages/RegistoPage";
-import DashboardPage from "./pages/DashboardPage";
+import HomePage from "./pages/HomePage";
 import CollectionPage from "./pages/CollectionPage";
 import WishlistPage from "./pages/WishlistPage";
 import StatsPage from "./pages/StatsPage";
@@ -47,7 +47,7 @@ export default function App() {
           </RotaProtegida>
         }
       >
-        <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="home" element={<HomePage />} />
         <Route path="colecao" element={<CollectionPage />} />
         <Route path="wishlist" element={<WishlistPage />} />
         <Route path="estatisticas" element={<StatsPage />} />
@@ -61,7 +61,7 @@ export default function App() {
         {/* NOVO: detalhe RAWG (explorar) */}
         <Route path="explorar/:externalId" element={<ExternalGameDetailsPage />} />
 
-        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route index element={<Navigate to="home" replace />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/login" replace />} />

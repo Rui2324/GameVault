@@ -5,6 +5,45 @@ import AddGameModal from "../components/AddGameModal";
 import api from "../services/api";
 import { useToast } from "../components/Toast";
 
+// ============ COMPONENTES RETRO ============
+
+function RetroCard({ children, color = "fuchsia", className = "" }) {
+  const colors = {
+    fuchsia: "border-fuchsia-500 shadow-[4px_4px_0px_0px_rgba(217,70,239,0.8)]",
+    cyan: "border-cyan-400 shadow-[4px_4px_0px_0px_rgba(34,211,238,0.8)]",
+    yellow: "border-yellow-400 shadow-[4px_4px_0px_0px_rgba(250,204,21,0.8)]",
+    green: "border-green-400 shadow-[4px_4px_0px_0px_rgba(74,222,128,0.8)]",
+    rose: "border-rose-500 shadow-[4px_4px_0px_0px_rgba(244,63,94,0.8)]",
+  };
+
+  return (
+    <div className={`bg-slate-900 border-2 ${colors[color]} ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+function RetroButton({ children, color = "fuchsia", onClick, className = "", disabled = false }) {
+  const colors = {
+    fuchsia: "border-fuchsia-500 bg-fuchsia-500/20 text-fuchsia-400 hover:bg-fuchsia-500 hover:text-white shadow-[3px_3px_0px_0px_rgba(217,70,239,0.6)]",
+    cyan: "border-cyan-400 bg-cyan-400/20 text-cyan-400 hover:bg-cyan-400 hover:text-slate-900 shadow-[3px_3px_0px_0px_rgba(34,211,238,0.6)]",
+    yellow: "border-yellow-400 bg-yellow-400/20 text-yellow-400 hover:bg-yellow-400 hover:text-slate-900 shadow-[3px_3px_0px_0px_rgba(250,204,21,0.6)]",
+    green: "border-green-400 bg-green-400/20 text-green-400 hover:bg-green-400 hover:text-slate-900 shadow-[3px_3px_0px_0px_rgba(74,222,128,0.6)]",
+    rose: "border-rose-500 bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white shadow-[3px_3px_0px_0px_rgba(244,63,94,0.6)]",
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`px-4 py-2 border-2 font-bold text-sm uppercase tracking-wide transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-x-0 disabled:hover:translate-y-0 ${colors[color]} ${className}`}
+    >
+      {children}
+    </button>
+  );
+}
+
 function EstadoBadge({ estado }) {
   if (!estado) return null;
 
@@ -12,38 +51,33 @@ function EstadoBadge({ estado }) {
     por_jogar: {
       label: "Por jogar",
       icon: "⏳",
-      classes: "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600",
+      classes: "border-slate-500 bg-slate-500/20 text-slate-300",
     },
     a_jogar: {
       label: "A jogar",
       icon: "🎮",
-      classes: "bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:border-sky-700",
+      classes: "border-cyan-400 bg-cyan-400/20 text-cyan-400",
     },
     concluido: {
       label: "Concluído",
       icon: "✅",
-      classes: "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700",
+      classes: "border-green-400 bg-green-400/20 text-green-400",
     },
     abandonado: {
       label: "Abandonado",
       icon: "❌",
-      classes: "bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-700",
+      classes: "border-rose-500 bg-rose-500/20 text-rose-400",
     },
   };
 
   const cfg = map[estado] || {
     label: estado,
     icon: "📋",
-    classes: "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600",
+    classes: "border-slate-500 bg-slate-500/20 text-slate-300",
   };
 
   return (
-    <span
-      className={
-        "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold " +
-        cfg.classes
-      }
-    >
+    <span className={`inline-flex items-center gap-1 border-2 px-2 py-1 text-[11px] font-bold uppercase tracking-wide ${cfg.classes}`}>
       <span>{cfg.icon}</span> {cfg.label}
     </span>
   );
@@ -52,21 +86,19 @@ function EstadoBadge({ estado }) {
 function RatingChip({ rating }) {
   if (rating == null) {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 dark:bg-slate-700 px-2.5 py-1 text-[11px] text-slate-500 dark:text-slate-400">
-        <span>⭐</span> --
+      <span className="inline-flex items-center gap-1 border-2 border-slate-600 bg-slate-700/50 px-2 py-1 text-[11px] text-slate-400 font-bold">
+        ⭐ --
       </span>
     );
   }
 
   const valor = Number(rating);
-  let cor = "bg-gradient-to-r from-emerald-400 to-teal-400 text-white";
-  if (valor <= 4) cor = "bg-gradient-to-r from-rose-400 to-pink-400 text-white";
-  else if (valor <= 7) cor = "bg-gradient-to-r from-amber-400 to-orange-400 text-white";
+  let classes = "border-green-400 bg-green-400/20 text-green-400";
+  if (valor <= 4) classes = "border-rose-500 bg-rose-500/20 text-rose-400";
+  else if (valor <= 7) classes = "border-yellow-400 bg-yellow-400/20 text-yellow-400";
 
   return (
-    <span
-      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold shadow-sm ${cor}`}
-    >
+    <span className={`inline-flex items-center gap-1 border-2 px-2 py-1 text-[11px] font-bold ${classes}`}>
       ⭐ {valor.toFixed(1)}
     </span>
   );
@@ -92,13 +124,13 @@ function formatHoras(v) {
 
 function Chip({ children, onClear }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-2 py-0.5 text-[11px] text-slate-700 dark:text-slate-300">
+    <span className="inline-flex items-center gap-2 border-2 border-fuchsia-500/50 bg-fuchsia-500/10 px-2 py-1 text-[11px] text-fuchsia-400 font-bold">
       {children}
       {onClear && (
         <button
           type="button"
           onClick={onClear}
-          className="rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-600 px-1.5 py-0.5 text-[10px] text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-500"
+          className="border border-fuchsia-500/50 bg-fuchsia-500/20 px-1.5 py-0.5 text-[10px] text-fuchsia-400 hover:bg-fuchsia-500 hover:text-white transition-colors"
           title="Remover filtro"
         >
           ✕
@@ -114,13 +146,14 @@ function SortHeader({ label, active, dir, onClick, alignRight = false }) {
       type="button"
       onClick={onClick}
       className={
-        "group inline-flex items-center gap-1 text-left hover:text-slate-600 dark:hover:text-slate-300 " +
-        (alignRight ? "justify-end w-full" : "")
+        "group inline-flex items-center gap-1 text-left hover:text-cyan-400 transition-colors " +
+        (alignRight ? "justify-end w-full" : "") +
+        (active ? " text-cyan-400" : " text-slate-400")
       }
       title="Clica para ordenar"
     >
       <span>{label}</span>
-      <span className="text-[10px] text-slate-300 dark:text-slate-500 group-hover:text-slate-400 dark:group-hover:text-slate-400">
+      <span className="text-[10px]">
         {active ? (dir === "asc" ? "▲" : "▼") : "↕"}
       </span>
     </button>
@@ -332,32 +365,35 @@ export default function CollectionPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header com gradiente */}
-      <div className="relative rounded-2xl overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 animate-gradient opacity-90"></div>
-        <div className="relative z-10 p-6 md:p-8">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
-                <span className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">🎮</span>
-                Minha Coleção
-              </h1>
-              <p className="mt-2 text-sm text-white/80">
-                📊 {jogos.length} jogos na tua biblioteca • Clica nos cabeçalhos para ordenar
-              </p>
+      {/* Header Retro */}
+      <RetroCard color="fuchsia" className="p-6 relative overflow-hidden">
+        {/* Grid pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(217,70,239,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(217,70,239,0.1)_1px,transparent_1px)] bg-[size:20px_20px]" />
+        
+        <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="flex items-center gap-2 text-fuchsia-400 text-sm font-bold uppercase tracking-widest mb-2">
+              <span className="inline-block w-3 h-3 bg-fuchsia-400 animate-pulse" />
+              Biblioteca
             </div>
-
-            <button
-              type="button"
-              onClick={() => setMostrarModal(true)}
-              className="inline-flex items-center gap-2 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/30 transition-all duration-300 hover:scale-105 shadow-lg"
-            >
-              <span className="text-lg">➕</span>
-              Adicionar jogo
-            </button>
+            <h1 className="text-2xl md:text-3xl font-black text-white flex items-center gap-3">
+              🎮 Minha Coleção
+            </h1>
+            <p className="mt-2 text-sm text-slate-400">
+              📊 {jogos.length} jogos na tua biblioteca • Clica nos cabeçalhos para ordenar
+            </p>
           </div>
+
+          <RetroButton color="cyan" onClick={() => setMostrarModal(true)}>
+            ➕ Adicionar jogo
+          </RetroButton>
         </div>
-      </div>
+
+        {/* Decorative pixels */}
+        <div className="absolute top-4 right-4 w-4 h-4 bg-cyan-400" />
+        <div className="absolute top-4 right-10 w-2 h-2 bg-yellow-400" />
+        <div className="absolute bottom-4 right-6 w-3 h-3 bg-fuchsia-500" />
+      </RetroCard>
 
       {/* Modal RAWG */}
       <AddGameModal
@@ -371,15 +407,15 @@ export default function CollectionPage() {
       />
 
       {/* Filtros + pesquisa */}
-      <div className="rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm px-5 py-4 shadow-lg">
+      <RetroCard color="cyan" className="p-4">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap gap-3 text-xs">
             <div className="flex items-center gap-2">
-              <span className="text-slate-500 dark:text-slate-400 font-medium">🎯 Plataforma</span>
+              <span className="text-cyan-400 font-bold uppercase text-[10px]">🎯 Plataforma</span>
               <select
                 value={filtroPlataforma}
                 onChange={(e) => setFiltroPlataforma(e.target.value)}
-                className="rounded-xl border border-slate-200/50 dark:border-slate-600/50 bg-white/50 dark:bg-slate-700/50 px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                className="border-2 border-slate-600 bg-slate-800 px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-400 cursor-pointer"
               >
                 <option value="todas">Todas</option>
                 <option value="pc">💻 PC</option>
@@ -390,11 +426,11 @@ export default function CollectionPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-slate-500 dark:text-slate-400 font-medium">📋 Estado</span>
+              <span className="text-cyan-400 font-bold uppercase text-[10px]">📋 Estado</span>
               <select
                 value={filtroEstado}
                 onChange={(e) => setFiltroEstado(e.target.value)}
-                className="rounded-xl border border-slate-200/50 dark:border-slate-600/50 bg-white/50 dark:bg-slate-700/50 px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                className="border-2 border-slate-600 bg-slate-800 px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-400 cursor-pointer"
               >
                 <option value="todos">Todos</option>
                 <option value="por_jogar">⏳ Por jogar</option>
@@ -405,11 +441,11 @@ export default function CollectionPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-slate-500 dark:text-slate-400 font-medium">🏷️ Género</span>
+              <span className="text-cyan-400 font-bold uppercase text-[10px]">🏷️ Género</span>
               <select
                 value={filtroGenero}
                 onChange={(e) => setFiltroGenero(e.target.value)}
-                className="rounded-xl border border-slate-200/50 dark:border-slate-600/50 bg-white/50 dark:bg-slate-700/50 px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                className="border-2 border-slate-600 bg-slate-800 px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-400 cursor-pointer"
               >
                 <option value="todos">Todos</option>
                 {generos.map((g) => (
@@ -421,34 +457,30 @@ export default function CollectionPage() {
             </div>
 
             {temFiltrosAtivos && (
-              <button
-                type="button"
-                onClick={limparFiltros}
-                className="rounded-xl border border-rose-200/50 dark:border-rose-700/50 bg-rose-50 dark:bg-rose-900/30 px-3 py-2 text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-all"
-              >
-                🗑️ Limpar filtros
-              </button>
+              <RetroButton color="rose" onClick={limparFiltros} className="text-[10px] px-3 py-1">
+                🗑️ Limpar
+              </RetroButton>
             )}
           </div>
 
           <div className="flex flex-wrap items-center gap-3 text-xs">
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">🔍</span>
               <input
                 type="text"
                 placeholder="Procurar por título, plataforma ou género..."
                 value={pesquisa}
                 onChange={(e) => setPesquisa(e.target.value)}
-                className="w-72 rounded-xl border border-slate-200/50 dark:border-slate-600/50 bg-white/50 dark:bg-slate-700/50 pl-9 pr-3 py-2.5 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                className="w-72 border-2 border-slate-600 bg-slate-800 pl-9 pr-3 py-2.5 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-fuchsia-500 transition-colors"
               />
             </div>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/50 px-3 py-1.5 rounded-full">{rangeText}</span>
+            <span className="text-[11px] text-fuchsia-400 bg-fuchsia-500/20 border-2 border-fuchsia-500/50 px-3 py-1.5 font-bold">{rangeText}</span>
           </div>
         </div>
 
         {/* Chips de filtros ativos */}
         {temFiltrosAtivos && (
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t-2 border-slate-700">
             {pesquisa.trim() && (
               <Chip onClear={() => setPesquisa("")}>Pesquisa: “{pesquisa.trim()}”</Chip>
             )}
@@ -469,39 +501,34 @@ export default function CollectionPage() {
             )}
           </div>
         )}
-      </div>
+      </RetroCard>
 
       {/* Lista */}
-      <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm overflow-hidden">
+      <RetroCard color="fuchsia" className="overflow-hidden">
         {loading ? (
-          <div className="px-4 py-6 text-sm text-slate-500 dark:text-slate-400">A carregar coleção...</div>
+          <div className="px-4 py-6 text-sm text-slate-400">A carregar coleção...</div>
         ) : erro ? (
-          <div className="px-4 py-6 text-sm text-red-600 dark:text-red-400">{erro}</div>
+          <div className="px-4 py-6 text-sm text-rose-400">{erro}</div>
         ) : total === 0 ? (
           <div className="px-4 py-16 text-center">
-            <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-2xl flex items-center justify-center">
+            <div className="w-20 h-20 mx-auto mb-4 border-2 border-fuchsia-500/50 bg-fuchsia-500/10 flex items-center justify-center">
               <span className="text-4xl">🎮</span>
             </div>
-            <p className="font-semibold text-lg text-slate-700 dark:text-slate-300 mb-2">
+            <p className="font-bold text-lg text-white mb-2">
               Nenhum jogo encontrado
             </p>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+            <p className="text-sm text-slate-400 mb-6">
               Tenta limpar os filtros ou adiciona novos jogos à tua coleção.
             </p>
-            <button
-              type="button"
-              onClick={() => setMostrarModal(true)}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-5 py-2.5 text-sm font-semibold text-white hover:shadow-lg hover:shadow-indigo-500/25 hover:scale-105 transition-all duration-300"
-            >
-              <span className="text-lg">➕</span>
-              Adicionar jogo
-            </button>
+            <RetroButton color="cyan" onClick={() => setMostrarModal(true)}>
+              ➕ Adicionar jogo
+            </RetroButton>
           </div>
         ) : (
           <>
             <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
               {/* Cabeçalho "sticky" */}
-              <div className="sticky top-0 z-10 grid grid-cols-12 gap-3 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500 border-b border-slate-200/50 dark:border-slate-700/50">
+              <div className="sticky top-0 z-10 grid grid-cols-12 gap-3 bg-slate-900/95 backdrop-blur-sm px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-slate-500 border-b-2 border-slate-700">
                 <div className="col-span-5">
                   <SortHeader
                     label="Jogo"
@@ -510,8 +537,8 @@ export default function CollectionPage() {
                     onClick={() => toggleSort("titulo")}
                   />
                 </div>
-                <div className="col-span-2">Plataforma / Género</div>
-                <div className="col-span-2">Estado</div>
+                <div className="col-span-2 text-slate-500">Plataforma / Género</div>
+                <div className="col-span-2 text-slate-500">Estado</div>
                 <div className="col-span-2">
                   <div className="flex items-center justify-between">
                     <SortHeader
@@ -546,11 +573,11 @@ export default function CollectionPage() {
                 return (
                   <div
                     key={jogo.id}
-                    className="group grid grid-cols-12 gap-3 px-4 py-3 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 cursor-pointer transition-colors duration-200"
+                    className="group grid grid-cols-12 gap-3 px-4 py-3 hover:bg-fuchsia-500/10 cursor-pointer transition-colors duration-200 border-b border-slate-800"
                     onClick={() => navigate(`/app/jogo/${jogo.id}`)}
                   >
                     <div className="col-span-5 flex items-center gap-3">
-                      <div className="h-14 w-10 overflow-hidden rounded-lg bg-slate-200 dark:bg-slate-700 flex-shrink-0 shadow-sm group-hover:shadow-md transition-shadow">
+                      <div className="h-14 w-10 overflow-hidden border-2 border-cyan-400/50 bg-slate-800 flex-shrink-0">
                         {capa ? (
                           <img
                             src={capa}
@@ -558,18 +585,18 @@ export default function CollectionPage() {
                             className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         ) : (
-                          <div className="h-full w-full flex items-center justify-center text-2xl bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30">
+                          <div className="h-full w-full flex items-center justify-center text-2xl bg-slate-800">
                             🎮
                           </div>
                         )}
                       </div>
 
                       <div className="min-w-0">
-                        <div className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        <div className="text-sm font-bold text-white truncate group-hover:text-cyan-400 transition-colors">
                           {jogo.titulo}
                         </div>
                         {jogo.notas && (
-                          <div className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">
+                          <div className="mt-0.5 text-[11px] text-slate-500 line-clamp-1">
                             📝 {jogo.notas}
                           </div>
                         )}
@@ -577,8 +604,8 @@ export default function CollectionPage() {
                     </div>
 
                     <div className="col-span-2 flex flex-col justify-center gap-1">
-                      <div className="text-xs font-medium text-slate-700 dark:text-slate-300">{jogo.plataforma || "—"}</div>
-                      <div className="text-[11px] text-slate-400 dark:text-slate-500">{jogo.genero || "—"}</div>
+                      <div className="text-xs font-medium text-slate-300">{jogo.plataforma || "—"}</div>
+                      <div className="text-[11px] text-slate-500">{jogo.genero || "—"}</div>
                     </div>
 
                     <div className="col-span-2 flex items-center">
@@ -587,7 +614,7 @@ export default function CollectionPage() {
 
                     <div className="col-span-2 flex flex-col justify-center gap-1.5">
                       <RatingChip rating={jogo.rating} />
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400 text-right flex items-center justify-end gap-1">
+                      <div className="text-[11px] text-slate-500 text-right flex items-center justify-end gap-1">
                         <span>🕐</span> {formatHoras(jogo.horas_jogadas)}h
                       </div>
                     </div>
@@ -599,7 +626,7 @@ export default function CollectionPage() {
                           e.stopPropagation();
                           handleRemover(jogo.id, jogo.titulo);
                         }}
-                        className="opacity-0 group-hover:opacity-100 rounded-lg border border-rose-200/50 dark:border-rose-800/50 bg-rose-50 dark:bg-rose-900/30 px-2.5 py-1.5 text-[11px] font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-all duration-200"
+                        className="opacity-0 group-hover:opacity-100 border-2 border-rose-500/50 bg-rose-500/20 px-2 py-1 text-[11px] font-bold text-rose-400 hover:bg-rose-500 hover:text-white transition-all duration-200"
                       >
                         🗑️
                       </button>
@@ -610,34 +637,34 @@ export default function CollectionPage() {
             </div>
 
             {/* Paginação */}
-            <div className="flex items-center justify-between px-4 py-4 text-xs border-t border-slate-200/50 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50">
-              <div className="text-slate-500 dark:text-slate-400 font-medium">
+            <div className="flex items-center justify-between px-4 py-4 text-xs border-t-2 border-slate-700 bg-slate-900/50">
+              <div className="text-fuchsia-400 font-bold">
                 📄 Página {paginaAtual} de {totalPaginas}
               </div>
 
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
+                <RetroButton
+                  color="cyan"
                   disabled={paginaAtual <= 1}
                   onClick={() => setPagina((p) => Math.max(1, p - 1))}
-                  className="rounded-xl border border-slate-200/50 dark:border-slate-600/50 bg-white dark:bg-slate-700 px-4 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                  className="text-[10px] px-3 py-1"
                 >
                   ← Anterior
-                </button>
+                </RetroButton>
 
-                <button
-                  type="button"
+                <RetroButton
+                  color="cyan"
                   disabled={paginaAtual >= totalPaginas}
                   onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
-                  className="rounded-xl border border-slate-200/50 dark:border-slate-600/50 bg-white dark:bg-slate-700 px-4 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                  className="text-[10px] px-3 py-1"
                 >
                   Seguinte →
-                </button>
+                </RetroButton>
               </div>
             </div>
           </>
         )}
-      </div>
+      </RetroCard>
     </div>
   );
 }
