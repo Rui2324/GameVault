@@ -1,3 +1,4 @@
+// src/pages/HomePage.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
@@ -38,14 +39,14 @@ function getTimeAgo(dateValue) {
 
 function RetroCard({ children, color = "fuchsia", className = "" }) {
   const colors = {
-    fuchsia: "border-fuchsia-500 shadow-[4px_4px_0px_0px_rgba(217,70,239,0.8)]",
-    cyan: "border-cyan-400 shadow-[4px_4px_0px_0px_rgba(34,211,238,0.8)]",
-    yellow: "border-yellow-400 shadow-[4px_4px_0px_0px_rgba(250,204,21,0.8)]",
-    green: "border-green-400 shadow-[4px_4px_0px_0px_rgba(74,222,128,0.8)]",
+    fuchsia: "border-fuchsia-500 shadow-[4px_4px_0px_0px_rgba(217,70,239,0.5)]",
+    cyan: "border-cyan-400 shadow-[4px_4px_0px_0px_rgba(34,211,238,0.5)]",
+    yellow: "border-yellow-400 shadow-[4px_4px_0px_0px_rgba(250,204,21,0.5)]",
+    green: "border-green-400 shadow-[4px_4px_0px_0px_rgba(74,222,128,0.5)]",
   };
 
   return (
-    <div className={`bg-slate-900 border-2 ${colors[color]} ${className}`}>
+    <div className={`bg-white dark:bg-slate-900 border-2 ${colors[color]} ${className}`}>
       {children}
     </div>
   );
@@ -53,9 +54,9 @@ function RetroCard({ children, color = "fuchsia", className = "" }) {
 
 function RetroButton({ children, color = "fuchsia", onClick, className = "" }) {
   const colors = {
-    fuchsia: "border-fuchsia-500 bg-fuchsia-500/20 text-fuchsia-400 hover:bg-fuchsia-500 hover:text-white shadow-[3px_3px_0px_0px_rgba(217,70,239,0.6)]",
-    cyan: "border-cyan-400 bg-cyan-400/20 text-cyan-400 hover:bg-cyan-400 hover:text-slate-900 shadow-[3px_3px_0px_0px_rgba(34,211,238,0.6)]",
-    yellow: "border-yellow-400 bg-yellow-400/20 text-yellow-400 hover:bg-yellow-400 hover:text-slate-900 shadow-[3px_3px_0px_0px_rgba(250,204,21,0.6)]",
+    fuchsia: "border-fuchsia-500 bg-fuchsia-50 text-fuchsia-600 dark:bg-fuchsia-500/20 dark:text-fuchsia-400 hover:bg-fuchsia-500 hover:text-white shadow-[3px_3px_0px_0px_rgba(217,70,239,0.6)]",
+    cyan: "border-cyan-400 bg-cyan-50 text-cyan-600 dark:bg-cyan-400/20 dark:text-cyan-400 hover:bg-cyan-400 hover:text-slate-900 shadow-[3px_3px_0px_0px_rgba(34,211,238,0.6)]",
+    yellow: "border-yellow-400 bg-yellow-50 text-yellow-600 dark:bg-yellow-400/20 dark:text-yellow-400 hover:bg-yellow-400 hover:text-slate-900 shadow-[3px_3px_0px_0px_rgba(250,204,21,0.6)]",
   };
 
   return (
@@ -69,14 +70,14 @@ function RetroButton({ children, color = "fuchsia", onClick, className = "" }) {
   );
 }
 
-function SectionTitle({ children, icon }) {
+function SectionTitle({ children }) {
   return (
     <div className="flex items-center gap-3 mb-6">
-      <span className="text-2xl">{icon}</span>
-      <h2 className="text-xl font-black uppercase tracking-wider text-white">
+      {/* Removido o ícone emoji daqui */}
+      <h2 className="text-xl font-black uppercase tracking-wider text-slate-900 dark:text-white">
         {children}
       </h2>
-      <div className="flex-1 h-0.5 bg-gradient-to-r from-fuchsia-500 via-cyan-400 to-transparent" />
+      <div className="flex-1 h-0.5 bg-gradient-to-r from-fuchsia-500 via-cyan-400 to-transparent opacity-50" />
     </div>
   );
 }
@@ -96,7 +97,7 @@ function GameCard({ game, onClick }) {
       className="group text-left w-full"
     >
       <RetroCard color="cyan" className="overflow-hidden transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none">
-        <div className="relative aspect-[4/3] w-full bg-slate-800 overflow-hidden">
+        <div className="relative aspect-[4/3] w-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
           {img ? (
             <img
               src={img}
@@ -106,31 +107,28 @@ function GameCard({ game, onClick }) {
               onError={(e) => (e.currentTarget.style.display = "none")}
             />
           ) : (
-            <div className="flex h-full items-center justify-center text-slate-600">
-              <span className="text-4xl">🎮</span>
+            <div className="flex h-full items-center justify-center text-slate-400 dark:text-slate-600 font-bold text-xs">
+              SEM IMAGEM
             </div>
           )}
 
           {rating != null && (
-            <div className="absolute top-2 right-2 bg-yellow-400 text-slate-900 text-xs font-black px-2 py-1 border-2 border-yellow-300">
+            <div className="absolute top-2 right-2 bg-yellow-400 text-slate-900 text-xs font-black px-2 py-1 border-2 border-yellow-300 shadow-md">
               ★ {Number(rating).toFixed(1)}
             </div>
           )}
-
-          {/* Scanline effect */}
-          <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.1)_2px,rgba(0,0,0,0.1)_4px)] pointer-events-none" />
         </div>
 
-        <div className="p-3 bg-slate-900">
-          <div className="text-sm font-bold text-white truncate group-hover:text-cyan-400 transition-colors">
+        <div className="p-3 bg-white dark:bg-slate-900 border-t-2 border-cyan-400/20">
+          <div className="text-sm font-bold text-slate-900 dark:text-white truncate group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
             {title}
           </div>
           <div className="flex items-center justify-between mt-1">
             {genres?.[0] ? (
-              <div className="text-xs text-fuchsia-400 font-medium truncate">{genres[0]}</div>
+              <div className="text-xs text-fuchsia-600 dark:text-fuchsia-400 font-bold truncate">{genres[0]}</div>
             ) : <span />}
             {totalUsers && (
-              <div className="text-xs text-slate-500">
+              <div className="text-xs text-slate-500 font-medium">
                 {totalUsers} {totalUsers === 1 ? "voto" : "votos"}
               </div>
             )}
@@ -153,23 +151,18 @@ function UpcomingCard({ game, onClick }) {
       className="group text-left w-full"
     >
       <RetroCard color="yellow" className="overflow-hidden flex transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none">
-        <div className="w-20 h-24 bg-slate-800 flex-shrink-0 overflow-hidden">
+        <div className="w-20 h-24 bg-slate-200 dark:bg-slate-800 flex-shrink-0 overflow-hidden border-r-2 border-yellow-400/20">
           {img ? (
-            <img
-              src={img}
-              alt={title}
-              referrerPolicy="no-referrer"
-              className="h-full w-full object-cover"
-            />
+            <img src={img} alt={title} referrerPolicy="no-referrer" className="h-full w-full object-cover" />
           ) : (
-            <div className="flex h-full items-center justify-center text-2xl">📅</div>
+            <div className="flex h-full items-center justify-center font-bold text-xs text-slate-400">DATA</div>
           )}
         </div>
-        <div className="p-3 flex-1 min-w-0">
-          <div className="text-sm font-bold text-white truncate group-hover:text-yellow-400 transition-colors">
+        <div className="p-3 flex-1 min-w-0 bg-white dark:bg-slate-900">
+          <div className="text-sm font-bold text-slate-900 dark:text-white truncate group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors">
             {title}
           </div>
-          <div className="text-xs text-yellow-400/70 mt-1 font-medium">
+          <div className="text-xs text-slate-500 dark:text-yellow-400/70 mt-1 font-bold uppercase">
             {released ? formatDateShort(released) : "A confirmar"}
           </div>
         </div>
@@ -183,94 +176,58 @@ function ActivityItem({ activity, onNavigate }) {
 
   const getConfig = () => {
     switch (type) {
-      case "game_added":
-        return { text: "adicionou", icon: "🎮", color: "text-cyan-400" };
-      case "review":
-        return { text: rating ? `avaliou ${Number(rating).toFixed(1)}★` : "review", icon: "⭐", color: "text-yellow-400" };
+      case "game_added": return { text: "adicionou", color: "text-cyan-600 dark:text-cyan-400" };
+      case "review": return { text: rating ? `avaliou ${Number(rating).toFixed(1)}★` : "review", color: "text-yellow-600 dark:text-yellow-400" };
       case "status_change":
         if (["concluido", "completed", "completo"].includes(status?.toLowerCase())) {
-          return { text: "completou", icon: "🏆", color: "text-green-400" };
+          return { text: "completou", color: "text-green-600 dark:text-green-400" };
         }
-        return { text: status, icon: "📝", color: "text-slate-400" };
-      default:
-        return { text: "atividade", icon: "📌", color: "text-slate-400" };
+        return { text: status, color: "text-slate-500 dark:text-slate-400" };
+      default: return { text: "atividade", color: "text-slate-500 dark:text-slate-400" };
     }
   };
 
   const config = getConfig();
-  const avatarUrl = user?.avatar_url?.startsWith("http") 
-    ? user.avatar_url 
-    : user?.avatar_url 
-      ? `http://localhost:4000${user.avatar_url}` 
-      : null;
+  const avatarUrl = user?.avatar_url?.startsWith("http") ? user.avatar_url : user?.avatar_url ? `http://localhost:4000${user.avatar_url}` : null;
 
   return (
-    <div className="flex gap-3 py-3 border-b border-slate-700/50 last:border-0 group">
+    <div className="flex gap-3 py-3 border-b border-slate-200 dark:border-slate-700/50 last:border-0 group hover:bg-slate-50 dark:hover:bg-slate-800/50 p-2 rounded transition">
       <button
         type="button"
         onClick={() => onNavigate(`/app/perfil/${user?.id}`)}
-        className="w-10 h-10 border-2 border-fuchsia-500 bg-fuchsia-500/20 flex items-center justify-center text-fuchsia-400 font-bold text-sm overflow-hidden flex-shrink-0 hover:bg-fuchsia-500 hover:text-white transition"
+        className="w-10 h-10 border-2 border-fuchsia-500 bg-fuchsia-50 dark:bg-fuchsia-500/20 flex items-center justify-center text-fuchsia-600 dark:text-fuchsia-400 font-bold text-sm overflow-hidden flex-shrink-0 hover:bg-fuchsia-500 hover:text-white transition rounded-full"
       >
-        {avatarUrl ? (
-          <img src={avatarUrl} alt={user?.name} className="w-full h-full object-cover" />
-        ) : (
-          user?.name?.charAt(0).toUpperCase() || "?"
-        )}
+        {avatarUrl ? <img src={avatarUrl} alt={user?.name} className="w-full h-full object-cover" /> : user?.name?.charAt(0).toUpperCase() || "?"}
       </button>
 
       <div className="flex-1 min-w-0">
         <div className="text-sm">
-          <button
-            type="button"
-            onClick={() => onNavigate(`/app/perfil/${user?.id}`)}
-            className="font-bold text-white hover:text-fuchsia-400 transition"
-          >
+          <button type="button" onClick={() => onNavigate(`/app/perfil/${user?.id}`)} className="font-bold text-slate-900 dark:text-white hover:text-fuchsia-600 dark:hover:text-fuchsia-400 transition">
             {user?.name || "User"}
           </button>
-          {" "}
-          <span className={config.color}>{config.text}</span>
-          {" "}
-          <button
-            type="button"
-            onClick={() => onNavigate(`/app/explorar/${game?.id}`)}
-            className="font-bold text-cyan-400 hover:underline"
-          >
+          {" "}<span className={`${config.color} font-medium`}>{config.text}</span>{" "}
+          <button type="button" onClick={() => onNavigate(`/app/explorar/${game?.id}`)} className="font-bold text-cyan-600 dark:text-cyan-400 hover:underline">
             {game?.title || "jogo"}
           </button>
-          {" "}{config.icon}
         </div>
-        <div className="text-xs text-slate-500 mt-1">{getTimeAgo(date)}</div>
+        <div className="text-xs text-slate-400 mt-1 font-bold">{getTimeAgo(date)}</div>
       </div>
     </div>
   );
 }
 
 function UserCard({ user, onClick }) {
-  const avatarUrl = user?.avatar_url?.startsWith("http") 
-    ? user.avatar_url 
-    : user?.avatar_url 
-      ? `http://localhost:4000${user.avatar_url}` 
-      : null;
+  const avatarUrl = user?.avatar_url?.startsWith("http") ? user.avatar_url : user?.avatar_url ? `http://localhost:4000${user.avatar_url}` : null;
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="group text-left w-full"
-    >
+    <button type="button" onClick={onClick} className="group text-left w-full">
       <RetroCard color="green" className="p-4 flex items-center gap-3 transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none">
-        <div className="w-12 h-12 border-2 border-green-400 bg-green-400/20 flex items-center justify-center text-green-400 font-bold overflow-hidden flex-shrink-0 group-hover:bg-green-400 group-hover:text-slate-900 transition">
-          {avatarUrl ? (
-            <img src={avatarUrl} alt={user.name} className="w-full h-full object-cover" />
-          ) : (
-            user.name?.charAt(0).toUpperCase()
-          )}
+        <div className="w-12 h-12 border-2 border-green-400 bg-green-50 dark:bg-green-400/20 flex items-center justify-center text-green-600 dark:text-green-400 font-bold overflow-hidden flex-shrink-0 group-hover:bg-green-400 group-hover:text-slate-900 transition rounded-full">
+          {avatarUrl ? <img src={avatarUrl} alt={user.name} className="w-full h-full object-cover" /> : user.name?.charAt(0).toUpperCase()}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="font-bold text-white truncate group-hover:text-green-400 transition">{user.name}</div>
-          <div className="text-xs text-slate-400">
-            Lv.{user.level} · {user.total_games || 0} jogos
-          </div>
+          <div className="font-bold text-slate-900 dark:text-white truncate group-hover:text-green-600 dark:group-hover:text-green-400 transition">{user.name}</div>
+          <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">Lv.{user.level} · {user.total_games || 0} jogos</div>
         </div>
       </RetroCard>
     </button>
@@ -278,9 +235,7 @@ function UserCard({ user, onClick }) {
 }
 
 function SkeletonRetro({ className = "" }) {
-  return (
-    <div className={`bg-slate-800 animate-pulse border-2 border-slate-700 ${className}`} />
-  );
+  return <div className={`bg-slate-200 dark:bg-slate-800 animate-pulse border-2 border-slate-300 dark:border-slate-700 ${className}`} />;
 }
 
 // ============ PÁGINA PRINCIPAL ============
@@ -305,18 +260,10 @@ export default function HomePage() {
           api.get("/profile/users/discover", { params: { limit: 4 } }),
         ]);
 
-        if (topRated.status === "fulfilled") {
-          setFeaturedGames(topRated.value?.data?.topGames || []);
-        }
-        if (upcoming.status === "fulfilled") {
-          setUpcomingGames(upcoming.value?.data?.jogos || []);
-        }
-        if (feed.status === "fulfilled") {
-          setActivityFeed(feed.value?.data?.activities || []);
-        }
-        if (users.status === "fulfilled") {
-          setDiscoverUsers(users.value?.data?.users || []);
-        }
+        if (topRated.status === "fulfilled") setFeaturedGames(topRated.value?.data?.topGames || []);
+        if (upcoming.status === "fulfilled") setUpcomingGames(upcoming.value?.data?.jogos || []);
+        if (feed.status === "fulfilled") setActivityFeed(feed.value?.data?.activities || []);
+        if (users.status === "fulfilled") setDiscoverUsers(users.value?.data?.users || []);
       } finally {
         setLoading(false);
       }
@@ -325,100 +272,73 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="space-y-10">
-      {/* HERO */}
+    <div className="space-y-10 pb-10">
+      {/* HERO BANNER - SEM EMOJIS */}
       <RetroCard color="fuchsia" className="p-8 relative overflow-hidden">
-        {/* Grid pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(217,70,239,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(217,70,239,0.1)_1px,transparent_1px)] bg-[size:20px_20px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(217,70,239,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(217,70,239,0.1)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
         
         <div className="relative z-10">
-          <div className="flex items-center gap-2 text-fuchsia-400 text-sm font-bold uppercase tracking-widest mb-2">
-            <span className="inline-block w-3 h-3 bg-fuchsia-400 animate-pulse" />
+          <div className="flex items-center gap-2 text-fuchsia-600 dark:text-fuchsia-400 text-sm font-bold uppercase tracking-widest mb-2">
+            <span className="inline-block w-3 h-3 bg-fuchsia-500 animate-pulse" />
             GameVault
           </div>
-          <h1 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">
-            Bem-vindo de volta! <span className="text-cyan-400">👾</span>
+          <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-4 tracking-tight drop-shadow-sm">
+            Bem-vindo de volta!
           </h1>
-          <p className="text-slate-400 text-lg max-w-xl">
+          <p className="text-slate-600 dark:text-slate-300 text-lg max-w-xl font-medium">
             Descobre novos jogos, acompanha a comunidade e expande a tua coleção.
           </p>
         </div>
 
         {/* Decorative pixels */}
-        <div className="absolute top-4 right-4 w-4 h-4 bg-cyan-400" />
-        <div className="absolute top-4 right-10 w-2 h-2 bg-yellow-400" />
-        <div className="absolute bottom-4 right-6 w-3 h-3 bg-fuchsia-500" />
+        <div className="absolute top-4 right-4 w-4 h-4 bg-cyan-400 shadow-lg" />
+        <div className="absolute top-4 right-10 w-2 h-2 bg-yellow-400 shadow-lg" />
+        <div className="absolute bottom-4 right-6 w-3 h-3 bg-fuchsia-500 shadow-lg" />
       </RetroCard>
 
-      {/* GRID PRINCIPAL */}
       <div className="grid gap-8 lg:grid-cols-3">
         {/* COLUNA ESQUERDA - JOGOS */}
         <div className="lg:col-span-2 space-y-10">
-          {/* JOGOS EM DESTAQUE */}
           <section>
-            <SectionTitle icon="⭐">Top Avaliados pela Comunidade</SectionTitle>
+            <SectionTitle>Top Avaliados</SectionTitle>
             
             {loading ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {[...Array(8)].map((_, i) => (
-                  <SkeletonRetro key={i} className="aspect-[4/3]" />
-                ))}
+                {[...Array(8)].map((_, i) => <SkeletonRetro key={i} className="aspect-[4/3]" />)}
               </div>
             ) : featuredGames.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {featuredGames.slice(0, 8).map((game) => (
-                  <GameCard
-                    key={game.id || game.external_id}
-                    game={game}
-                    onClick={() => navigate(`/app/jogo/${game.id}`)}
-                  />
+                  <GameCard key={game.id || game.external_id} game={game} onClick={() => navigate(`/app/jogo/${game.id}`)} />
                 ))}
               </div>
             ) : (
-              <RetroCard color="cyan" className="p-8 text-center">
-                <span className="text-4xl block mb-3">🎮</span>
-                <p className="text-slate-400">
-                  Ainda não há jogos avaliados pela comunidade.
-                </p>
-                <p className="text-slate-500 text-sm mt-2">
-                  Adiciona jogos à tua coleção e avalia-os!
-                </p>
+              <RetroCard color="cyan" className="p-8 text-center text-slate-500 font-medium">
+                Ainda não há jogos avaliados.
               </RetroCard>
             )}
           </section>
 
-          {/* ATIVIDADE DA COMUNIDADE */}
           <section>
-            <SectionTitle icon="📡">Atividade da Comunidade</SectionTitle>
-            
+            <SectionTitle>Atividade</SectionTitle>
             <RetroCard color="fuchsia" className="p-4">
               {loading ? (
                 <div className="space-y-3">
                   {[...Array(5)].map((_, i) => (
                     <div key={i} className="flex gap-3">
-                      <SkeletonRetro className="w-10 h-10" />
-                      <div className="flex-1 space-y-2">
-                        <SkeletonRetro className="h-4 w-3/4" />
-                        <SkeletonRetro className="h-3 w-1/4" />
-                      </div>
+                      <SkeletonRetro className="w-10 h-10 rounded-full" />
+                      <div className="flex-1 space-y-2"><SkeletonRetro className="h-4 w-3/4" /><SkeletonRetro className="h-3 w-1/4" /></div>
                     </div>
                   ))}
                 </div>
               ) : activityFeed.length > 0 ? (
-                <div className="max-h-[400px] overflow-y-auto">
+                <div className="max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
                   {activityFeed.map((act, idx) => (
-                    <ActivityItem
-                      key={`${act.type}-${act.user?.id}-${act.game?.id}-${idx}`}
-                      activity={act}
-                      onNavigate={navigate}
-                    />
+                    <ActivityItem key={`${act.type}-${act.user?.id}-${act.game?.id}-${idx}`} activity={act} onNavigate={navigate} />
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-slate-500">
-                  <span className="text-4xl block mb-2">📭</span>
-                  Sem atividade recente
-                </div>
+                <div className="text-center py-8 text-slate-500">Sem atividade recente</div>
               )}
             </RetroCard>
           </section>
@@ -426,69 +346,36 @@ export default function HomePage() {
 
         {/* COLUNA DIREITA */}
         <div className="space-y-8">
-          {/* PRÓXIMOS LANÇAMENTOS */}
           <section>
-            <SectionTitle icon="📅">Em Breve</SectionTitle>
-            
+            <SectionTitle>Em Breve</SectionTitle>
             <div className="space-y-3">
               {loading ? (
-                [...Array(4)].map((_, i) => (
-                  <SkeletonRetro key={i} className="h-24" />
-                ))
+                [...Array(4)].map((_, i) => <SkeletonRetro key={i} className="h-24" />)
               ) : upcomingGames.length > 0 ? (
                 upcomingGames.slice(0, 4).map((game) => (
-                  <UpcomingCard
-                    key={game.id || game.external_id}
-                    game={game}
-                    onClick={() => navigate(`/app/explorar/${game.external_id || game.id}`)}
-                  />
+                  <UpcomingCard key={game.id || game.external_id} game={game} onClick={() => navigate(`/app/explorar/${game.external_id || game.id}`)} />
                 ))
               ) : (
-                <div className="text-center py-6 text-slate-500">
-                  Sem lançamentos próximos
-                </div>
+                <div className="text-center py-6 text-slate-500">Sem lançamentos próximos</div>
               )}
             </div>
           </section>
 
-          {/* DESCOBRIR UTILIZADORES */}
           <section>
-            <SectionTitle icon="👥">Descobrir</SectionTitle>
-            
+            <SectionTitle>Descobrir</SectionTitle>
             <div className="space-y-3">
               {loading ? (
-                [...Array(4)].map((_, i) => (
-                  <SkeletonRetro key={i} className="h-20" />
-                ))
+                [...Array(4)].map((_, i) => <SkeletonRetro key={i} className="h-20" />)
               ) : discoverUsers.length > 0 ? (
                 discoverUsers.map((user) => (
-                  <UserCard
-                    key={user.id}
-                    user={user}
-                    onClick={() => navigate(`/app/perfil/${user.id}`)}
-                  />
+                  <UserCard key={user.id} user={user} onClick={() => navigate(`/app/perfil/${user.id}`)} />
                 ))
               ) : (
-                <div className="text-center py-6 text-slate-500">
-                  Sem sugestões de momento
-                </div>
+                <div className="text-center py-6 text-slate-500">Sem sugestões de momento</div>
               )}
             </div>
           </section>
 
-          {/* QUICK ACTIONS */}
-          <section>
-            <SectionTitle icon="⚡">Ações Rápidas</SectionTitle>
-            
-            <div className="space-y-3">
-              <RetroButton color="cyan" onClick={() => navigate("/app/explorar")} className="w-full justify-center">
-                🔍 Explorar Jogos
-              </RetroButton>
-              <RetroButton color="yellow" onClick={() => navigate("/app/conquistas")} className="w-full justify-center">
-                🏆 Conquistas
-              </RetroButton>
-            </div>
-          </section>
         </div>
       </div>
     </div>

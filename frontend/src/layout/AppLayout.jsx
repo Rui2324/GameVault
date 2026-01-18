@@ -17,16 +17,12 @@ export default function AppLayout() {
   const userMenuRef = useRef(null);
 
   const navLinks = [
-    { to: "/app/home", label: "Início"},
-    { to: "/app/colecao", label: "Coleção"},
-    { to: "/app/wishlist", label: "Wishlist"},
-    { to: "/app/estatisticas", label: "Estatísticas"},
-    { to: "/app/conquistas", label: "Conquistas"},
+    { to: "/app/home", label: "Início", icon: "" },
+    { to: "/app/colecao", label: "Coleção", icon: "" },
+    { to: "/app/wishlist", label: "Wishlist", icon: "" },
+    { to: "/app/estatisticas", label: "Estatísticas", icon: "" },
+    { to: "/app/conquistas", label: "Conquistas", icon: "" },
   ];
-
-  //function handleAvatarClick() {
-  //navigate("/app/settings");
-  //}
 
   function handleLogout() {
     logout();
@@ -44,7 +40,7 @@ export default function AppLayout() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Resolver URL do avatar: se vier como "/uploads/..." juntar o backend
+  // Resolver URL do avatar
   let avatarSrc = null;
   if (user?.avatar_url) {
     if (
@@ -58,9 +54,7 @@ export default function AppLayout() {
     }
   }
 
-  // -------------------------
   // Pesquisa global (RAWG)
-  // -------------------------
   const [openSearch, setOpenSearch] = useState(false);
   const [collectionExternalIds, setCollectionExternalIds] = useState(new Set());
   const toast = useToast();
@@ -75,14 +69,12 @@ export default function AppLayout() {
       );
       setCollectionExternalIds(ids);
     } catch (err) {
-      // se falhar não estraga nada; só não bloqueia duplicados
       console.error(err);
     }
   }
 
   async function handleOpenGlobalSearch() {
     setOpenSearch(true);
-    // carregar ids para bloquear duplicados (não bloqueia a abertura)
     refreshCollectionExternalIds();
   }
 
@@ -91,7 +83,6 @@ export default function AppLayout() {
     const onKeyDown = (e) => {
       const isCmdK = (e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K");
       if (!isCmdK) return;
-
       e.preventDefault();
       handleOpenGlobalSearch();
     };
@@ -101,20 +92,16 @@ export default function AppLayout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Quando algo é importado, avisar e atualizar ids
   async function onAddedToCollection(item) {
     toast.game(`Adicionado à coleção: ${item?.title || "jogo"}`, {
       title: "Jogo Adicionado! 🎉",
     });
     await refreshCollectionExternalIds();
-
-    // opcional: se quiseres ir logo para a coleção, descomenta
-    // navigate("/app/colecao");
-    // ou até abrir o detalhe (depende do backend devolver o id da entry)
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors">
+    // MUDANÇA: bg-slate-50 (mais claro) em vez de bg-slate-100 para o modo claro
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors font-sans">
       {/* Modal global RAWG */}
       <AddGameModal
         open={openSearch}
@@ -124,9 +111,10 @@ export default function AppLayout() {
       />
 
       {/* TOP BAR - RETRO STYLE */}
-      <header className="relative border-b-4 border-fuchsia-500 bg-slate-900">
-        {/* Grid pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(217,70,239,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(217,70,239,0.05)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
+      {/* MUDANÇA: bg-white forçado no header */}
+      <header className="relative border-b-4 border-fuchsia-500 bg-white dark:bg-slate-900 z-50">
+        {/* Grid pattern - Aumentei opacidade no light mode para ver melhor o efeito retro */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(217,70,239,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(217,70,239,0.05)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(217,70,239,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(217,70,239,0.05)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
         
         <div className="relative flex items-center justify-between px-6 py-3">
           {/* Logo + nav */}
@@ -136,12 +124,12 @@ export default function AppLayout() {
               onClick={() => navigate("/app/home")}
               className="group flex items-center gap-3 focus:outline-none"
             >
-              <div className="flex h-10 w-10 items-center justify-center border-2 border-cyan-400 bg-cyan-400/20 text-xl text-cyan-400 shadow-[3px_3px_0px_0px_rgba(34,211,238,0.6)] group-hover:bg-cyan-400 group-hover:text-slate-900 transition-all">
+              <div className="flex h-10 w-10 items-center justify-center border-2 border-cyan-400 bg-cyan-400/10 text-xl text-cyan-600 dark:text-cyan-400 shadow-[3px_3px_0px_0px_rgba(34,211,238,0.6)] group-hover:bg-cyan-400 group-hover:text-slate-900 transition-all">
                 🎮
               </div>
               <div className="leading-tight text-left">
-                <div className="text-base font-black tracking-wider text-white group-hover:text-cyan-400 transition-colors">GAMEVAULT</div>
-                <div className="text-[10px] text-fuchsia-400 font-bold uppercase tracking-widest">
+                <div className="text-base font-black tracking-wider text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">GAMEVAULT</div>
+                <div className="text-[10px] text-fuchsia-600 dark:text-fuchsia-400 font-bold uppercase tracking-widest">
                   Retro Edition
                 </div>
               </div>
@@ -157,11 +145,11 @@ export default function AppLayout() {
                       "group flex items-center gap-2 px-4 py-2 border-2 font-bold text-sm uppercase tracking-wide transition-all",
                       isActive
                         ? "border-cyan-400 bg-cyan-400 text-slate-900 shadow-[3px_3px_0px_0px_rgba(34,211,238,0.6)]"
-                        : "border-slate-700 text-slate-400 hover:border-fuchsia-500 hover:text-fuchsia-400 hover:bg-fuchsia-500/10",
+                        : "border-transparent hover:border-fuchsia-500 text-slate-700 dark:text-slate-400 hover:text-fuchsia-600 dark:hover:text-fuchsia-400 hover:bg-fuchsia-50 dark:hover:bg-fuchsia-500/10",
                     ].join(" ")
                   }
                 >
-                  <span className="text-sm">{link.icon}</span>
+                  <span className="text-lg">{link.icon}</span>
                   <span>{link.label}</span>
                 </NavLink>
               ))}
@@ -170,16 +158,16 @@ export default function AppLayout() {
 
           {/* Search + theme toggle + user */}
           <div className="flex items-center gap-4">
-            {/* Pesquisa global (abre modal) */}
+            {/* Pesquisa global */}
             <button
               type="button"
               onClick={handleOpenGlobalSearch}
-              className="group hidden items-center gap-2 border-2 border-yellow-400 bg-yellow-400/10 px-4 py-2 text-sm text-yellow-400 font-bold uppercase tracking-wide shadow-[3px_3px_0px_0px_rgba(250,204,21,0.6)] hover:bg-yellow-400 hover:text-slate-900 transition-all sm:flex"
+              className="group hidden items-center gap-2 border-2 border-yellow-400 bg-yellow-50 dark:bg-yellow-400/10 px-4 py-2 text-sm text-yellow-700 dark:text-yellow-400 font-bold uppercase tracking-wide shadow-[3px_3px_0px_0px_rgba(250,204,21,0.6)] hover:bg-yellow-400 hover:text-slate-900 transition-all sm:flex"
               title="Pesquisar e importar jogos (Ctrl+K)"
             >
               <span className="text-base">🔍</span>
               <span>Pesquisar</span>
-              <span className="ml-2 border border-yellow-400/50 px-1.5 py-0.5 text-[10px]">
+              <span className="ml-2 border border-yellow-600/30 dark:border-yellow-400/50 px-1.5 py-0.5 text-[10px] bg-white/50 dark:bg-transparent">
                 Ctrl K
               </span>
             </button>
@@ -188,7 +176,7 @@ export default function AppLayout() {
             <button
               type="button"
               onClick={toggleTheme}
-              className="group flex h-10 w-10 items-center justify-center border-2 border-fuchsia-500 bg-fuchsia-500/10 text-lg text-fuchsia-400 shadow-[3px_3px_0px_0px_rgba(217,70,239,0.6)] hover:bg-fuchsia-500 hover:text-white transition-all"
+              className="group flex h-10 w-10 items-center justify-center border-2 border-fuchsia-500 bg-fuchsia-50 dark:bg-fuchsia-500/10 text-lg text-fuchsia-600 dark:text-fuchsia-400 shadow-[3px_3px_0px_0px_rgba(217,70,239,0.6)] hover:bg-fuchsia-500 hover:text-white transition-all"
               title={theme === "dark" ? "Mudar para modo claro" : "Mudar para modo escuro"}
             >
               {theme === "dark" ? "☀️" : "🌙"}
@@ -196,10 +184,10 @@ export default function AppLayout() {
 
             <div className="flex items-center gap-3">
               <div className="text-right leading-tight hidden sm:block">
-                <div className="text-xs font-bold text-white uppercase tracking-wide">
+                <div className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wide">
                   {user?.name || "Utilizador"}
                 </div>
-                <div className="text-[10px] text-cyan-400 font-medium">Online</div>
+                <div className="text-[10px] text-cyan-600 dark:text-cyan-400 font-medium">Online</div>
               </div>
 
               {/* Avatar com dropdown */}
@@ -208,7 +196,7 @@ export default function AppLayout() {
                   type="button"
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   title="Menu do utilizador"
-                  className="group relative h-10 w-10 overflow-hidden border-2 border-green-400 bg-green-400/20 text-sm font-bold text-green-400 shadow-[3px_3px_0px_0px_rgba(74,222,128,0.6)] hover:bg-green-400 hover:text-slate-900 transition-all"
+                  className="group relative h-10 w-10 overflow-hidden border-2 border-green-400 bg-green-50 dark:bg-green-400/20 text-sm font-bold text-green-700 dark:text-green-400 shadow-[3px_3px_0px_0px_rgba(74,222,128,0.6)] hover:bg-green-400 hover:text-slate-900 transition-all"
                 >
                   {avatarSrc ? (
                     <img
@@ -221,69 +209,51 @@ export default function AppLayout() {
                       {inicial}
                     </span>
                   )}
-                  {/* Indicador online */}
-                  <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-green-400 border-2 border-slate-900"></span>
+                  <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-green-400 border-2 border-white dark:border-slate-900"></span>
                 </button>
 
                 {/* Dropdown Menu */}
                 {showUserMenu && (
-                  <div className="absolute right-0 mt-3 w-56 border-2 border-fuchsia-500 bg-slate-900 shadow-[4px_4px_0px_0px_rgba(217,70,239,0.8)] z-50 overflow-hidden">
-                    {/* Header do dropdown */}
-                    <div className="bg-fuchsia-500/20 border-b-2 border-fuchsia-500 p-4">
+                  <div className="absolute right-0 mt-3 w-64 border-2 border-slate-200 dark:border-fuchsia-500 bg-white dark:bg-slate-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] dark:shadow-[4px_4px_0px_0px_rgba(217,70,239,0.8)] z-50 overflow-hidden rounded-lg">
+                    <div className="bg-slate-50 dark:bg-fuchsia-500/20 border-b border-slate-200 dark:border-fuchsia-500 p-4">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 border-2 border-cyan-400 bg-cyan-400/20 flex items-center justify-center text-cyan-400 font-bold overflow-hidden">
+                        <div className="h-10 w-10 border-2 border-cyan-400 bg-cyan-400/20 flex items-center justify-center text-cyan-600 dark:text-cyan-400 font-bold overflow-hidden rounded">
                           {avatarSrc ? (
                             <img src={avatarSrc} alt="" className="h-full w-full object-cover" />
                           ) : inicial}
                         </div>
                         <div>
-                          <p className="font-bold text-white text-sm uppercase">{user?.name || "Utilizador"}</p>
-                          <p className="text-xs text-fuchsia-400">{user?.email}</p>
+                          <p className="font-bold text-slate-900 dark:text-white text-sm uppercase">{user?.name || "Utilizador"}</p>
+                          <p className="text-xs text-slate-500 dark:text-fuchsia-400">{user?.email}</p>
                         </div>
                       </div>
                     </div>
                     
-                    <div className="p-2">
+                    <div className="p-2 bg-white dark:bg-slate-900">
                       <button
-                        onClick={() => {
-                          navigate(`/app/perfil/${user?.id}`);
-                          setShowUserMenu(false);
-                        }}
-                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-slate-300 hover:bg-cyan-400/20 hover:text-cyan-400 transition-colors font-medium"
+                        onClick={() => { navigate(`/app/perfil/${user?.id}`); setShowUserMenu(false); }}
+                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-cyan-400/20 hover:text-cyan-700 dark:hover:text-cyan-400 transition-colors font-medium rounded-md"
                       >
-                        <span className="w-8 h-8 border border-slate-700 flex items-center justify-center">👤</span>
-                        O Meu Perfil
+                        <span>👤</span> O Meu Perfil
                       </button>
                       <button
-                        onClick={() => {
-                          navigate("/app/conquistas");
-                          setShowUserMenu(false);
-                        }}
-                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-slate-300 hover:bg-yellow-400/20 hover:text-yellow-400 transition-colors font-medium"
+                        onClick={() => { navigate("/app/conquistas"); setShowUserMenu(false); }}
+                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-yellow-400/20 hover:text-yellow-700 dark:hover:text-yellow-400 transition-colors font-medium rounded-md"
                       >
-                        <span className="w-8 h-8 border border-slate-700 flex items-center justify-center">🏆</span>
-                        Conquistas
+                        <span>🏆</span> Conquistas
                       </button>
                       <button
-                        onClick={() => {
-                          navigate("/app/settings");
-                          setShowUserMenu(false);
-                        }}
-                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-slate-300 hover:bg-fuchsia-400/20 hover:text-fuchsia-400 transition-colors font-medium"
+                        onClick={() => { navigate("/app/settings"); setShowUserMenu(false); }}
+                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-fuchsia-400/20 hover:text-fuchsia-700 dark:hover:text-fuchsia-400 transition-colors font-medium rounded-md"
                       >
-                        <span className="w-8 h-8 border border-slate-700 flex items-center justify-center">⚙️</span>
-                        Definições
+                        <span>⚙️</span> Definições
                       </button>
-                      <hr className="my-2 border-slate-700" />
+                      <hr className="my-2 border-slate-200 dark:border-slate-700" />
                       <button
-                        onClick={() => {
-                          handleLogout();
-                          setShowUserMenu(false);
-                        }}
-                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-rose-400 hover:bg-rose-500/20 hover:text-rose-300 transition-colors font-medium"
+                        onClick={() => { handleLogout(); setShowUserMenu(false); }}
+                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/20 hover:text-rose-700 dark:hover:text-rose-300 transition-colors font-medium rounded-md"
                       >
-                        <span className="w-8 h-8 border border-slate-700 flex items-center justify-center">🚪</span>
-                        Sair
+                        <span>🚪</span> Sair
                       </button>
                     </div>
                   </div>
@@ -295,11 +265,12 @@ export default function AppLayout() {
       </header>
 
       {/* CONTEÚDO PRINCIPAL - RETRO */}
-      <main className="flex-1 px-4 sm:px-6 py-6 bg-slate-950">
-        {/* Scanline effect */}
-        <div className="fixed inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.03)_2px,rgba(0,0,0,0.03)_4px)] pointer-events-none z-10" />
+      <main className="flex-1 px-4 sm:px-6 py-6 bg-slate-100 dark:bg-slate-950">
+        {/* Scanline effect (mais subtil no claro) */}
+        <div className="fixed inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.01)_2px,rgba(0,0,0,0.01)_4px)] dark:bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.03)_2px,rgba(0,0,0,0.03)_4px)] pointer-events-none z-10" />
         
-        <div className="relative z-0 w-full border-2 border-cyan-500/30 bg-slate-900 p-5 shadow-[0_0_30px_rgba(34,211,238,0.1)]">
+        {/* Container Principal: Branco Puro no Light Mode com borda definida */}
+        <div className="relative z-0 w-full border-2 border-slate-200 dark:border-cyan-500/30 bg-white dark:bg-slate-900 p-5 shadow-sm dark:shadow-[0_0_30px_rgba(34,211,238,0.1)] rounded-xl">
           <Outlet />
         </div>
       </main>
@@ -307,23 +278,23 @@ export default function AppLayout() {
       {/* FOOTER - RETRO */}
       <footer className="mt-0">
         <div className="h-1 bg-gradient-to-r from-fuchsia-500 via-cyan-400 to-yellow-400" />
-        <div className="bg-slate-900 border-t-2 border-slate-700">
+        <div className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700">
           <div className="flex flex-col gap-3 px-6 py-4 text-xs md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
-                <span className="h-8 w-8 border-2 border-fuchsia-500 bg-fuchsia-500/20 flex items-center justify-center text-fuchsia-400 text-sm">🎮</span>
-                <span className="text-white font-black uppercase tracking-wider">GameVault</span>
+                <span className="h-8 w-8 border-2 border-fuchsia-500 bg-fuchsia-50 dark:bg-fuchsia-500/20 flex items-center justify-center text-fuchsia-600 dark:text-fuchsia-400 text-sm">🎮</span>
+                <span className="text-slate-900 dark:text-white font-black uppercase tracking-wider">GameVault</span>
               </div>
-              <span className="text-slate-700">|</span>
-              <span className="text-slate-500">Retro Gaming Collection</span>
+              <span className="text-slate-300 dark:text-slate-700">|</span>
+              <span className="text-slate-500 dark:text-slate-500">Retro Gaming Collection</span>
             </div>
 
             <div className="flex flex-wrap items-center gap-4">
-              <span className="flex items-center gap-2 border border-slate-700 px-3 py-1.5 text-slate-400">
+              <span className="flex items-center gap-2 border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-slate-600 dark:text-slate-400 rounded">
                 <span>🎓</span> ISTEC 2026
               </span>
-              <span className="flex items-center gap-2 border border-green-500/50 bg-green-500/10 text-green-400 px-3 py-1.5">
-                <span className="h-2 w-2 bg-green-400 animate-pulse" />
+              <span className="flex items-center gap-2 border border-green-500/50 bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 px-3 py-1.5 rounded">
+                <span className="h-2 w-2 bg-green-500 dark:bg-green-400 animate-pulse rounded-full" />
                 <span>ONLINE</span>
               </span>
             </div>
