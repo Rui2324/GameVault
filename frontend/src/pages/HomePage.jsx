@@ -73,7 +73,6 @@ function RetroButton({ children, color = "fuchsia", onClick, className = "" }) {
 function SectionTitle({ children }) {
   return (
     <div className="flex items-center gap-3 mb-6">
-      {/* Removido o ícone emoji daqui */}
       <h2 className="text-xl font-black uppercase tracking-wider text-slate-900 dark:text-white">
         {children}
       </h2>
@@ -190,6 +189,18 @@ function ActivityItem({ activity, onNavigate }) {
   const config = getConfig();
   const avatarUrl = user?.avatar_url?.startsWith("http") ? user.avatar_url : user?.avatar_url ? `http://localhost:4000${user.avatar_url}` : null;
 
+  // Função helper para decidir o link correto do jogo na atividade
+  const handleGameClick = () => {
+    // Tenta usar external_id primeiro para ir para explorar
+    if (game?.external_id) {
+        onNavigate(`/app/explorar/${game.external_id}`);
+    } else if (game?.id) {
+        // Se só tiver ID interno, tenta ir, mas pode falhar se o user não tiver o jogo
+        // O ideal é o backend enviar external_id nas atividades
+        onNavigate(`/app/explorar/${game.id}`); 
+    }
+  };
+
   return (
     <div className="flex gap-3 py-3 border-b border-slate-200 dark:border-slate-700/50 last:border-0 group hover:bg-slate-50 dark:hover:bg-slate-800/50 p-2 rounded transition">
       <button
@@ -206,7 +217,7 @@ function ActivityItem({ activity, onNavigate }) {
             {user?.name || "User"}
           </button>
           {" "}<span className={`${config.color} font-medium`}>{config.text}</span>{" "}
-          <button type="button" onClick={() => onNavigate(`/app/explorar/${game?.id}`)} className="font-bold text-cyan-600 dark:text-cyan-400 hover:underline">
+          <button type="button" onClick={handleGameClick} className="font-bold text-cyan-600 dark:text-cyan-400 hover:underline">
             {game?.title || "jogo"}
           </button>
         </div>
@@ -271,9 +282,17 @@ export default function HomePage() {
     loadData();
   }, []);
 
+  // Handler seguro para navegação
+  const handleGameClick = (game) => {
+    // PRIORIDADE: Usar o external_id para ir para a página pública de detalhes (Explorar)
+    // Assim funciona mesmo se o user não tiver o jogo na coleção.
+    const targetId = game.external_id || game.id;
+    navigate(`/app/explorar/${targetId}`);
+  };
+
   return (
     <div className="space-y-10 pb-10">
-      {/* HERO BANNER - SEM EMOJIS */}
+      {/* HERO BANNER */}
       <RetroCard color="fuchsia" className="p-8 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(rgba(217,70,239,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(217,70,239,0.1)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
         
@@ -290,7 +309,6 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* Decorative pixels */}
         <div className="absolute top-4 right-4 w-4 h-4 bg-cyan-400 shadow-lg" />
         <div className="absolute top-4 right-10 w-2 h-2 bg-yellow-400 shadow-lg" />
         <div className="absolute bottom-4 right-6 w-3 h-3 bg-fuchsia-500 shadow-lg" />
@@ -309,7 +327,12 @@ export default function HomePage() {
             ) : featuredGames.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {featuredGames.slice(0, 8).map((game) => (
-                  <GameCard key={game.id || game.external_id} game={game} onClick={() => navigate(`/app/jogo/${game.id}`)} />
+                  <GameCard 
+                    key={game.id || game.external_id} 
+                    game={game} 
+                    // CORREÇÃO AQUI: Usa a função segura que vai para /explorar
+                    onClick={() => handleGameClick(game)} 
+                  />
                 ))}
               </div>
             ) : (
@@ -353,7 +376,12 @@ export default function HomePage() {
                 [...Array(4)].map((_, i) => <SkeletonRetro key={i} className="h-24" />)
               ) : upcomingGames.length > 0 ? (
                 upcomingGames.slice(0, 4).map((game) => (
-                  <UpcomingCard key={game.id || game.external_id} game={game} onClick={() => navigate(`/app/explorar/${game.external_id || game.id}`)} />
+                  <UpcomingCard 
+                    key={game.id || game.external_id} 
+                    game={game} 
+                    // CORREÇÃO: Garante que vai para /explorar
+                    onClick={() => navigate(`/app/explorar/${game.external_id || game.id}`)} 
+                  />
                 ))
               ) : (
                 <div className="text-center py-6 text-slate-500">Sem lançamentos próximos</div>
@@ -376,6 +404,13 @@ export default function HomePage() {
             </div>
           </section>
 
+          <section>
+            <SectionTitle>Ações</SectionTitle>
+            <div className="space-y-3">
+              <RetroButton color="cyan" onClick={() => navigate("/app/explorar")} className="w-full flex justify-center items-center gap-2">Explorar Jogos</RetroButton>
+              <RetroButton color="yellow" onClick={() => navigate("/app/conquistas")} className="w-full flex justify-center items-center gap-2">Conquistas</RetroButton>
+            </div>
+          </section>
         </div>
       </div>
     </div>
