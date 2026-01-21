@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useToast } from "../components/Toast";
+import ImageCropper from "../components/ImageCropper"; // <--- IMPORTANTE: Importar o Cropper
 
 // Componente RetroCard
 function RetroCard({ children, className = "", color = "fuchsia" }) {
@@ -59,15 +60,30 @@ export default function SettingsPage() {
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [showInRanking, setShowInRanking] = useState(true);
 
+  // --- NOVO: Estados para o ImageCropper ---
+  const [imageSrc, setImageSrc] = useState(null);
+  const [showCropper, setShowCropper] = useState(false);
+
+  // --- NOVO: Função que lê o ficheiro e abre o Cropper ---
   function handleAvatarChange(e) {
     const file = e.target.files?.[0];
     if (file) {
-      setAvatarFile(file);
-      setPreview(URL.createObjectURL(file));
-    } else {
-      setAvatarFile(null);
-      setPreview(avatarUrl || "");
+      const reader = new FileReader();
+      reader.addEventListener("load", () => {
+        setImageSrc(reader.result);
+        setShowCropper(true); // Abre o modal
+      });
+      reader.readAsDataURL(file);
     }
+    // Limpar o input para permitir selecionar a mesma foto se cancelar
+    e.target.value = null;
+  }
+
+  // --- NOVO: Função chamada quando o corte termina ---
+  function handleCropComplete(croppedBlob) {
+    setAvatarFile(croppedBlob); // Guarda o blob pronto a enviar
+    setPreview(URL.createObjectURL(croppedBlob)); // Atualiza a preview visual
+    setShowCropper(false); // Fecha o modal
   }
 
   async function handleSubmit(e) {
@@ -77,18 +93,39 @@ export default function SettingsPage() {
       const formData = new FormData();
       formData.append("name", name);
       formData.append("bio", bio);
-      if (avatarFile) formData.append("avatar", avatarFile);
-      else if (avatarUrl) formData.append("avatar_url", avatarUrl);
+      
+      if (avatarFile) {
+        // Enviar o blob com um nome de ficheiro
+        formData.append("avatar", avatarFile, "avatar.jpg");
+      } else if (avatarUrl) {
+        formData.append("avatar_url", avatarUrl);
+      }
+      
       await atualizarPerfil(formData);
       toast.success("Perfil atualizado com sucesso!");
-    } catch (err) { console.error(err); toast.error("Erro ao atualizar perfil."); } finally { setSaving(false); }
+    } catch (err) { 
+      console.error(err); 
+      toast.error("Erro ao atualizar perfil."); 
+    } finally { 
+      setSaving(false); 
+    }
   }
 
   const inicial = (name || user?.email || "?")[0].toUpperCase();
-  const resolvedPreview = (preview || avatarUrl) ? ((preview || avatarUrl).startsWith("data:") || (preview || avatarUrl).startsWith("http") ? (preview || avatarUrl) : `http://localhost:4000${(preview || avatarUrl)}`) : "";
+  const resolvedPreview = (preview || avatarUrl) ? ((preview || avatarUrl).startsWith("data:") || (preview || avatarUrl).startsWith("blob:") || (preview || avatarUrl).startsWith("http") ? (preview || avatarUrl) : `http://localhost:4000${(preview || avatarUrl)}`) : "";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      
+      {/* --- NOVO: Renderizar o Cropper se showCropper for true --- */}
+      {showCropper && (
+        <ImageCropper 
+          imageSrc={imageSrc}
+          onCancel={() => setShowCropper(false)}
+          onCropComplete={handleCropComplete}
+        />
+      )}
+
       {/* Header Retro */}
       <div className="relative overflow-hidden bg-white dark:bg-slate-900 border-2 border-fuchsia-500/30 shadow-sm">
         <div className="absolute inset-0 bg-[linear-gradient(rgba(217,70,239,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(217,70,239,0.1)_1px,transparent_1px)] bg-[size:20px_20px]" />

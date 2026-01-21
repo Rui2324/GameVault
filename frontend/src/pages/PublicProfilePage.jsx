@@ -141,59 +141,79 @@ export default function PublicProfilePage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Header do Perfil */}
       <RetroCard color="fuchsia" className="overflow-hidden">
-        <div className="h-32 md:h-40 relative overflow-hidden bg-slate-900">
+        {/* Banner */}
+        <div className="h-24 md:h-36 relative overflow-hidden bg-slate-900">
           <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-600 via-purple-600 to-cyan-500" />
           <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.3)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.3)_1px,transparent_1px)] bg-[size:20px_20px]" />
         </div>
         
-        <div className="px-6 pb-6">
-          <div className="flex flex-col md:flex-row md:items-end gap-4 -mt-12 md:-mt-16">
-            {/* Avatar */}
+        <div className="px-5 pb-5">
+          <div className="flex flex-col md:flex-row md:items-end gap-5 -mt-12 md:-mt-14">
+            
+            {/* AVATAR: object-cover object-center para preencher sem deformar */}
             <div className="relative shrink-0">
-              <div className="w-24 h-24 md:w-28 md:h-28 border-4 border-cyan-400 bg-white dark:bg-slate-900 p-1 shadow-[4px_4px_0px_0px_rgba(34,211,238,0.8)]">
-                <div className="w-full h-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-4xl font-bold text-cyan-500 dark:text-cyan-400 overflow-hidden">
+              <div className="w-24 h-24 md:w-32 md:h-32 border-4 border-cyan-400 bg-white dark:bg-slate-950 p-1 shadow-[4px_4px_0px_0px_rgba(34,211,238,0.8)]">
+                <div className="w-full h-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-4xl font-bold text-cyan-500 dark:text-cyan-400 overflow-hidden">
                   {profile.avatar_url ? (
-                    <img src={profile.avatar_url.startsWith("http") ? profile.avatar_url : `http://localhost:4000${profile.avatar_url}`} alt={profile.name} className="w-full h-full object-cover" />
+                    <img 
+                      src={profile.avatar_url.startsWith("http") ? profile.avatar_url : `http://localhost:4000${profile.avatar_url}`} 
+                      alt={profile.name} 
+                      className="w-full h-full object-cover object-center" 
+                    />
                   ) : profile.name?.charAt(0).toUpperCase()}
                 </div>
               </div>
-              <div className="absolute -bottom-2 -right-2 px-2.5 py-1 bg-yellow-400 border-2 border-yellow-500 text-xs font-bold text-slate-900 shadow-sm">
-                Nv. {profile.level}
+              <div className="absolute -bottom-3 -right-3 px-3 py-1 bg-yellow-400 border-2 border-yellow-500 text-xs font-black text-slate-900 shadow-sm uppercase tracking-wide">
+                Lv. {profile.level}
               </div>
             </div>
             
-            <div className="flex-1 pt-4 md:pt-6 min-w-0">
-              <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white truncate uppercase tracking-wide">{profile.name}</h1>
-                {!profile.is_public && (
-                  <span className="px-2.5 py-1 bg-rose-50 dark:bg-slate-800 border-2 border-rose-500 text-rose-500 dark:text-rose-400 text-xs font-bold flex items-center gap-1 shrink-0">
-                    🔒 Privado
-                  </span>
-                )}
+            <div className="flex-1 pt-3 md:pt-4 min-w-0">
+              <div className="flex flex-col gap-1">
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white truncate uppercase tracking-tighter drop-shadow-sm leading-none">
+                  {profile.name}
+                </h1>
+
+                <div className="flex items-center gap-2 mt-1">
+                    {!profile.is_public && (
+                    <span className="px-2.5 py-1 bg-rose-50 dark:bg-slate-800 border-2 border-rose-500 text-rose-500 dark:text-rose-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shrink-0">
+                        🔒 Privado
+                    </span>
+                    )}
+                    <span className="text-xs text-slate-400 font-mono font-bold uppercase">
+                        Membro desde {new Date(profile.member_since).getFullYear()}
+                    </span>
+                </div>
               </div>
-              {profile.bio && <p className="text-slate-600 dark:text-slate-400 text-sm mt-2 max-w-lg font-mono">{profile.bio}</p>}
+
+              {profile.bio && (
+                <p className="text-slate-600 dark:text-slate-300 text-sm mt-3 max-w-2xl font-medium leading-relaxed border-l-4 border-slate-200 dark:border-slate-700 pl-3">
+                  {profile.bio}
+                </p>
+              )}
               
-              <div className="flex items-center gap-6 mt-3">
+              <div className="flex items-center gap-6 mt-4">
                 <button onClick={() => setActiveTab("followers")} className="group text-sm text-slate-500 dark:text-slate-400 hover:text-fuchsia-600 dark:hover:text-fuchsia-400 transition">
-                  <span className="font-bold text-fuchsia-600 dark:text-fuchsia-400 text-lg">{followCounts.followers}</span> seguidores
+                  <span className="font-black text-fuchsia-600 dark:text-fuchsia-400 text-xl mr-1">{followCounts.followers}</span> 
+                  <span className="uppercase text-xs font-bold tracking-wide">Seguidores</span>
                 </button>
                 <button onClick={() => setActiveTab("following")} className="group text-sm text-slate-500 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition">
-                  <span className="font-bold text-cyan-600 dark:text-cyan-400 text-lg">{followCounts.following}</span> a seguir
+                  <span className="font-black text-cyan-600 dark:text-cyan-400 text-xl mr-1">{followCounts.following}</span> 
+                  <span className="uppercase text-xs font-bold tracking-wide">A Seguir</span>
                 </button>
-                <span className="text-xs text-slate-400 hidden md:inline font-mono">📅 Desde {formatDate(profile.member_since)}</span>
               </div>
             </div>
             
-            <div className="flex gap-2 pt-2 md:pt-0">
+            <div className="flex gap-2 pt-4 md:pt-0">
               {!isOwnProfile && (
                 <RetroButton onClick={handleFollow} disabled={followLoading} color={isFollowing ? "rose" : "fuchsia"} className="flex items-center gap-2">
                   {followLoading ? "..." : isFollowing ? "✓ A seguir" : "➕ Seguir"}
                 </RetroButton>
               )}
-              <RetroButton onClick={copyProfileLink} color="cyan" className="flex items-center gap-2">🔗 Partilhar</RetroButton>
+              <RetroButton onClick={copyProfileLink} color="cyan" className="flex items-center gap-2">🔗</RetroButton>
               {isOwnProfile && (
                 <Link to="/app/settings" className="border-2 border-yellow-400 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-400 hover:text-slate-900 bg-yellow-50 dark:bg-slate-900/50 font-bold px-4 py-2 transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none flex items-center gap-2">
                   ⚙️ Editar
