@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useToast } from "../components/Toast";
-import ImageCropper from "../components/ImageCropper"; // <--- IMPORTANTE: Importar o Cropper
+import ImageCropper from "../components/ImageCropper"; // <--- Importação do Cortador
 
 // Componente RetroCard
 function RetroCard({ children, className = "", color = "fuchsia" }) {
@@ -53,37 +53,37 @@ export default function SettingsPage() {
   const [name, setName] = useState(user?.name || "");
   const [bio, setBio] = useState(user?.bio || "");
   const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url || "");
-  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarFile, setAvatarFile] = useState(null); // O ficheiro final cortado
   const [preview, setPreview] = useState(user?.avatar_url || "");
   const [saving, setSaving] = useState(false);
   const [isPublic, setIsPublic] = useState(user?.is_public !== false);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [showInRanking, setShowInRanking] = useState(true);
 
-  // --- NOVO: Estados para o ImageCropper ---
-  const [imageSrc, setImageSrc] = useState(null);
+  // --- NOVOS ESTADOS PARA O CROPPER ---
+  const [imageSrc, setImageSrc] = useState(null); // A imagem crua original
   const [showCropper, setShowCropper] = useState(false);
 
-  // --- NOVO: Função que lê o ficheiro e abre o Cropper ---
+  // --- 1. Quando escolhes o ficheiro, ABRE O CROPPER ---
   function handleAvatarChange(e) {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.addEventListener("load", () => {
         setImageSrc(reader.result);
-        setShowCropper(true); // Abre o modal
+        setShowCropper(true); // Abre a janela de corte
       });
       reader.readAsDataURL(file);
     }
-    // Limpar o input para permitir selecionar a mesma foto se cancelar
+    // Limpa o input para poderes selecionar a mesma foto se cancelares
     e.target.value = null;
   }
 
-  // --- NOVO: Função chamada quando o corte termina ---
+  // --- 2. Quando clicas "Guardar" no Cropper ---
   function handleCropComplete(croppedBlob) {
-    setAvatarFile(croppedBlob); // Guarda o blob pronto a enviar
-    setPreview(URL.createObjectURL(croppedBlob)); // Atualiza a preview visual
-    setShowCropper(false); // Fecha o modal
+    setAvatarFile(croppedBlob); // Guarda o blob já cortado
+    setPreview(URL.createObjectURL(croppedBlob)); // Mostra o preview quadrado
+    setShowCropper(false); // Fecha a janela
   }
 
   async function handleSubmit(e) {
@@ -94,8 +94,8 @@ export default function SettingsPage() {
       formData.append("name", name);
       formData.append("bio", bio);
       
+      // Envia o ficheiro cortado (se existir)
       if (avatarFile) {
-        // Enviar o blob com um nome de ficheiro
         formData.append("avatar", avatarFile, "avatar.jpg");
       } else if (avatarUrl) {
         formData.append("avatar_url", avatarUrl);
@@ -117,7 +117,7 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6 relative">
       
-      {/* --- NOVO: Renderizar o Cropper se showCropper for true --- */}
+      {/* --- O MODAL DO CROPPER (Aparece por cima de tudo) --- */}
       {showCropper && (
         <ImageCropper 
           imageSrc={imageSrc}

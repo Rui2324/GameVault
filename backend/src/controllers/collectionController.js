@@ -18,6 +18,7 @@ async function listMyCollection(req, res) {
     const colecao = entries.map((e) => ({
       id: e.id,
       jogo_id: e.game_id,
+      external_id: e.external_id, // <--- ADICIONADO: Envia o ID para o Frontend
       rating: e.rating,
       horas_jogadas: e.hours_played,
       estado: e.status,
@@ -37,7 +38,7 @@ async function listMyCollection(req, res) {
   }
 }
 
-// GET /api/collection/:id  → detalhes de uma entrada
+// GET /api/collection/:id
 async function getMyCollectionEntry(req, res) {
   try {
     const userId = req.userId;
@@ -200,7 +201,7 @@ async function removeMyCollectionEntry(req, res) {
   }
 }
 
-// GET /api/collection/by-game/:gameId - Obter entrada pelo game_id
+// GET /api/collection/by-game/:gameId
 async function getMyCollectionEntryByGameId(req, res) {
   try {
     const userId = req.userId;

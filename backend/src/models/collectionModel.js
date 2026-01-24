@@ -11,7 +11,8 @@ async function listCollectionForUser(userId) {
       g.platform,
       g.genre,
       g.cover_url,
-      g.description
+      g.description,
+      g.external_id  -- <--- ADICIONADO: Necessário para o frontend saber qual é o jogo
     FROM collection_entries c
     JOIN games g ON c.game_id = g.id
     WHERE c.user_id = ?
@@ -113,7 +114,7 @@ async function removeFromCollection(id, userId) {
   return result.affectedRows > 0;
 }
 
-// NOVO: obter uma entrada específica (para a página de detalhes)
+// Obter uma entrada específica (para a página de detalhes)
 async function getCollectionEntryById(id, userId) {
   const [rows] = await pool.query(
     `
@@ -137,7 +138,7 @@ async function getCollectionEntryById(id, userId) {
   return rows[0];
 }
 
-// NOVO: obter entrada pelo game_id (para o ranking global)
+// Obter entrada pelo game_id (para o ranking global)
 async function getCollectionEntryByGameId(gameId, userId) {
   const [rows] = await pool.query(
     `

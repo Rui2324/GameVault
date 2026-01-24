@@ -61,7 +61,8 @@ export default function ExternalGameDetailsPage() {
 
   const [descricaoExpandida, setDescricaoExpandida] = useState(false);
 
-  const [jaNaColecao, setJaNaColecao] = useState(false);
+  // --- ALTERAÇÃO IMPORTANTE: Guardar o ID da coleção ---
+  const [collectionId, setCollectionId] = useState(null); // Guarda o ID interno (ex: 30) se existir
   const [jaNaWishlist, setJaNaWishlist] = useState(false);
 
   async function carregar() {
@@ -69,42 +70,68 @@ export default function ExternalGameDetailsPage() {
       setLoading(true);
       setErro("");
 
+      // 1. Carregar detalhes da API Externa (RAWG)
       const res = await api.get(`/external-games/${externalId}`);
       const j = res.data.jogo;
       setJogo(j);
 
-      const extId = j?.external_id ?? j?.id ?? Number(externalId);
+      const extId = Number(j?.external_id ?? j?.id ?? externalId);
+      
+      console.log("🔍 A procurar ID Externo:", extId);
 
-      Promise.allSettled([api.get("/collection"), api.get("/wishlist")]).then(
-        (results) => {
-          const col =
-            results?.[0]?.status === "fulfilled"
-              ? results[0].value?.data?.colecao || []
-              : [];
+      // 2. Buscar Coleção e Wishlist
+      const [resCol, resWish] = await Promise.allSettled([
+        api.get("/collection?limit=1000"), 
+        api.get("/wishlist")
+      ]);
 
-          const colIds = new Set(
-            col.map((x) => x.external_id).filter((x) => x != null)
-          );
+      // --- LÓGICA DE COLEÇÃO SUPER ROBUSTA ---
+      if (resCol.status === "fulfilled") {
+        const dados = resCol.value?.data;
+        const listaColecao = dados?.colecao || dados?.items || dados?.data || (Array.isArray(dados) ? dados : []);
 
-          const w =
-            results?.[1]?.status === "fulfilled"
-              ? results[1].value?.data?.wishlist ||
-                results[1].value?.data?.items ||
-                []
-              : [];
-
-          const wIds = new Set(
-            w
-              .map((x) => x.external_id ?? x?.game?.external_id ?? null)
-              .filter((x) => x != null)
-          );
-
-          setJaNaColecao(colIds.has(extId));
-          setJaNaWishlist(wIds.has(extId));
+        // DEBUG: Mostra a estrutura do primeiro item para percebermos onde está o ID
+        if (listaColecao.length > 0) {
+            console.log("📦 Exemplo de item da coleção:", listaColecao[0]);
         }
-      );
+
+        const itemEncontrado = listaColecao.find((item) => {
+          // Tenta encontrar o ID externo em TODOS os sítios possíveis
+          const idNoItem = item.external_id;
+          const idNoGame = item.game?.external_id; // Caso venha aninhado
+          const idComoGameId = item.game_id; // Às vezes o backend guarda assim
+
+          // Converte tudo para número para comparar
+          return Number(idNoItem) === extId || 
+                 Number(idNoGame) === extId ||
+                 (Number(idComoGameId) === extId && !item.is_internal); // Só usa game_id se não for confuso
+        });
+        
+        if (itemEncontrado) {
+          console.log("✅ ENCONTRADO! ID Interno:", itemEncontrado.id);
+          setCollectionId(itemEncontrado.id);
+        } else {
+          console.warn("❌ Não encontrado. IDs disponíveis na lista:", 
+            listaColecao.map(i => i.external_id || i.game?.external_id).slice(0, 5) // Mostra só os primeiros 5 para não poluir
+          );
+          setCollectionId(null);
+        }
+      }
+
+      // --- LÓGICA DE WISHLIST ---
+      if (resWish.status === "fulfilled") {
+        const dadosW = resWish.value?.data;
+        const listaWish = dadosW?.wishlist || dadosW?.items || dadosW?.data || (Array.isArray(dadosW) ? dadosW : []);
+        
+        const foundInWishlist = listaWish.some((item) => {
+            const wId = item.external_id ?? item.game?.external_id;
+            return Number(wId) === extId;
+        });
+        setJaNaWishlist(foundInWishlist);
+      }
+
     } catch (e) {
-      console.error(e);
+      console.error("Erro critico no carregar:", e);
       setErro("Não foi possível carregar os detalhes do jogo.");
       setJogo(null);
     } finally {
@@ -133,7 +160,6 @@ export default function ExternalGameDetailsPage() {
     coverOriginal ||
     null;
 
-  // imagens “leves”
   const cover = rawgImage(coverOriginal, {
     mode: "resize",
     width: 700,
@@ -141,7 +167,6 @@ export default function ExternalGameDetailsPage() {
   });
   const bg = rawgImage(bgOriginal, { mode: "resize", width: 1800, height: "-" });
 
-  // extras
   const metacritic = jogo?.metacritic ?? null;
   const website = jogo?.website || null;
   const reddit = jogo?.reddit_url || null;
@@ -187,7 +212,6 @@ export default function ExternalGameDetailsPage() {
   const plataformas = useMemo(() => splitList(platformsRaw), [platformsRaw]);
   const generos = useMemo(() => splitList(genresRaw), [genresRaw]);
 
-  // screenshots com resized + original (fallback)
   const screenshots = useMemo(() => {
     const raw = jogo?.screenshots || jogo?.short_screenshots || null;
     if (!raw) return [];
@@ -215,7 +239,7 @@ export default function ExternalGameDetailsPage() {
 
   async function importarParaColecao() {
     if (!jogo) return;
-    if (jaNaColecao) return;
+    if (collectionId) return; // Já tem, não faz nada
 
     try {
       setAImportar(true);
@@ -228,16 +252,18 @@ export default function ExternalGameDetailsPage() {
         notes: null,
       });
 
-      setJaNaColecao(true);
-      toast.game(`${title} adicionado à coleção!`);
-
-      const entryId = res.data?.collection_entry_id;
-      if (entryId) navigate(`/app/jogo/${entryId}`);
+      // Atualiza o estado imediatamente
+      const novoId = res.data?.collection_entry_id;
+      if (novoId) {
+        setCollectionId(novoId);
+        toast.success(`${title} adicionado à coleção!`);
+      }
+      
     } catch (e) {
       console.error(e);
       if (e?.response?.status === 409) {
-        setJaNaColecao(true);
         toast.info("Este jogo já está na tua coleção.");
+        // Opcional: Podíamos fazer carregar() de novo aqui para apanhar o ID
       } else {
         toast.error("Falhou ao adicionar à coleção.");
       }
@@ -252,11 +278,9 @@ export default function ExternalGameDetailsPage() {
 
     try {
       setAWishlist(true);
-
       await api.post("/external-games/import/wishlist", {
         external_id: extIdFinal,
       });
-
       setJaNaWishlist(true);
       toast.success(`${title} adicionado à wishlist!`);
     } catch (e) {
@@ -299,7 +323,7 @@ export default function ExternalGameDetailsPage() {
 
   return (
     <div className="space-y-5">
-      {/* HERO: blur a partir da CAPA */}
+      {/* HERO */}
       <div className="relative overflow-hidden rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white dark:bg-slate-800 shadow-xl h-[200px] md:h-[240px]">
         {(cover || bg) && (
           <img
@@ -324,7 +348,6 @@ export default function ExternalGameDetailsPage() {
           />
         )}
 
-        {/* Overlay gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-slate-900/30 backdrop-blur-xl" />
 
         <div className="relative z-10 p-6 h-full">
@@ -343,7 +366,6 @@ export default function ExternalGameDetailsPage() {
                 {title}
               </h1>
               
-              {/* Meta info */}
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 {released && (
                   <span className="text-xs text-white/80 bg-white/10 rounded-lg px-2 py-1">
@@ -363,40 +385,54 @@ export default function ExternalGameDetailsPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={adicionarWishlist}
-                disabled={aWishlist || jaNaWishlist}
-                className={`inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all ${
-                  jaNaWishlist
-                    ? "bg-white/30 text-white/70 cursor-not-allowed"
-                    : "bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 hover:scale-105"
-                } ${aWishlist ? " opacity-60" : ""}`}
-              >
-                {jaNaWishlist ? "💝 Na wishlist" : aWishlist ? "⏳ A adicionar..." : "💝 Wishlist"}
-              </button>
+              
+              {/* O BOTÃO DE WISHLIST AGORA SÓ APARECE SE O JOGO NÃO ESTIVER NA COLEÇÃO */}
+              {!collectionId && (
+                <button
+                  type="button"
+                  onClick={adicionarWishlist}
+                  disabled={aWishlist || jaNaWishlist}
+                  className={`inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all ${
+                    jaNaWishlist
+                      ? "bg-white/30 text-white/70 cursor-not-allowed"
+                      : "bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 hover:scale-105"
+                  } ${aWishlist ? " opacity-60" : ""}`}
+                >
+                  {jaNaWishlist ? "💝 Na wishlist" : aWishlist ? "⏳ A adicionar..." : "💝 Wishlist"}
+                </button>
+              )}
 
-              <button
-                type="button"
-                onClick={importarParaColecao}
-                disabled={aImportar || jaNaColecao}
-                className={`inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition-all ${
-                  jaNaColecao
-                    ? "bg-emerald-500/50 cursor-not-allowed"
-                    : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:shadow-xl hover:scale-105"
-                } ${aImportar ? " opacity-60" : ""}`}
-              >
-                {jaNaColecao ? "✅ Na coleção" : aImportar ? "⏳ A adicionar..." : "➕ Adicionar à coleção"}
-              </button>
+              {/* --- BOTÃO DINÂMICO AQUI --- */}
+              {collectionId ? (
+                <button
+                  type="button"
+                  onClick={() => navigate(`/app/jogo/${collectionId}`)} // Usa o ID da BD
+                  className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white bg-emerald-500 hover:bg-emerald-600 shadow-lg hover:scale-105 transition-all"
+                >
+                  <span>✏️</span> Editar na Coleção
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={importarParaColecao}
+                  disabled={aImportar}
+                  className={`inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition-all ${
+                    aImportar 
+                      ? "bg-indigo-600/50 opacity-60 cursor-wait"
+                      : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:shadow-xl hover:scale-105"
+                  }`}
+                >
+                  {aImportar ? "⏳ A adicionar..." : "➕ Adicionar à coleção"}
+                </button>
+              )}
             </div>
           </div>
         </div>
       </div>
-      {/* CONTEÚDO */}
+
       <div className="grid gap-6 md:grid-cols-[360px,1fr]">
-        {/* Sidebar */}
+        {/* Sidebar (Capa, Resumo, Links) */}
         <div className="space-y-4">
-          {/* Capa */}
           <div className="rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-4 shadow-xl">
             <div className="w-full overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-700">
               {cover ? (
@@ -414,9 +450,7 @@ export default function ExternalGameDetailsPage() {
                   }}
                 />
               ) : (
-                <div className="flex h-60 w-full items-center justify-center text-4xl">
-                  🎮
-                </div>
+                <div className="flex h-60 w-full items-center justify-center text-4xl">🎮</div>
               )}
             </div>
           </div>
@@ -424,33 +458,24 @@ export default function ExternalGameDetailsPage() {
           {/* Resumo */}
           <div className="rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-5 shadow-xl">
             <SectionTitle icon="📋">Resumo</SectionTitle>
-
             <div className="flex flex-wrap gap-2">
               {released && <Chip>Lançamento: {formatDate(released)}</Chip>}
               {playtime != null && <Chip>Tempo médio: {playtime}h</Chip>}
               {metacritic != null && <Chip>Metacritic: {metacritic}</Chip>}
               {esrb && <Chip>ESRB: {esrb}</Chip>}
             </div>
-
+            
             <div className="mt-3">
               <SectionTitle>Géneros</SectionTitle>
               <div className="flex flex-wrap gap-2">
-                {generos.length ? (
-                  generos.slice(0, 10).map((g) => <Chip key={g}>{g}</Chip>)
-                ) : (
-                  <span className="text-xs text-slate-400 dark:text-slate-500">—</span>
-                )}
+                {generos.length ? generos.slice(0, 10).map((g) => <Chip key={g}>{g}</Chip>) : <span className="text-xs text-slate-400">—</span>}
               </div>
             </div>
 
             <div className="mt-3">
               <SectionTitle>Plataformas</SectionTitle>
               <div className="flex flex-wrap gap-2">
-                {plataformas.length ? (
-                  plataformas.slice(0, 12).map((p) => <Chip key={p}>{p}</Chip>)
-                ) : (
-                  <span className="text-xs text-slate-400 dark:text-slate-500">—</span>
-                )}
+                {plataformas.length ? plataformas.slice(0, 12).map((p) => <Chip key={p}>{p}</Chip>) : <span className="text-xs text-slate-400">—</span>}
               </div>
             </div>
 
@@ -458,129 +483,62 @@ export default function ExternalGameDetailsPage() {
               <div className="mt-3">
                 <SectionTitle>Developers</SectionTitle>
                 <div className="flex flex-wrap gap-2">
-                  {developers.slice(0, 10).map((d) => (
-                    <Chip key={d}>{d}</Chip>
-                  ))}
+                  {developers.slice(0, 10).map((d) => <Chip key={d}>{d}</Chip>)}
                 </div>
               </div>
             )}
-
+            
             {publishers.length > 0 && (
               <div className="mt-3">
                 <SectionTitle>Editoras</SectionTitle>
                 <div className="flex flex-wrap gap-2">
-                  {publishers.slice(0, 10).map((p) => (
-                    <Chip key={p}>{p}</Chip>
-                  ))}
+                  {publishers.slice(0, 10).map((p) => <Chip key={p}>{p}</Chip>)}
                 </div>
               </div>
             )}
           </div>
 
-          {/* Links */}
           <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
             <SectionTitle>Links</SectionTitle>
             <div className="space-y-2 text-sm">
-              {website ? (
-                <a
-                  href={website}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="block rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs text-indigo-700 dark:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-600"
-                >
-                  🌐 Website oficial
-                </a>
-              ) : (
-                <div className="text-xs text-slate-400 dark:text-slate-500">Sem website.</div>
-              )}
-
-              {reddit ? (
-                <a
-                  href={reddit}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="block rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs text-indigo-700 dark:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-600"
-                >
-                  💬 Reddit
-                </a>
-              ) : (
-                <div className="text-xs text-slate-400 dark:text-slate-500">Sem link do Reddit.</div>
-              )}
+              {website ? <a href={website} target="_blank" rel="noreferrer" className="block rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs text-indigo-700 dark:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-600">🌐 Website oficial</a> : <div className="text-xs text-slate-400">Sem website.</div>}
+              {reddit ? <a href={reddit} target="_blank" rel="noreferrer" className="block rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs text-indigo-700 dark:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-600">💬 Reddit</a> : <div className="text-xs text-slate-400">Sem link do Reddit.</div>}
             </div>
           </div>
         </div>
 
-        {/* Main */}
+        {/* Main Content */}
         <div className="space-y-4">
-          {/* Descrição */}
           <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
             <SectionTitle>Descrição</SectionTitle>
-
             <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line">
-              {descricaoCurta
-                ? descricaoCurta
-                : "Sem descrição disponível na RAWG para este jogo."}
+              {descricaoCurta ? descricaoCurta : "Sem descrição disponível na RAWG para este jogo."}
             </p>
-
             {safeStr(description).trim().length > 450 && (
-              <button
-                type="button"
-                onClick={() => setDescricaoExpandida((v) => !v)}
-                className="mt-3 rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600"
-              >
+              <button type="button" onClick={() => setDescricaoExpandida((v) => !v)} className="mt-3 rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600">
                 {descricaoExpandida ? "Mostrar menos" : "Ler mais"}
               </button>
             )}
           </div>
 
-          {/* Tags */}
           <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
             <SectionTitle>Tags</SectionTitle>
             <div className="flex flex-wrap gap-2">
-              {tags.length ? (
-                tags.slice(0, 18).map((t) => <Chip key={t}>{t}</Chip>)
-              ) : (
-                <span className="text-xs text-slate-400 dark:text-slate-500">Sem tags.</span>
-              )}
+              {tags.length ? tags.slice(0, 18).map((t) => <Chip key={t}>{t}</Chip>) : <span className="text-xs text-slate-400">Sem tags.</span>}
             </div>
           </div>
 
-          {/* Galeria */}
           <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
             <SectionTitle>Galeria</SectionTitle>
-
             {screenshots.length ? (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {screenshots.slice(0, 9).map((shot) => (
-                  <a
-                    key={shot.resized || shot.original}
-                    href={shot.original}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="group block overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-700"
-                    title="Abrir imagem"
-                  >
-                    <img
-                      src={shot.resized || shot.original}
-                      alt="Screenshot"
-                      loading="lazy"
-                      referrerPolicy="no-referrer"
-                      onError={(e) => {
-                        if (!e.currentTarget.dataset.fallback && shot.original) {
-                          e.currentTarget.dataset.fallback = "1";
-                          e.currentTarget.src = shot.original;
-                        }
-                      }}
-                      className="h-32 w-full object-cover transition-transform group-hover:scale-[1.03]"
-                    />
+                  <a key={shot.resized || shot.original} href={shot.original} target="_blank" rel="noreferrer" className="group block overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-700" title="Abrir imagem">
+                    <img src={shot.resized || shot.original} alt="Screenshot" loading="lazy" referrerPolicy="no-referrer" onError={(e) => { if (!e.currentTarget.dataset.fallback && shot.original) { e.currentTarget.dataset.fallback = "1"; e.currentTarget.src = shot.original; } }} className="h-32 w-full object-cover transition-transform group-hover:scale-[1.03]" />
                   </a>
                 ))}
               </div>
-            ) : (
-              <div className="text-xs text-slate-400 dark:text-slate-500">
-                Sem screenshots disponíveis.
-              </div>
-            )}
+            ) : <div className="text-xs text-slate-400">Sem screenshots disponíveis.</div>}
           </div>
         </div>
       </div>

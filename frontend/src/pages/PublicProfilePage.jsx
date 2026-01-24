@@ -308,7 +308,7 @@ export default function PublicProfilePage() {
         <RetroCard color="cyan" className="p-6">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {[...favoriteGames, ...recentGames].filter((g, i, self) => i === self.findIndex(x => x.id === g.id)).map(g => (
-              <div key={g.id} onClick={() => navigate(`/app/jogo/${g.id}`)} className="cursor-pointer group bg-white dark:bg-slate-800 border-2 border-cyan-400/30 hover:border-cyan-400 transition-all shadow-sm hover:shadow-md">
+              <div key={g.id} onClick={() => navigate(`/app/explorar/${g.external_id || g.id}`)} className="cursor-pointer group bg-white dark:bg-slate-800 border-2 border-cyan-400/30 hover:border-cyan-400 transition-all shadow-sm hover:shadow-md">
                 <div className="aspect-[3/4] overflow-hidden bg-slate-200 dark:bg-slate-700">
                   {g.cover_url ? <img src={g.cover_url} alt={g.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform" /> : <div className="w-full h-full flex items-center justify-center text-3xl">🎮</div>}
                 </div>
@@ -444,9 +444,17 @@ function TabButton({ children, active, onClick }) {
   );
 }
 
+// CORREÇÃO: Função atualizada para usar /explorar
 function GameCard({ game, navigate, showDate }) {
+  // Tenta usar external_id primeiro (jogos API), senão usa o id (jogos BD)
+  // E navega para /app/explorar/:id
+  const targetId = game.external_id || game.id;
+
   return (
-    <div onClick={() => navigate(`/app/jogo/${game.id}`)} className="flex items-center gap-3 bg-white dark:bg-slate-800/50 border-2 border-cyan-400/30 p-3 cursor-pointer hover:border-cyan-400 transition-all shadow-sm">
+    <div 
+      onClick={() => navigate(`/app/explorar/${targetId}`)} 
+      className="flex items-center gap-3 bg-white dark:bg-slate-800/50 border-2 border-cyan-400/30 p-3 cursor-pointer hover:border-cyan-400 transition-all shadow-sm"
+    >
       <div className="w-12 h-16 overflow-hidden bg-slate-200 dark:bg-slate-700 flex-shrink-0 border-2 border-cyan-400/50">
         {game.cover_url ? <img src={game.cover_url} alt={game.title} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xl">🎮</div>}
       </div>
