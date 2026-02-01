@@ -1,4 +1,5 @@
 // src/pages/CollectionPage.jsx
+// TODO: Teste de commit - verificar sincronização com Git
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
@@ -511,3 +512,6 @@ export default function CollectionPage() {
     </div>
   );
 }
+
+// Fim src/pages/CollectionPage.jsx
+// testesfnaliflaifqloiajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfa
