@@ -80,17 +80,6 @@ function RatingChip({ rating }) {
   );
 }
 
-function Chip({ children, onClear }) {
-  return (
-    <span className="inline-flex items-center gap-2 border-2 border-fuchsia-300 bg-fuchsia-50 text-fuchsia-700 dark:border-fuchsia-500/50 dark:bg-fuchsia-500/10 dark:text-fuchsia-400 px-2 py-1 text-[11px] font-bold">
-      {children}
-      {onClear && (
-        <button type="button" onClick={onClear} className="hover:text-white hover:bg-fuchsia-500 px-1">✕</button>
-      )}
-    </span>
-  );
-}
-
 function SortHeader({ label, active, dir, onClick, alignRight = false }) {
   return (
     <button
@@ -137,17 +126,11 @@ export default function CollectionPage() {
   const [erroModal, setErroModal] = useState("");
   const [aAdicionarId, setAAdicionarId] = useState(null);
 
-  // --- BLOQUEAR SCROLL QUANDO O MODAL ABRE ---
+  // --- BLOQUEAR SCROLL ---
   useEffect(() => {
-    if (mostrarModal) {
-      document.body.style.overflow = "hidden"; // Bloqueia scroll
-    } else {
-      document.body.style.overflow = "unset"; // Liberta scroll
-    }
-    // Cleanup: Garante que liberta se o componente desmontar
-    return () => {
-      document.body.style.overflow = "unset";
-    };
+    if (mostrarModal) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "unset";
+    return () => { document.body.style.overflow = "unset"; };
   }, [mostrarModal]);
 
   useEffect(() => {
@@ -265,6 +248,7 @@ export default function CollectionPage() {
     }
   }
 
+  // Live Search (debounce)
   useEffect(() => {
     if (termoPesquisaModal.trim().length < 2) {
         setResultadosModal([]);
@@ -328,13 +312,21 @@ export default function CollectionPage() {
             <h1 className="text-3xl font-black text-slate-900 dark:text-white">🎮 Minha Coleção</h1>
             <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">📊 {jogos.length} jogos na tua biblioteca</p>
           </div>
-          <RetroButton color="cyan" onClick={() => {
-              setMostrarModal(true);
-              setResultadosModal([]);
-              setTermoPesquisaModal("");
-          }}>
-            ➕ Adicionar jogo
-          </RetroButton>
+          
+          <div className="flex gap-2">
+            {/* BOTÃO DA STEAM ADICIONADO AQUI */}
+            <RetroButton color="slate" onClick={() => navigate("/app/steam-import")}>
+                ☁️ Steam
+            </RetroButton>
+
+            <RetroButton color="cyan" onClick={() => {
+                setMostrarModal(true);
+                setResultadosModal([]);
+                setTermoPesquisaModal("");
+            }}>
+                ➕ Adicionar jogo
+            </RetroButton>
+          </div>
         </div>
       </RetroCard>
 
@@ -355,7 +347,7 @@ export default function CollectionPage() {
              <div className="flex items-center gap-2">
                 <span className="font-bold text-cyan-500 uppercase">Plataforma</span>
                 <select value={filtroPlataforma} onChange={e => setFiltroPlataforma(e.target.value)} className="bg-slate-50 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-sm px-2 py-1 focus:border-cyan-400 outline-none">
-                    <option value="todos">Todas</option>
+                    <option value="todas">Todas</option>
                     <option value="pc">PC</option>
                     <option value="playstation">PlayStation</option>
                     <option value="xbox">Xbox</option>
@@ -382,12 +374,11 @@ export default function CollectionPage() {
         </div>
       </RetroCard>
 
-      {/* LISTA (TABELA ORIGINAL RESTAURADA) */}
+      {/* LISTA (TABELA) */}
       <RetroCard color="fuchsia" className="overflow-hidden">
         {loading ? <div className="p-8 text-center text-slate-500">A carregar...</div> :
          total === 0 ? <div className="p-16 text-center text-slate-500 font-bold">Nenhum jogo encontrado.</div> :
          <div>
-            {/* Cabeçalho da Tabela */}
             <div className="sticky top-0 z-10 grid grid-cols-12 gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-900 border-b-2 border-slate-200 dark:border-slate-700 text-[10px] font-bold uppercase text-slate-500 tracking-wider">
                <div className="col-span-5"><SortHeader label="JOGO" active={sort.key === "titulo"} dir={sort.dir} onClick={() => toggleSort("titulo")} /></div>
                <div className="col-span-2">PLATAFORMA / GÉNERO</div>
@@ -401,14 +392,11 @@ export default function CollectionPage() {
                <div className="col-span-1 text-right"><SortHeader label="ATUAL." active={sort.key === "atualizado"} dir={sort.dir} onClick={() => toggleSort("atualizado")} alignRight /></div>
             </div>
 
-            {/* Linhas da Tabela */}
             <div className="divide-y divide-slate-200 dark:divide-slate-700/50">
                {jogosPagina.map(jogo => {
                   const capa = jogo.url_capa || jogo.cover_url;
                   return (
                     <div key={jogo.id} className="grid grid-cols-12 gap-3 px-4 py-3 items-center hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group cursor-pointer" onClick={() => navigate(`/app/jogo/${jogo.id}`)}>
-                       
-                       {/* Coluna 1: Imagem + Título + Notas */}
                        <div className="col-span-5 flex items-center gap-3">
                           <div className="w-10 h-14 bg-slate-200 shrink-0 border border-slate-300 dark:border-slate-600 overflow-hidden">
                              {capa ? <img src={capa} className="w-full h-full object-cover group-hover:scale-110 transition-transform" /> : <div className="flex items-center justify-center h-full text-xs">🎮</div>}
@@ -418,23 +406,15 @@ export default function CollectionPage() {
                              {jogo.notas && <div className="text-[10px] text-slate-500 truncate">📝 {jogo.notas}</div>}
                           </div>
                        </div>
-
-                       {/* Coluna 2: Plataforma / Género */}
                        <div className="col-span-2 flex flex-col justify-center">
                           <div className="text-xs font-bold text-slate-600 dark:text-slate-300">{jogo.plataforma || "-"}</div>
                           <div className="text-[10px] text-slate-500 truncate">{jogo.genero || "—"}</div>
                        </div>
-
-                       {/* Coluna 3: Estado */}
                        <div className="col-span-2"><EstadoBadge estado={jogo.estado} /></div>
-
-                       {/* Coluna 4: Rating + Horas */}
                        <div className="col-span-2 flex flex-col gap-1">
                           <RatingChip rating={jogo.rating} />
                           <div className="text-right text-[10px] text-slate-500 font-mono font-bold">{formatHoras(jogo.horas_jogadas)}h</div>
                        </div>
-
-                       {/* Coluna 5: Botão Remover (Escondido até hover) */}
                        <div className="col-span-1 text-right">
                           <button onClick={(e) => { e.stopPropagation(); handleRemover(jogo.id, jogo.titulo); }} className="text-slate-400 hover:text-rose-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity border-2 border-transparent hover:border-rose-500/30 bg-transparent hover:bg-rose-500/10">🗑️</button>
                        </div>
@@ -443,7 +423,6 @@ export default function CollectionPage() {
                })}
             </div>
 
-            {/* Paginação */}
             <div className="p-4 bg-slate-50 dark:bg-slate-900 border-t-2 border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs">
                <span className="font-bold text-fuchsia-600">Pág. {paginaAtual} de {totalPaginas}</span>
                <div className="flex gap-2">
@@ -455,12 +434,10 @@ export default function CollectionPage() {
         }
       </RetroCard>
 
-      {/* === MODAL DE ADICIONAR (NOVO ESTILO RETRO & INFO CORRIGIDA) === */}
+      {/* === MODAL DE ADICIONAR === */}
       {mostrarModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/90 backdrop-blur-sm p-4 animate-in fade-in duration-200">
           <RetroCard color="cyan" className="w-full max-w-4xl max-h-[85vh] flex flex-col relative shadow-2xl">
-            
-            {/* Header Modal */}
             <div className="p-4 border-b-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
               <h3 className="text-xl font-black text-cyan-600 dark:text-cyan-400 flex items-center gap-2 uppercase tracking-wide">
                 <span>➕</span> Adicionar à Coleção
@@ -468,7 +445,6 @@ export default function CollectionPage() {
               <button onClick={() => setMostrarModal(false)} className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-100 dark:hover:bg-rose-900/20 font-bold text-xl transition-colors">✕</button>
             </div>
 
-            {/* Corpo Modal */}
             <div className="p-6 flex flex-col flex-1 overflow-hidden bg-white dark:bg-slate-900">
               <form onSubmit={handleManualSearch} className="flex gap-3 mb-6">
                 <input 
@@ -484,7 +460,6 @@ export default function CollectionPage() {
                 </RetroButton>
               </form>
 
-              {/* Lista de Resultados Modal */}
               <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3">
                 {erroModal && <div className="p-3 bg-rose-50 dark:bg-rose-900/30 border-2 border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 mb-2 font-bold text-sm">⚠️ {erroModal}</div>}
                 
@@ -499,8 +474,6 @@ export default function CollectionPage() {
                    const jaTem = colecaoExternalIds.has(Number(idReal));
                    const capa = jogo.background_image || jogo.cover_url;
                    const nome = jogo.name || jogo.title;
-                   
-                   // CORREÇÃO: Data e Rating no Modal
                    const rawDate = jogo.release_date || jogo.released;
                    const ano = rawDate ? rawDate.split('-')[0] : "----";
                    const rating = jogo.rating || jogo.metacritic || "-";
@@ -510,29 +483,16 @@ export default function CollectionPage() {
                         <div className="w-16 h-20 bg-slate-200 shrink-0 overflow-hidden border border-slate-300 dark:border-slate-600">
                            {capa ? <img src={capa} className="w-full h-full object-cover" alt={nome} /> : <div className="w-full h-full flex items-center justify-center text-xs text-slate-400">IMG</div>}
                         </div>
-                        
                         <div className="flex-1 min-w-0">
                            <div className="font-bold text-slate-900 dark:text-white truncate">{nome}</div>
                            <div className="flex items-center gap-3 mt-1 text-xs text-slate-500 font-mono">
                               <span>📅 {ano}</span>
-                              {/* Agora mostra o rating se existir */}
                               {rating !== "-" && <span className="text-yellow-500 font-bold">★ {rating}</span>}
                            </div>
                         </div>
-                        
                         <div className="flex items-center gap-2">
-                           <button 
-                              onClick={() => irParaDetalhes(idReal)} 
-                              className="px-3 py-1.5 text-xs font-bold text-slate-500 border-2 border-slate-200 dark:border-slate-600 hover:text-slate-900 dark:hover:text-white hover:border-slate-400 transition-colors"
-                           >
-                              Detalhes
-                           </button>
-                           <RetroButton 
-                              color={jaTem ? "slate" : "green"} 
-                              onClick={() => adicionarAoCarregar(jogo)} 
-                              disabled={jaTem || aAdicionarId === idReal} 
-                              className="min-w-[110px]"
-                           >
+                           <button onClick={() => irParaDetalhes(idReal)} className="px-3 py-1.5 text-xs font-bold text-slate-500 border-2 border-slate-200 dark:border-slate-600 hover:text-slate-900 dark:hover:text-white hover:border-slate-400 transition-colors">Detalhes</button>
+                           <RetroButton color={jaTem ? "slate" : "green"} onClick={() => adicionarAoCarregar(jogo)} disabled={jaTem || aAdicionarId === idReal} className="min-w-[110px]">
                               {aAdicionarId === idReal ? "A guardar..." : jaTem ? "Já tens" : "Importar"}
                            </RetroButton>
                         </div>
@@ -548,7 +508,6 @@ export default function CollectionPage() {
           </RetroCard>
         </div>
       )}
-
     </div>
   );
 }

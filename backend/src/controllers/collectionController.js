@@ -18,7 +18,10 @@ async function listMyCollection(req, res) {
     const colecao = entries.map((e) => ({
       id: e.id,
       jogo_id: e.game_id,
-      external_id: e.external_id, // <--- ADICIONADO: Envia o ID para o Frontend
+      external_id: e.external_id,
+      steam_appid: e.steam_appid ?? null,
+      rawg_id: e.rawg_id ?? null,
+      source: e.source ?? null,
       rating: e.rating,
       horas_jogadas: e.hours_played,
       estado: e.status,
@@ -27,6 +30,10 @@ async function listMyCollection(req, res) {
       plataforma: e.platform,
       genero: e.genre,
       url_capa: e.cover_url,
+      achievements_total: e.achievements_total ?? null,
+      achievements_unlocked: e.achievements_unlocked ?? null,
+      achievements_completed: e.achievements_completed ?? null,
+      achievements_last_sync: e.achievements_last_sync ?? null,
     }));
 
     return res.json({ colecao });
@@ -55,6 +62,10 @@ async function getMyCollectionEntry(req, res) {
       id: entry.id,
       game_id: entry.game_id,
       jogo_id: entry.game_id,
+      external_id: entry.external_id,
+      steam_appid: entry.steam_appid ?? null,
+      rawg_id: entry.rawg_id ?? null,
+      source: entry.source ?? null,
       rating: entry.rating,
       horas_jogadas: entry.hours_played,
       estado: entry.status,
@@ -66,6 +77,10 @@ async function getMyCollectionEntry(req, res) {
       descricao: entry.description,
       criado_em: entry.created_at,
       atualizado_em: entry.updated_at,
+      achievements_total: entry.achievements_total ?? null,
+      achievements_unlocked: entry.achievements_unlocked ?? null,
+      achievements_completed: entry.achievements_completed ?? 0,
+      achievements_last_sync: entry.achievements_last_sync ?? null,
     };
 
     return res.json({ entrada: resposta });

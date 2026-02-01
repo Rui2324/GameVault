@@ -13,6 +13,8 @@ import GameDetailsPage from "./pages/GameDetailsPage";
 import ExternalGameDetailsPage from "./pages/ExternalGameDetailsPage";
 import AchievementsPage from "./pages/AchievementsPage";
 import PublicProfilePage from "./pages/PublicProfilePage";
+import SteamImportPage from "./pages/SteamImportPage"; // <--- 1. IMPORTAR A PÁGINA
+import SteamWishlistImportPage from "./pages/SteamWishlistImportPage";
 import AppLayout from "./layout/AppLayout";
 
 function RotaProtegida({ children }) {
@@ -53,12 +55,18 @@ export default function App() {
         <Route path="estatisticas" element={<StatsPage />} />
         <Route path="conquistas" element={<AchievementsPage />} />
         <Route path="settings" element={<SettingsPage />} />
+        
+        {/* ROTA NOVA DA STEAM */}
+        <Route path="steam-import" element={<SteamImportPage />} />
+
+        <Route path="steam-wishlist-import" element={<SteamWishlistImportPage />} />
+
         <Route path="perfil/:identifier" element={<PublicProfilePage />} />
 
         {/* Detalhe da tua entrada na coleção */}
         <Route path="jogo/:id" element={<GameDetailsPage />} />
 
-        {/* NOVO: detalhe RAWG (explorar) */}
+        {/* Detalhe RAWG (explorar) */}
         <Route path="explorar/:externalId" element={<ExternalGameDetailsPage />} />
 
         <Route index element={<Navigate to="home" replace />} />

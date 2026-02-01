@@ -12,7 +12,10 @@ async function listCollectionForUser(userId) {
       g.genre,
       g.cover_url,
       g.description,
-      g.external_id  -- <--- ADICIONADO: Necessário para o frontend saber qual é o jogo
+      g.external_id,
+      g.steam_appid,
+      g.rawg_id,
+      g.source
     FROM collection_entries c
     JOIN games g ON c.game_id = g.id
     WHERE c.user_id = ?
@@ -22,6 +25,31 @@ async function listCollectionForUser(userId) {
   );
 
   return rows;
+}
+
+// Atualiza conquistas (Steam) numa entrada da coleção.
+// Se completed=1, também marca status='concluido'.
+async function updateAchievements(entryId, userId, { total, unlocked, completed }) {
+  const totalN = total ?? null;
+  const unlockedN = unlocked ?? null;
+  const completedN = completed ? 1 : 0;
+
+  const [result] = await pool.query(
+    `
+    UPDATE collection_entries
+    SET
+      achievements_total = ?,
+      achievements_unlocked = ?,
+      achievements_completed = ?,
+      achievements_last_sync = NOW(),
+      status = IF(?, 'concluido', status),
+      updated_at = NOW()
+    WHERE id = ? AND user_id = ?
+    `,
+    [totalN, unlockedN, completedN, completedN, entryId, userId]
+  );
+
+  return result.affectedRows > 0;
 }
 
 // Adicionar um jogo à coleção
@@ -169,4 +197,5 @@ module.exports = {
   removeFromCollection,
   getCollectionEntryById,
   getCollectionEntryByGameId,
+  updateAchievements,
 };

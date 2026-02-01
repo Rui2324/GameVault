@@ -26,9 +26,9 @@ async function getPublicProfile(req, res) {
     // Calcular nível
     const level = Math.floor(profile.total_xp / 100) + 1;
     
-    // Buscar jogos favoritos e recentes
-    const favoriteGames = await profileModel.getFavoriteGames(profile.id, 6);
-    const recentGames = await profileModel.getRecentGames(profile.id, 6);
+    // Buscar jogos favoritos e recentes (12 cada para mostrar mais)
+    const favoriteGames = await profileModel.getFavoriteGames(profile.id, 12);
+    const recentGames = await profileModel.getRecentGames(profile.id, 12);
     
     // Buscar conquistas desbloqueadas
     const achievements = await achievementModel.getUnlockedAchievements(profile.id);

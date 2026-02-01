@@ -1,81 +1,64 @@
-// src/controllers/wishlistController.js
-const {
-  listarWishlistPorUtilizador,
-  adicionarWishlist: adicionarWishlistModel,
-  removerWishlist,
-} = require("../models/wishlistModel");
+// backend/src/controllers/wishlistController.js
+const wishlistModel = require("../models/wishlistModel");
 
-// Lista wishlist do utilizador autenticado
+// GET /api/wishlist
 async function listarWishlist(req, res) {
   try {
-    // tenta obter o id a partir de vários sítios
-    const userId = req.user?.id || req.userId;
+    const userId = req.userId;
 
     if (!userId) {
-      return res
-        .status(401)
-        .json({ mensagem: "Utilizador não autenticado." });
+      return res.status(401).json({ mensagem: "Não autenticado." });
     }
 
-    const wishlist = await listarWishlistPorUtilizador(userId);
-    res.json({ wishlist });
+    const wishlist = await wishlistModel.listarWishlistPorUtilizador(userId);
+    return res.json({ wishlist });
   } catch (err) {
-    console.error("Erro a listar wishlist:", err);
-    res.status(500).json({ mensagem: "Erro ao listar wishlist." });
+    console.error("ERRO listarWishlist:", err.sqlMessage || err);
+    return res.status(500).json({ mensagem: "Erro ao carregar wishlist." });
   }
 }
 
-// Adiciona jogo à wishlist do utilizador autenticado
+// POST /api/wishlist
 async function adicionarWishlist(req, res) {
   try {
-    const userId = req.user?.id || req.userId;
+    const userId = req.userId;
+    const { jogo_id } = req.body;
 
-    if (!userId) {
-      return res
-        .status(401)
-        .json({ mensagem: "Utilizador não autenticado." });
-    }
+    if (!userId) return res.status(401).json({ mensagem: "Não autenticado." });
+    if (!jogo_id) return res.status(400).json({ mensagem: "Falta jogo_id." });
 
-    const { game_id } = req.body;
-
-    if (!game_id) {
-      return res
-        .status(400)
-        .json({ mensagem: "É obrigatório indicar o game_id." });
-    }
-
-    const entrada = await adicionarWishlistModel(userId, game_id);
-    res.status(201).json({ mensagem: "Jogo adicionado à wishlist.", entrada });
+    const item = await wishlistModel.adicionarWishlist(userId, jogo_id);
+    return res.status(201).json({ item });
   } catch (err) {
-    console.error("Erro a adicionar à wishlist:", err);
-    res.status(500).json({ mensagem: "Erro ao adicionar jogo à wishlist." });
+    console.error("ERRO adicionarWishlist:", err.sqlMessage || err);
+
+    // duplicado (se tiveres unique(user_id, game_id))
+    if (err.code === "ER_DUP_ENTRY") {
+      return res.status(409).json({ mensagem: "Já está na wishlist." });
+    }
+
+    return res.status(500).json({ mensagem: "Erro ao adicionar." });
   }
 }
 
-// Remove entrada da wishlist (só do utilizador autenticado)
-async function removerWishlistController(req, res) {
+// DELETE /api/wishlist/:id
+async function removerWishlist(req, res) {
   try {
-    const userId = req.user?.id || req.userId;
-
-    if (!userId) {
-      return res
-        .status(401)
-        .json({ mensagem: "Utilizador não autenticado." });
-    }
-
+    const userId = req.userId;
     const { id } = req.params;
 
-    await removerWishlist(id, userId);
+    if (!userId) return res.status(401).json({ mensagem: "Não autenticado." });
 
-    res.json({ mensagem: "Entrada removida da wishlist." });
+    await wishlistModel.removerWishlist(id, userId);
+    return res.json({ mensagem: "Removido." });
   } catch (err) {
-    console.error("Erro a remover da wishlist:", err);
-    res.status(500).json({ mensagem: "Erro ao remover jogo da wishlist." });
+    console.error("ERRO removerWishlist:", err.sqlMessage || err);
+    return res.status(500).json({ mensagem: "Erro ao remover." });
   }
 }
 
 module.exports = {
   listarWishlist,
   adicionarWishlist,
-  removerWishlist: removerWishlistController,
+  removerWishlist,
 };

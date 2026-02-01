@@ -36,9 +36,9 @@ async function getProfileStats(userId) {
     [userId]
   );
   
-  // Jogos concluídos
+  // Jogos concluídos (status = 'concluido')
   const [completedCount] = await pool.query(
-    "SELECT COUNT(*) as total FROM collection_entries WHERE user_id = ? AND status = 'completed'",
+    "SELECT COUNT(*) as total FROM collection_entries WHERE user_id = ? AND status = 'concluido'",
     [userId]
   );
   
@@ -60,9 +60,9 @@ async function getProfileStats(userId) {
     [userId]
   );
   
-  // Conquistas desbloqueadas
+  // Conquistas desbloqueadas (soma de achievements_unlocked de todos os jogos)
   const [achievementsCount] = await pool.query(
-    "SELECT COUNT(*) as total FROM user_achievements WHERE user_id = ?",
+    "SELECT COALESCE(SUM(achievements_unlocked), 0) as total FROM collection_entries WHERE user_id = ?",
     [userId]
   );
   
@@ -72,7 +72,7 @@ async function getProfileStats(userId) {
     totalHours: parseFloat(hoursResult[0].total) || 0,
     totalReviews: reviewsCount[0].total,
     averageRating: avgRating[0].average ? parseFloat(avgRating[0].average).toFixed(1) : null,
-    totalAchievements: achievementsCount[0].total
+    totalAchievements: parseInt(achievementsCount[0].total) || 0
   };
 }
 

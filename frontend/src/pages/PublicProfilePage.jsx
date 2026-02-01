@@ -59,6 +59,12 @@ export default function PublicProfilePage() {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
   
+  // Estado para todos os jogos
+  const [allGames, setAllGames] = useState([]);
+  const [allGamesLoading, setAllGamesLoading] = useState(false);
+  const [allGamesTotal, setAllGamesTotal] = useState(0);
+  const [showAllGames, setShowAllGames] = useState(false);
+  
   const [isFollowing, setIsFollowing] = useState(false);
   const [followCounts, setFollowCounts] = useState({ followers: 0, following: 0 });
   const [followLoading, setFollowLoading] = useState(false);
@@ -81,6 +87,28 @@ export default function PublicProfilePage() {
       }
     } catch (err) { console.error(err); }
   }
+
+  // Carregar todos os jogos da coleção
+  async function fetchAllGames() {
+    if (!profile?.id) return;
+    try {
+      setAllGamesLoading(true);
+      const res = await api.get(`/profile/${profile.id}/collection`, { params: { limit: 100 } });
+      setAllGames(res.data.games || []);
+      setAllGamesTotal(res.data.total || 0);
+    } catch (err) { 
+      console.error(err); 
+    } finally { 
+      setAllGamesLoading(false); 
+    }
+  }
+
+  // Carregar todos os jogos quando mudar para a tab "games"
+  useEffect(() => {
+    if (activeTab === "games" && profile?.id && allGames.length === 0) {
+      fetchAllGames();
+    }
+  }, [activeTab, profile?.id]);
 
   async function handleFollow() {
     if (!user) return navigate("/login");
@@ -306,19 +334,64 @@ export default function PublicProfilePage() {
 
       {activeTab === "games" && (
         <RetroCard color="cyan" className="p-6">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {[...favoriteGames, ...recentGames].filter((g, i, self) => i === self.findIndex(x => x.id === g.id)).map(g => (
-              <div key={g.id} onClick={() => navigate(`/app/explorar/${g.external_id || g.id}`)} className="cursor-pointer group bg-white dark:bg-slate-800 border-2 border-cyan-400/30 hover:border-cyan-400 transition-all shadow-sm hover:shadow-md">
-                <div className="aspect-[3/4] overflow-hidden bg-slate-200 dark:bg-slate-700">
-                  {g.cover_url ? <img src={g.cover_url} alt={g.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform" /> : <div className="w-full h-full flex items-center justify-center text-3xl">🎮</div>}
-                </div>
-                <div className="p-2">
-                  <p className="text-xs font-semibold text-slate-900 dark:text-slate-200 truncate">{g.title}</p>
-                  {g.rating && <p className="text-[10px] font-bold mt-0.5 text-yellow-500 dark:text-yellow-400">⭐ {g.rating}/10</p>}
-                </div>
-              </div>
-            ))}
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-bold text-cyan-600 dark:text-cyan-400 flex items-center gap-2 uppercase tracking-wide">
+              <span className="w-8 h-8 border-2 border-cyan-400 bg-cyan-50 dark:bg-cyan-400/20 flex items-center justify-center text-base">🎮</span>
+              {allGamesLoading ? "A carregar..." : `${allGamesTotal || stats?.totalGames || 0} Jogos na Coleção`}
+            </h2>
+            {!showAllGames && allGames.length > 0 && (
+              <button 
+                onClick={() => setShowAllGames(true)} 
+                className="text-xs font-bold text-cyan-600 dark:text-cyan-400 hover:underline"
+              >
+                Ver todos →
+              </button>
+            )}
           </div>
+          
+          {allGamesLoading ? (
+            <div className="text-center py-10">
+              <div className="w-10 h-10 border-4 border-cyan-400/30 border-t-cyan-400 animate-spin mx-auto"></div>
+              <p className="text-slate-500 text-sm mt-3">A carregar jogos...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+              {(showAllGames ? allGames : allGames.slice(0, 12)).map(g => (
+                <div key={g.id} onClick={() => navigate(`/app/explorar/${g.external_id || g.id}`)} className="cursor-pointer group bg-white dark:bg-slate-800 border-2 border-cyan-400/30 hover:border-cyan-400 transition-all shadow-sm hover:shadow-md">
+                  <div className="aspect-[3/4] overflow-hidden bg-slate-200 dark:bg-slate-700">
+                    {g.cover_url ? <img src={g.cover_url} alt={g.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform" /> : <div className="w-full h-full flex items-center justify-center text-3xl">🎮</div>}
+                  </div>
+                  <div className="p-2">
+                    <p className="text-xs font-semibold text-slate-900 dark:text-slate-200 truncate">{g.title}</p>
+                    <div className="flex items-center justify-between mt-1">
+                      {g.rating && <span className="text-[10px] font-bold text-yellow-500 dark:text-yellow-400">⭐ {g.rating}/10</span>}
+                      {g.hours_played > 0 && <span className="text-[10px] text-cyan-500">{g.hours_played}h</span>}
+                    </div>
+                    {g.status && (
+                      <span className={`text-[9px] font-bold uppercase mt-1 inline-block px-1.5 py-0.5 border ${
+                        g.status === 'concluido' ? 'border-green-400 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-400/20' :
+                        g.status === 'a_jogar' ? 'border-cyan-400 text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-400/20' :
+                        'border-slate-300 text-slate-500 bg-slate-50 dark:bg-slate-700'
+                      }`}>
+                        {g.status === 'concluido' ? '✓ Concluído' : g.status === 'a_jogar' ? '▶ A Jogar' : '○ Por Jogar'}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {!showAllGames && allGames.length > 12 && (
+            <div className="text-center mt-6">
+              <button 
+                onClick={() => setShowAllGames(true)} 
+                className="px-6 py-2 border-2 border-cyan-400 text-cyan-600 dark:text-cyan-400 font-bold text-sm hover:bg-cyan-400 hover:text-slate-900 transition-all"
+              >
+                Ver todos os {allGamesTotal} jogos
+              </button>
+            </div>
+          )}
         </RetroCard>
       )}
 
