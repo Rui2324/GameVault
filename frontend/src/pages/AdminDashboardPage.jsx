@@ -1,10 +1,11 @@
 // src/pages/AdminDashboardPage.jsx
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../components/Toast";
 import { 
   Users, Database, Heart, TrendingUp, UserX, Crown, Shield, 
-  AlertTriangle, CheckCircle, XCircle 
+  AlertTriangle, CheckCircle, XCircle, Settings 
 } from "lucide-react";
 import api from "../services/api";
 
@@ -31,7 +32,7 @@ function StatCard({ title, value, icon, color = "blue" }) {
   );
 }
 
-function UserRow({ user, currentUserId, onRoleChange, onDeleteUser }) {
+function UserRow({ user, currentUserId, onRoleChange, onDeleteUser, onManage }) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -102,6 +103,13 @@ function UserRow({ user, currentUserId, onRoleChange, onDeleteUser }) {
       
       {/* Ações */}
       <div className="col-span-3 flex items-center justify-end gap-2">
+        <button
+          onClick={() => onManage(user.id)}
+          className="px-3 py-1.5 bg-cyan-200 text-cyan-800 hover:bg-cyan-300 dark:bg-cyan-900/30 dark:text-cyan-400 dark:hover:bg-cyan-900/50 rounded-lg text-xs font-medium transition-colors flex items-center gap-1"
+        >
+          <Settings size={12} />
+          Gerir
+        </button>
         {user.id !== currentUserId ? (
           <>
             <button
@@ -133,6 +141,7 @@ function UserRow({ user, currentUserId, onRoleChange, onDeleteUser }) {
 export default function AdminDashboardPage() {
   const { user } = useAuth();
   const toast = useToast();
+  const navigate = useNavigate();
   
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
@@ -184,6 +193,10 @@ export default function AdminDashboardPage() {
       console.error('Erro ao eliminar user:', error);
       toast.error('Erro ao eliminar user');
     }
+  }
+
+  function handleManageUser(userId) {
+    navigate(`/app/admin/user/${userId}`);
   }
 
   if (loading) {
@@ -277,6 +290,7 @@ export default function AdminDashboardPage() {
               currentUserId={user.id}
               onRoleChange={handleRoleChange}
               onDeleteUser={handleDeleteUser}
+              onManage={handleManageUser}
             />
           ))}
         </div>
