@@ -13,8 +13,9 @@ import GameDetailsPage from "./pages/GameDetailsPage";
 import ExternalGameDetailsPage from "./pages/ExternalGameDetailsPage";
 import AchievementsPage from "./pages/AchievementsPage";
 import PublicProfilePage from "./pages/PublicProfilePage";
-import SteamImportPage from "./pages/SteamImportPage"; // <--- 1. IMPORTAR A PÁGINA
+import SteamImportPage from "./pages/SteamImportPage";
 import SteamWishlistImportPage from "./pages/SteamWishlistImportPage";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AppLayout from "./layout/AppLayout";
 
 function RotaProtegida({ children }) {
@@ -36,11 +37,15 @@ function RotaProtegida({ children }) {
 }
 
 export default function App() {
+  const { user } = useAuth();
+  
   return (
     <Routes>
+      {/* ============ ROTAS PÚBLICAS ============ */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/registo" element={<RegistoPage />} />
 
+      {/* ============ ROTAS PROTEGIDAS ============ */}
       <Route
         path="/app"
         element={
@@ -56,23 +61,28 @@ export default function App() {
         <Route path="conquistas" element={<AchievementsPage />} />
         <Route path="settings" element={<SettingsPage />} />
         
-        {/* ROTA NOVA DA STEAM */}
+        {/* Admin Dashboard */}
+        <Route path="admin" element={<AdminDashboardPage />} />
+        
+        {/* Steam Import */}
         <Route path="steam-import" element={<SteamImportPage />} />
-
         <Route path="steam-wishlist-import" element={<SteamWishlistImportPage />} />
 
+        {/* Perfil público (acessível por users logados) */}
         <Route path="perfil/:identifier" element={<PublicProfilePage />} />
 
-        {/* Detalhe da tua entrada na coleção */}
+        {/* Detalhe da entrada na coleção */}
         <Route path="jogo/:id" element={<GameDetailsPage />} />
 
-        {/* Detalhe RAWG (explorar) */}
+        {/* Detalhe RAWG (explorar) - Versão autenticada com opções de adicionar */}
         <Route path="explorar/:externalId" element={<ExternalGameDetailsPage />} />
 
         <Route index element={<Navigate to="home" replace />} />
       </Route>
 
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      {/* Redireciona tudo para login se não estiver logado, para app se estiver */}
+      <Route path="/" element={user ? <Navigate to="/app" replace /> : <Navigate to="/login" replace />} />
+      <Route path="*" element={user ? <Navigate to="/app" replace /> : <Navigate to="/login" replace />} />
     </Routes>
   );
 }

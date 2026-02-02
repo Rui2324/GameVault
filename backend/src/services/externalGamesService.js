@@ -109,10 +109,33 @@ async function getGameStores(externalId) {
   }
 }
 
+// Buscar trailers/movies de um jogo específico
+async function getGameMovies(externalId) {
+  try {
+    const res = await axios.get(`${RAWG_BASE_URL}/games/${externalId}/movies`, {
+      params: {
+        key: RAWG_API_KEY,
+      },
+    });
+
+    const results = res.data.results || [];
+    return results.map((m) => ({
+      id: m.id,
+      name: m.name,
+      preview: m.preview, // imagem de preview
+      video_low: m.data?.["480"] || null,
+      video_max: m.data?.max || null,
+    })).filter((m) => m.video_max || m.video_low);
+  } catch (error) {
+    console.error(`[RAWG] Erro ao buscar movies para ${externalId}:`, error.message);
+    return [];
+  }
+}
+
 // Buscar detalhes completos de um jogo específico
 async function getGameDetails(externalId) {
-  // Buscar detalhes e screenshots em paralelo
-  const [detailsRes, screenshots, stores] = await Promise.all([
+  // Buscar detalhes, screenshots, stores e movies em paralelo
+  const [detailsRes, screenshots, stores, movies] = await Promise.all([
     axios.get(`${RAWG_BASE_URL}/games/${externalId}`, {
       params: {
         key: RAWG_API_KEY,
@@ -120,13 +143,15 @@ async function getGameDetails(externalId) {
     }),
     getGameScreenshots(externalId),
     getGameStores(externalId),
+    getGameMovies(externalId),
   ]);
 
   const game = mapRawgGame(detailsRes.data);
   
-  // Adicionar screenshots e stores ao resultado
+  // Adicionar screenshots, stores e movies ao resultado
   game.screenshots = screenshots.length > 0 ? screenshots : game.screenshots;
   game.stores = stores;
+  game.movies = movies;
   
   return game;
 }
@@ -172,6 +197,7 @@ module.exports = {
   getGameDetails,
   getGameScreenshots,
   getGameStores,
+  getGameMovies,
   getFeaturedGames,
   getUpcomingGames,
 };

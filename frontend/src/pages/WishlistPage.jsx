@@ -2,6 +2,17 @@ import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { useToast } from "../components/Toast";
+import { 
+  Heart, 
+  Wrench, 
+  Cloud, 
+  Plus, 
+  Search, 
+  Gamepad2, 
+  Download,
+  Trash2,
+  X
+} from "lucide-react";
 
 // ============ COMPONENTES VISUAIS ============
 
@@ -271,7 +282,7 @@ export default function WishlistPage() {
               Lista de Desejos
             </div>
             <h2 className="text-3xl font-black text-slate-900 dark:text-white flex items-center gap-3">
-              <span className="text-rose-500">💝</span> Wishlist
+              <Heart size={32} className="text-rose-500" /> Wishlist
             </h2>
             <p className="text-slate-600 dark:text-slate-400 text-sm mt-1 font-mono">
               {wishlist.length} jogos que queres comprar.
@@ -280,11 +291,11 @@ export default function WishlistPage() {
 
           <div className="flex gap-2">
             <RetroButton color="yellow" onClick={handleFix} disabled={loading}>
-              🛠️ Reparar Nomes
+              <Wrench size={14} /> Reparar Nomes
             </RetroButton>
 
             <RetroButton color="slate" onClick={() => navigate("/app/steam-wishlist-import")}>
-              ☁️ Steam
+              <Cloud size={14} /> Steam
             </RetroButton>
 
             <RetroButton color="cyan" onClick={() => {
@@ -292,68 +303,71 @@ export default function WishlistPage() {
               setResultadosExternos([]);
               setTermoPesquisa("");
             }}>
-              ➕ Adicionar jogo
+              <Plus size={14} /> Adicionar jogo
             </RetroButton>
           </div>
         </div>
       </RetroCard>
 
-      {/* LISTA */}
-      <RetroCard color="fuchsia" className="flex-1 p-5">
+      {/* GRID */}
+      <RetroCard color="fuchsia" className="flex-1 overflow-hidden">
         {loading ? <div className="text-center py-10 text-slate-500">A carregar...</div> :
           wishlist.length === 0 ? (
             <div className="text-center py-20 text-slate-500">
-              <div className="text-6xl mb-4 opacity-50 grayscale">💝</div>
+              <Heart size={64} className="mx-auto mb-4 opacity-50 text-slate-400" />
               <p className="font-bold text-lg">A tua wishlist está vazia.</p>
               <p className="text-sm">Adiciona jogos para começar.</p>
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="p-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {wishlist.map(item => {
                 const game = item.game || item;
                 const titulo = item.titulo || item.title || game.title || "Sem título";
                 const capa = item.url_capa || item.cover_url || game.cover_url;
-                const plataforma = item.plataforma || game.plataforma || game.platform || "—";
 
                 return (
-                  <div key={item.id} className="group relative flex gap-3 border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 hover:border-rose-400 transition-all shadow-sm">
-                    <div
-                      className="w-20 h-28 bg-slate-200 shrink-0 cursor-pointer overflow-hidden border border-slate-300 dark:border-slate-600 relative"
-                      onClick={() => irParaDetalhes(item)}
-                    >
-                      {capa
-                        ? <img src={capa} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={titulo} />
-                        : <div className="w-full h-full flex items-center justify-center text-2xl text-slate-300">🎮</div>
-                      }
-                    </div>
-
-                    <div className="flex flex-col justify-between flex-1 min-w-0">
-                      <div>
-                        <h3
-                          className="font-bold text-sm text-slate-900 dark:text-white line-clamp-2 cursor-pointer hover:text-rose-500"
+                  <div key={item.id} className="group">
+                    <div className="border-2 border-rose-400 bg-white dark:bg-slate-900 shadow-[4px_4px_0px_0px_rgba(244,63,94,0.5)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all overflow-hidden">
+                      {/* Capa */}
+                      <div 
+                        className="relative aspect-video w-full bg-slate-900 overflow-hidden cursor-pointer"
+                        onClick={() => irParaDetalhes(item)}
+                      >
+                        {capa ? (
+                          <img src={capa} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt={titulo} />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-slate-400"><Gamepad2 size={48} /></div>
+                        )}
+                        {/* Badge Wishlist */}
+                        <div className="absolute top-2 right-2">
+                          <span className="block w-8 h-8 bg-rose-500 border-2 border-white shadow-lg flex items-center justify-center"><Heart size={16} className="text-white" fill="white" /></span>
+                        </div>
+                      </div>
+                      {/* Info */}
+                      <div className="p-3 border-t-2 border-rose-400 bg-slate-50 dark:bg-slate-800">
+                        <div 
+                          className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-rose-500 transition-colors mb-2 cursor-pointer"
                           onClick={() => irParaDetalhes(item)}
                         >
                           {titulo}
-                        </h3>
-                        <p className="text-[10px] uppercase font-bold text-slate-500 mt-1">{plataforma}</p>
-                      </div>
-
-                      <div className="flex gap-2 mt-2">
-                        <RetroButton
-                          color="green"
-                          className="flex-1 text-[10px] px-1 h-8 flex items-center justify-center"
-                          onClick={() => moverParaColecao(item)}
-                          disabled={aMoverId === item.id}
-                        >
-                          {aMoverId === item.id ? "..." : "📥 Mover"}
-                        </RetroButton>
-                        <button
-                          onClick={() => removerDaWishlist(item)}
-                          disabled={aRemoverId === item.id}
-                          className="w-8 h-8 border-2 border-slate-300 dark:border-slate-600 hover:bg-rose-500 hover:text-white transition-colors flex items-center justify-center font-bold"
-                        >
-                          🗑️
-                        </button>
+                        </div>
+                        <div className="flex gap-2">
+                          <RetroButton
+                            color="green"
+                            className="flex-1 text-[10px] px-1 py-1 flex items-center justify-center gap-1"
+                            onClick={() => moverParaColecao(item)}
+                            disabled={aMoverId === item.id}
+                          >
+                            {aMoverId === item.id ? "..." : <><Download size={12} /> Coleção</>}
+                          </RetroButton>
+                          <button
+                            onClick={() => removerDaWishlist(item)}
+                            disabled={aRemoverId === item.id}
+                            className="w-8 h-8 border-2 border-slate-300 dark:border-slate-600 hover:bg-rose-500 hover:text-white transition-colors flex items-center justify-center"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -369,9 +383,9 @@ export default function WishlistPage() {
           <RetroCard color="cyan" className="w-full max-w-4xl max-h-[85vh] flex flex-col relative shadow-2xl">
             <div className="p-4 border-b-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
               <h3 className="text-xl font-black text-cyan-600 dark:text-cyan-400 flex items-center gap-2 uppercase tracking-wide">
-                <span>🔍</span> Adicionar à Wishlist
+                <Search size={20} /> Adicionar à Wishlist
               </h3>
-              <button onClick={() => setMostrarModal(false)} className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-100 dark:hover:bg-rose-900/20 font-bold text-xl transition-colors">✕</button>
+              <button onClick={() => setMostrarModal(false)} className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-100 dark:hover:bg-rose-900/20 font-bold text-xl transition-colors"><X size={20} /></button>
             </div>
 
             <div className="p-6 flex flex-col flex-1 overflow-hidden bg-white dark:bg-slate-900">

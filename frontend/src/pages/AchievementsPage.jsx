@@ -2,6 +2,14 @@
 import { useState, useEffect } from "react";
 import api from "../services/api";
 import { useToast } from "../components/Toast";
+import { 
+  Trophy, 
+  Award, 
+  Unlock, 
+  Lock,
+  Search,
+  X
+} from "lucide-react";
 
 // ============ COMPONENTES RETRO ADAPTADOS ============
 
@@ -82,7 +90,7 @@ export default function AchievementsPage() {
       if (res.data.newAchievements?.length > 0) {
         setNewUnlocks(res.data.newAchievements);
         fetchAchievements();
-        res.data.newAchievements.forEach((ach) => toast.achievement(`${ach.name} - ${ach.xp_reward} XP`, { title: "Nova Conquista! 🏆", icon: ach.icon }));
+        res.data.newAchievements.forEach((ach) => toast.achievement(`${ach.name} - ${ach.xp_reward} XP`, { title: "Nova Conquista!", icon: ach.icon }));
       } else {
         toast.info("Nenhuma nova conquista encontrada.", { title: "Verificação completa" });
         setNewUnlocks([]);
@@ -114,7 +122,7 @@ export default function AchievementsPage() {
 
   const categories = ["collection", "playtime", "social", "special"];
 
-  if (loading) return <div className="flex items-center justify-center py-20"><div className="text-4xl animate-pulse">🏆</div></div>;
+  if (loading) return <div className="flex items-center justify-center py-20"><Trophy size={48} className="animate-pulse text-yellow-500" /></div>;
 
   return (
     <div className="space-y-6">
@@ -128,13 +136,13 @@ export default function AchievementsPage() {
               <span className="inline-block w-3 h-3 bg-yellow-500 animate-pulse" />
               Conquistas
             </div>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white mb-1">🏆 Conquistas</h1>
+            <h1 className="text-2xl font-black text-slate-900 dark:text-white mb-1 flex items-center gap-2"><Trophy size={28} /> Conquistas</h1>
             <p className="text-slate-600 dark:text-slate-400 text-sm">
               Desbloqueia conquistas ao jogar e interagir com a comunidade
             </p>
           </div>
           <RetroButton color="cyan" onClick={checkForNewAchievements} disabled={checking}>
-            {checking ? <>🔄 A verificar...</> : <>🔍 Verificar Novas</>}
+            {checking ? <><Search size={14} className="animate-spin" /> A verificar...</> : <><Search size={14} /> Verificar Novas</>}
           </RetroButton>
         </div>
 
@@ -191,10 +199,10 @@ export default function AchievementsPage() {
           Todas ({achievements.length})
         </RetroButton>
         <RetroButton color="green" onClick={() => setFilter("unlocked")} active={filter === "unlocked"}>
-          ✅ Desbloqueadas ({achievements.filter(a => a.unlocked_at).length})
+          <Unlock size={14} className="inline" /> Desbloqueadas ({achievements.filter(a => a.unlocked_at).length})
         </RetroButton>
         <RetroButton color="slate" onClick={() => setFilter("locked")} active={filter === "locked"}>
-          🔒 Bloqueadas ({achievements.filter(a => !a.unlocked_at).length})
+          <Lock size={14} className="inline" /> Bloqueadas ({achievements.filter(a => !a.unlocked_at).length})
         </RetroButton>
         <div className="w-px bg-slate-300 dark:bg-slate-700 mx-1 hidden md:block" />
         {categories.map(cat => (
@@ -266,7 +274,7 @@ export default function AchievementsPage() {
 
       {filteredAchievements.length === 0 && (
         <div className="text-center py-12 text-slate-400">
-          <p className="text-4xl mb-2">🔍</p>
+          <Search size={48} className="mx-auto mb-2" />
           <p className="text-sm">Nenhuma conquista encontrada com este filtro.</p>
         </div>
       )}

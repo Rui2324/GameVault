@@ -1,5 +1,6 @@
 // src/components/ThemeToggle.jsx
 import { useTheme } from "../context/ThemeContext";
+import { Sun, Moon } from "lucide-react";
 
 export default function ThemeToggle({ className = "" }) {
   const { theme, toggleTheme } = useTheme();
@@ -20,9 +21,7 @@ export default function ThemeToggle({ className = "" }) {
         ${className}
       `}
     >
-      <span className="text-xl leading-none select-none">
-        {theme === "dark" ? "☀️" : "🌙"}
-      </span>
+      {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
     </button>
   );
 }

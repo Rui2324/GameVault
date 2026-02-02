@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
+import { Plus, Pencil, FileText, Heart } from "lucide-react";
 
 // Requisitos mínimos para escrever uma review
 const MIN_HOURS_FOR_REVIEW = 1; // pelo menos 1 hora jogada
@@ -166,7 +167,7 @@ export default function ReviewSection({ gameId, gameTitle, userRating, userHours
       <div className="flex items-center justify-between mb-5">
         <div>
           <h2 className="text-base font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-            ✍️ Reviews da Comunidade
+            <Pencil size={16} /> Reviews da Comunidade
           </h2>
           {stats.totalRatings > 0 && (
             <p className="text-slate-500 dark:text-slate-400 mt-0.5 text-sm">
@@ -186,22 +187,22 @@ export default function ReviewSection({ gameId, gameTitle, userRating, userHours
                 onClick={() => setShowForm(true)}
                 className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium rounded-lg transition flex items-center gap-1"
               >
-                ✏️ Editar
+                <Pencil size={14} /> Editar
               </button>
             ) : canWriteReview ? (
               <button
                 onClick={() => setShowForm(true)}
                 className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium rounded-lg transition flex items-center gap-1"
               >
-                ➕ Escrever
+                <Plus size={14} /> Escrever
               </button>
             ) : (
               <div className="text-right">
                 <button
                   disabled
-                  className="px-3 py-1.5 bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400 text-xs font-medium rounded-lg cursor-not-allowed"
+                  className="px-3 py-1.5 bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400 text-xs font-medium rounded-lg cursor-not-allowed flex items-center gap-1"
                 >
-                  ➕ Escrever
+                  <Plus size={14} /> Escrever
                 </button>
                 <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 max-w-[180px]">
                   {!hasRating && !hasMinHours && `Dá um rating e joga pelo menos ${MIN_HOURS_FOR_REVIEW}h`}
@@ -302,7 +303,7 @@ export default function ReviewSection({ gameId, gameTitle, userRating, userHours
       {/* Lista de Reviews */}
       {reviews.length === 0 ? (
         <div className="text-center py-6 text-slate-400 dark:text-slate-500 text-sm">
-          <p className="text-3xl mb-2">📝</p>
+          <FileText size={48} className="mx-auto mb-2 text-slate-300 dark:text-slate-600" />
           <p>Ainda não há reviews para este jogo.</p>
           {user && <p className="text-xs mt-1">Sê o primeiro a partilhar a tua opinião!</p>}
         </div>
@@ -383,7 +384,7 @@ export default function ReviewSection({ gameId, gameTitle, userRating, userHours
                       : "text-slate-400 dark:text-slate-500 hover:text-rose-500"
                   } ${!user ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
-                  {review.userLiked ? "❤️" : "🤍"} {review.likes_count || 0}
+                  <Heart size={14} fill={review.userLiked ? "currentColor" : "none"} /> {review.likes_count || 0}
                 </button>
                 {myReview?.id === review.id && (
                   <span className="text-[10px] text-indigo-600 dark:text-indigo-400 ml-auto font-medium">A tua review</span>

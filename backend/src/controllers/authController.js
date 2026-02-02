@@ -122,7 +122,7 @@ async function me(req, res) {
     const userId = req.userId;
 
     const [rows] = await pool.query(
-      "SELECT id, name, email, avatar_url, bio, created_at, updated_at FROM users WHERE id = ?",
+      "SELECT id, name, email, avatar_url, bio, role, created_at, updated_at FROM users WHERE id = ?",
       [userId]
     );
 

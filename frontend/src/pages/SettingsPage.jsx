@@ -4,6 +4,17 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useToast } from "../components/Toast";
 import ImageCropper from "../components/ImageCropper"; // <--- Importação do Cortador
+import { 
+  Settings as SettingsIcon, 
+  User, 
+  Image as ImageIcon, 
+  Mail, 
+  Lock, 
+  Save,
+  LogOut,
+  Moon,
+  Sun
+} from "lucide-react";
 
 // Componente RetroCard
 function RetroCard({ children, className = "", color = "fuchsia" }) {
@@ -131,7 +142,7 @@ export default function SettingsPage() {
         <div className="absolute inset-0 bg-[linear-gradient(rgba(217,70,239,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(217,70,239,0.1)_1px,transparent_1px)] bg-[size:20px_20px]" />
         <div className="relative flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">⚙️</span>
+            <SettingsIcon size={32} className="text-fuchsia-500" />
             <div>
               <h1 className="text-2xl font-bold text-fuchsia-600 dark:text-fuchsia-400 tracking-wider uppercase">Definições</h1>
               <p className="text-cyan-600 dark:text-cyan-400 text-sm font-mono">&gt; Personaliza o teu perfil_</p>
@@ -149,7 +160,7 @@ export default function SettingsPage() {
           <form onSubmit={handleSubmit}>
             <RetroCard color="fuchsia" className="p-6 space-y-5">
               <h2 className="text-lg font-bold text-fuchsia-600 dark:text-fuchsia-400 flex items-center gap-2 uppercase tracking-wide">
-                <span className="text-xl">👤</span> Perfil
+                <User size={20} /> Perfil
               </h2>
               
               {/* Avatar */}
@@ -183,7 +194,7 @@ export default function SettingsPage() {
               </div>
 
               <RetroButton type="submit" disabled={saving} color="fuchsia" className="w-full flex items-center justify-center gap-2">
-                {saving ? "⏳ A guardar..." : "💾 Guardar alterações"}
+                {saving ? <><Save size={14} className="animate-pulse" /> A guardar...</> : <><Save size={14} /> Guardar alterações</>}
               </RetroButton>
             </RetroCard>
           </form>
@@ -191,7 +202,7 @@ export default function SettingsPage() {
           {/* Conta */}
           <RetroCard color="cyan" className="p-6 space-y-4">
             <h2 className="text-lg font-bold text-cyan-600 dark:text-cyan-400 flex items-center gap-2 uppercase tracking-wide">
-              <span className="text-xl">📧</span> Conta
+              <Mail size={20} /> Conta
             </h2>
             <div className="space-y-3 text-sm">
               <div className="flex items-center justify-between py-2 border-b border-cyan-400/30">
@@ -214,11 +225,11 @@ export default function SettingsPage() {
         <div className="space-y-6">
           <RetroCard color="yellow" className="p-6 space-y-4">
             <h2 className="text-lg font-bold text-yellow-600 dark:text-yellow-400 flex items-center gap-2 uppercase tracking-wide"><span className="text-xl">🎨</span> Aparência</h2>
-            <ToggleOption icon={theme === "dark" ? "🌙" : "☀️"} iconColor="yellow" title="Tema" description={theme === "dark" ? "Modo escuro" : "Modo claro"} checked={theme === "dark"} onChange={toggleTheme} color="yellow" />
+            <ToggleOption IconComponent={theme === "dark" ? Moon : Sun} iconColor="yellow" title="Tema" description={theme === "dark" ? "Modo escuro" : "Modo claro"} checked={theme === "dark"} onChange={toggleTheme} color="yellow" />
           </RetroCard>
 
           <RetroCard color="green" className="p-6 space-y-4">
-            <h2 className="text-lg font-bold text-green-600 dark:text-green-400 flex items-center gap-2 uppercase tracking-wide"><span className="text-xl">🔒</span> Privacidade</h2>
+            <h2 className="text-lg font-bold text-green-600 dark:text-green-400 flex items-center gap-2 uppercase tracking-wide"><Lock size={20} /> Privacidade</h2>
             <ToggleOption icon="👁️" iconColor="green" title="Perfil Público" description="Visível para outros" checked={isPublic} onChange={() => { setIsPublic(!isPublic); toast.info(isPublic ? "Perfil privado" : "Perfil público"); }} color="green" />
             <ToggleOption icon="🏆" iconColor="yellow" title="Ranking" description="Mostrar no leaderboard" checked={showInRanking} onChange={() => { setShowInRanking(!showInRanking); toast.info(showInRanking ? "Removido do ranking" : "Adicionado ao ranking"); }} color="yellow" />
           </RetroCard>
@@ -230,7 +241,7 @@ export default function SettingsPage() {
 
           <RetroCard color="rose" className="p-6 space-y-4">
             <h2 className="text-lg font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2 uppercase tracking-wide"><span className="text-xl">⚠️</span> Zona de Perigo</h2>
-            <RetroButton onClick={() => { if (confirm("Terminar sessão?")) logout(); }} color="cyan" className="w-full flex items-center justify-center gap-2">🚪 Terminar sessão</RetroButton>
+            <RetroButton onClick={() => { if (confirm("Terminar sessão?")) logout(); }} color="cyan" className="w-full flex items-center justify-center gap-2"><LogOut size={16} /> Terminar sessão</RetroButton>
             <RetroButton onClick={() => { if (confirm("Eliminar conta?")) toast.error("Funcionalidade não implementada"); }} color="rose" className="w-full flex items-center justify-center gap-2">🗑️ Eliminar conta</RetroButton>
           </RetroCard>
         </div>
@@ -240,7 +251,7 @@ export default function SettingsPage() {
 }
 
 // Componente Toggle reutilizável
-function ToggleOption({ icon, iconColor, title, description, checked, onChange, color }) {
+function ToggleOption({ icon, IconComponent, iconColor, title, description, checked, onChange, color }) {
   const borderColors = {
     yellow: "border-yellow-400/30", green: "border-green-400/30", cyan: "border-cyan-400/30", fuchsia: "border-fuchsia-500/30"
   };
@@ -260,7 +271,9 @@ function ToggleOption({ icon, iconColor, title, description, checked, onChange, 
   return (
     <div className={`flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 border-2 ${borderColors[color]}`}>
       <div className="flex items-center gap-3">
-        <div className={`w-9 h-9 border-2 flex items-center justify-center text-sm ${iconBgColors[iconColor]}`}>{icon}</div>
+        <div className={`w-9 h-9 border-2 flex items-center justify-center text-sm ${iconBgColors[iconColor]}`}>
+          {IconComponent ? <IconComponent size={18} /> : icon}
+        </div>
         <div>
           <p className="text-sm font-medium text-slate-900 dark:text-slate-300">{title}</p>
           <p className="text-xs text-slate-500">{description}</p>

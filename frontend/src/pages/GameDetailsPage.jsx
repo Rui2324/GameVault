@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import api from "../services/api";
 import ReviewSection from "../components/ReviewSection";
 import { useToast } from "../components/Toast";
+import { Clock, Gamepad2, Check, X, FileText, Star, Trash2, Lightbulb, Target, Tag, Calendar, BarChart3, Save, RotateCcw, BookOpen } from "lucide-react";
 
 function EstadoBadge({ estado }) {
   if (!estado) return null;
@@ -11,32 +12,33 @@ function EstadoBadge({ estado }) {
   const map = {
     por_jogar: {
       label: "Por jogar",
-      icon: "⏳",
+      icon: Clock,
       classes: "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600",
     },
     a_jogar: {
       label: "A jogar",
-      icon: "🎮",
+      icon: Gamepad2,
       classes: "bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:border-sky-700",
     },
     concluido: {
       label: "Concluído",
-      icon: "✅",
+      icon: Check,
       classes: "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700",
     },
     abandonado: {
       label: "Abandonado",
-      icon: "❌",
+      icon: X,
       classes: "bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-700",
     },
   };
 
   const cfg = map[estado] || {
     label: estado,
-    icon: "📋",
+    icon: FileText,
     classes: "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600",
   };
 
+  const IconComponent = cfg.icon;
   return (
     <span
       className={
@@ -44,7 +46,7 @@ function EstadoBadge({ estado }) {
         cfg.classes
       }
     >
-      <span>{cfg.icon}</span> {cfg.label}
+      <IconComponent size={12} /> {cfg.label}
     </span>
   );
 }
@@ -53,7 +55,7 @@ function RatingChip({ rating }) {
   if (rating == null) {
     return (
       <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 dark:bg-slate-700 px-2.5 py-1 text-xs text-slate-500 dark:text-slate-400 shadow-sm">
-        <span>⭐</span> Sem rating
+        <Star size={12} /> Sem rating
       </span>
     );
   }
@@ -67,7 +69,7 @@ function RatingChip({ rating }) {
     <span
       className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold shadow-lg ${cor}`}
     >
-      ⭐ {valor.toFixed(1)}/10
+      <Star size={12} fill="currentColor" /> {valor.toFixed(1)}/10
     </span>
   );
 }
@@ -334,7 +336,7 @@ export default function GameDetailsPage() {
                 <EstadoBadge estado={entrada.estado} />
                 <RatingChip rating={entrada.rating} />
                 <span className="inline-flex items-center gap-1 rounded-full bg-white/20 backdrop-blur-sm px-3 py-1 text-xs font-medium text-white border border-white/30">
-                  🕐 {safeNum(entrada.horas_jogadas, 0)}h jogadas
+                  <Clock size={12} /> {safeNum(entrada.horas_jogadas, 0)}h jogadas
                 </span>
 
                 {temAlteracoes && (
@@ -346,7 +348,7 @@ export default function GameDetailsPage() {
               </div>
 
               <p className="mt-3 text-sm text-white/80">
-                💡 Dica: <span className="font-medium">Ctrl+S</span> para guardar rapidamente.
+                <Lightbulb size={14} className="inline mb-0.5" /> Dica: <span className="font-medium">Ctrl+S</span> para guardar rapidamente.
               </p>
             </div>
 
@@ -355,7 +357,7 @@ export default function GameDetailsPage() {
               onClick={handleRemover}
               className="inline-flex items-center gap-2 rounded-xl bg-rose-500/90 hover:bg-rose-600 backdrop-blur-sm px-4 py-2.5 text-sm font-medium text-white shadow-lg transition-all duration-300 hover:scale-105"
             >
-              <span>🗑️</span> Remover da coleção
+              <Trash2 size={16} /> Remover da coleção
             </button>
           </div>
         </div>
@@ -373,7 +375,7 @@ export default function GameDetailsPage() {
               />
             ) : (
               <div className="flex h-full w-full flex-col items-center justify-center text-slate-500 dark:text-slate-400 bg-gradient-to-br from-indigo-500/20 to-purple-500/20">
-                <span className="text-5xl mb-2">🎮</span>
+                <Gamepad2 size={48} className="mb-2" />
                 <span className="text-xs">Sem capa</span>
               </div>
             )}
@@ -381,21 +383,21 @@ export default function GameDetailsPage() {
 
           <div className="mt-4 space-y-2">
             <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 dark:bg-slate-700/50">
-              <span className="text-base">🎯</span>
+              <Target size={16} className="text-indigo-600 dark:text-indigo-400" />
               <div>
                 <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide">Plataforma</p>
                 <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{entrada.plataforma || "—"}</p>
               </div>
             </div>
             <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 dark:bg-slate-700/50">
-              <span className="text-base">🏷️</span>
+              <Tag size={16} className="text-purple-600 dark:text-purple-400" />
               <div>
                 <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide">Género</p>
                 <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{entrada.genero || "—"}</p>
               </div>
             </div>
             <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 dark:bg-slate-700/50">
-              <span className="text-base">📅</span>
+              <Calendar size={16} className="text-teal-600 dark:text-teal-400" />
               <div>
                 <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide">Adicionado em</p>
                 <p className="text-xs font-medium text-slate-700 dark:text-slate-300">{toDateTimePT(entrada.criado_em)}</p>
@@ -419,7 +421,7 @@ export default function GameDetailsPage() {
           >
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-sm shadow-md">📊</span>
+                <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-sm shadow-md"><BarChart3 size={16} className="text-white" /></span>
                 Atualizar progresso
               </h2>
 
@@ -438,7 +440,7 @@ export default function GameDetailsPage() {
                   </>
                 ) : (
                   <>
-                    <span>💾</span> Guardar
+                    <Save size={16} /> Guardar
                   </>
                 )}
               </button>
@@ -447,7 +449,7 @@ export default function GameDetailsPage() {
             <div className="grid gap-5 md:grid-cols-3">
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                  <span>⭐</span> Rating (0 a 10)
+                  <Star size={14} /> Rating (0 a 10)
                 </label>
                 <input
                   type="number"
@@ -463,7 +465,7 @@ export default function GameDetailsPage() {
 
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                  <span>🕐</span> Horas jogadas
+                  <Clock size={14} /> Horas jogadas
                 </label>
                 <input
                   type="number"
@@ -492,33 +494,33 @@ export default function GameDetailsPage() {
                   <button
                     type="button"
                     onClick={resetHoras}
-                    className="rounded-lg bg-rose-50 dark:bg-rose-900/30 border border-rose-200/50 dark:border-rose-700/50 px-2.5 py-1 text-[11px] font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-all"
+                    className="rounded-lg bg-rose-50 dark:bg-rose-900/30 border border-rose-200/50 dark:border-rose-700/50 px-2.5 py-1 text-[11px] font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-all flex items-center gap-1"
                   >
-                    🔄 Repor
+                    <RotateCcw size={10} /> Repor
                   </button>
                 </div>
               </div>
 
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                  <span>📋</span> Estado
+                  <FileText size={14} /> Estado
                 </label>
                 <select
                   value={form.estado}
                   onChange={(e) => setForm((f) => ({ ...f, estado: e.target.value }))}
                   className="w-full rounded-xl border border-slate-200/50 dark:border-slate-600/50 bg-white/50 dark:bg-slate-700/50 px-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all cursor-pointer"
                 >
-                  <option value="por_jogar">⏳ Por jogar</option>
-                  <option value="a_jogar">🎮 A jogar</option>
-                  <option value="concluido">✅ Concluído</option>
-                  <option value="abandonado">❌ Abandonado</option>
+                  <option value="por_jogar">Por jogar</option>
+                  <option value="a_jogar">A jogar</option>
+                  <option value="concluido">Concluído</option>
+                  <option value="abandonado">Abandonado</option>
                 </select>
               </div>
             </div>
 
             <div className="space-y-2">
               <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                <span>📝</span> Notas pessoais / análise do jogo
+                <FileText size={14} /> Notas pessoais / análise do jogo
               </label>
               <textarea
                 rows={5}
@@ -533,7 +535,7 @@ export default function GameDetailsPage() {
           {/* Descrição */}
           <div className="rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 shadow-lg">
             <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
-              <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-sm shadow-md">📖</span>
+              <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-sm shadow-md"><BookOpen size={16} className="text-white" /></span>
               Descrição do jogo
             </h3>
             <p className="text-sm text-slate-600 dark:text-slate-400 whitespace-pre-line leading-relaxed">

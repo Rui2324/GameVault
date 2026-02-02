@@ -19,6 +19,7 @@ const achievementRoutes = require("./src/routes/achievementRoutes");
 const profileRoutes = require("./src/routes/profileRoutes");
 const followRoutes = require("./src/routes/followRoutes");
 const activityRoutes = require("./src/routes/activityRoutes");
+const adminRoutes = require("./src/routes/adminRoutes");
 
 // NOVO: Rota da Steam
 const steamRoutes = require("./src/routes/steamRoutes");
@@ -68,6 +69,9 @@ app.use("/api/wishlist", authMiddleware, wishlistRoutes);
 // Nota: A proteção (authMiddleware) já está dentro do ficheiro steamRoutes.js, 
 // mas podes deixá-lo assim:
 app.use("/api/steam", steamRoutes);
+
+// ADMIN: Rotas de administração
+app.use("/api/admin", adminRoutes);
 
 // --- 404 HANDLER ---
 app.use((req, res) => {

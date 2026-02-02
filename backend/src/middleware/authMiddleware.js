@@ -1,8 +1,9 @@
 // backend/src/middleware/authMiddleware.js
 const jwt = require("jsonwebtoken");
+const pool = require("../config/db");
 
 // Middleware de autenticação obrigatória
-function verifyToken(req, res, next) {
+async function verifyToken(req, res, next) {
   try {
     const auth = req.headers.authorization || "";
     const [type, token] = auth.split(" ");
@@ -21,15 +22,19 @@ function verifyToken(req, res, next) {
     // id pode vir em campos diferentes dependendo de quem gerou o token
     const userId = payload.id ?? payload.userId ?? payload.sub;
 
-    // mete o que o teu projeto usa (id, email, user_type, etc.)
-    req.user = {
-      id: userId,
-      email: payload.email,
-      user_type: payload.user_type,
-    };
+    // Buscar dados completos do user da base de dados (incluindo role)
+    const [rows] = await pool.query(
+      "SELECT id, name, email, role FROM users WHERE id = ?",
+      [userId]
+    );
 
-    // compatibilidade com controladores que usam req.userId (authController.me, updateProfile, etc.)
-    req.userId = userId;
+    if (rows.length === 0) {
+      return res.status(401).json({ message: "User não encontrado." });
+    }
+
+    // Colocar user completo em req.user
+    req.user = rows[0];
+    req.userId = userId; // Manter compatibilidade
 
     if (!req.user.id) {
       return res.status(401).json({ message: "Token inválido." });
@@ -37,12 +42,13 @@ function verifyToken(req, res, next) {
 
     return next();
   } catch (err) {
+    console.error("Erro no authMiddleware:", err);
     return res.status(401).json({ message: "Token inválido ou expirado." });
   }
 }
 
 // Middleware de autenticação opcional (não falha se não houver token)
-function optionalAuth(req, res, next) {
+async function optionalAuth(req, res, next) {
   try {
     const auth = req.headers.authorization || "";
     const [type, token] = auth.split(" ");
@@ -52,16 +58,22 @@ function optionalAuth(req, res, next) {
       if (secret) {
         const payload = jwt.verify(token, secret);
         const userId = payload.id ?? payload.userId ?? payload.sub;
-        req.user = {
-          id: userId,
-          email: payload.email,
-          user_type: payload.user_type,
-        };
-        req.userId = userId;
+        
+        // Buscar dados completos do user também aqui
+        const [rows] = await pool.query(
+          "SELECT id, name, email, role FROM users WHERE id = ?",
+          [userId]
+        );
+
+        if (rows.length > 0) {
+          req.user = rows[0];
+          req.userId = userId;
+        }
       }
     }
-  } catch {
-    // Token inválido, mas não bloqueamos - apenas não definimos req.userId
+  } catch (err) {
+    console.error("Erro no optionalAuth:", err);
+    // Token inválido, mas não bloqueamos - apenas não definimos req.user
   }
   return next();
 }

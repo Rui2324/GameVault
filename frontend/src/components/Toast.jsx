@@ -1,5 +1,6 @@
 // src/components/Toast.jsx
 import { createContext, useContext, useState, useCallback } from "react";
+import { Check, X, AlertTriangle, Info, Gamepad2, Trophy } from "lucide-react";
 
 export const ToastContext = createContext(null);
 
@@ -15,7 +16,7 @@ export const useToast = () => {
 // Configurações por tipo
 const toastConfig = {
   success: {
-    icon: "✅",
+    icon: Check,
     gradient: "from-emerald-500 to-teal-500",
     bg: "bg-emerald-50/95 dark:bg-emerald-900/90",
     border: "border-emerald-200/50 dark:border-emerald-700/50",
@@ -23,7 +24,7 @@ const toastConfig = {
     progress: "bg-emerald-500",
   },
   error: {
-    icon: "❌",
+    icon: X,
     gradient: "from-rose-500 to-pink-500",
     bg: "bg-rose-50/95 dark:bg-rose-900/90",
     border: "border-rose-200/50 dark:border-rose-700/50",
@@ -31,7 +32,7 @@ const toastConfig = {
     progress: "bg-rose-500",
   },
   warning: {
-    icon: "⚠️",
+    icon: AlertTriangle,
     gradient: "from-amber-500 to-orange-500",
     bg: "bg-amber-50/95 dark:bg-amber-900/90",
     border: "border-amber-200/50 dark:border-amber-700/50",
@@ -39,7 +40,7 @@ const toastConfig = {
     progress: "bg-amber-500",
   },
   info: {
-    icon: "ℹ️",
+    icon: Info,
     gradient: "from-blue-500 to-cyan-500",
     bg: "bg-blue-50/95 dark:bg-blue-900/90",
     border: "border-blue-200/50 dark:border-blue-700/50",
@@ -47,7 +48,7 @@ const toastConfig = {
     progress: "bg-blue-500",
   },
   game: {
-    icon: "🎮",
+    icon: Gamepad2,
     gradient: "from-indigo-500 to-purple-500",
     bg: "bg-indigo-50/95 dark:bg-indigo-900/90",
     border: "border-indigo-200/50 dark:border-indigo-700/50",
@@ -55,7 +56,7 @@ const toastConfig = {
     progress: "bg-indigo-500",
   },
   achievement: {
-    icon: "🏆",
+    icon: Trophy,
     gradient: "from-yellow-500 to-amber-500",
     bg: "bg-yellow-50/95 dark:bg-yellow-900/90",
     border: "border-yellow-200/50 dark:border-yellow-700/50",
@@ -89,7 +90,11 @@ function ToastItem({ toast, onRemove }) {
           flex h-10 w-10 shrink-0 items-center justify-center rounded-xl 
           bg-gradient-to-br ${config.gradient} text-white text-lg shadow-lg
         `}>
-          {toast.icon || config.icon}
+          {toast.icon ? (
+            typeof toast.icon === 'string' ? toast.icon : <toast.icon size={20} />
+          ) : (
+            <config.icon size={20} />
+          )}
         </div>
 
         {/* Texto */}

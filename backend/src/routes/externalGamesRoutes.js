@@ -7,20 +7,19 @@ const authMiddleware = require("../middleware/authMiddleware");
 const externalGamesController = require("../controllers/externalGamesController");
 const dashboardController = require("../controllers/externalGamesDashboardController");
 
-// --- Dashboard lists ---
+// --- Dashboard lists (PRIVADAS - requer login) ---
 router.get("/featured", authMiddleware, dashboardController.featured);
 router.get("/upcoming", authMiddleware, dashboardController.upcoming);
 router.get("/releases", authMiddleware, dashboardController.releases);
 router.get("/list", authMiddleware, dashboardController.list);
 
-// --- RAWG / external ---
+// --- RAWG / external (PRIVADAS - pesquisa e detalhes requerem login) ---
 router.get("/search", authMiddleware, externalGamesController.searchExternalGames);
 router.get("/:externalId", authMiddleware, externalGamesController.getExternalGameDetails);
 
+// --- Ações que requerem autenticação ---
 router.post("/import/collection", authMiddleware, externalGamesController.importExternalToCollection);
 router.post("/import/wishlist", authMiddleware, externalGamesController.importExternalToWishlist);
-
-// ✅ ESTA É A QUE TE FALTA (o teu front está a chamar isto)
 router.post("/link-rawg", authMiddleware, externalGamesController.linkRawg);
 
 module.exports = router;

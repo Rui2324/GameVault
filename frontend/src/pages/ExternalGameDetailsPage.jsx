@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import api from "../services/api";
 import { rawgImage, rawgOriginal } from "../utils/rawgImages";
 import { useToast } from "../components/Toast";
+import { Calendar, Target, Heart, Clock, Plus, Pencil, Gamepad2, FileText, Globe, MessageCircle, Play, Image, Youtube, ExternalLink } from "lucide-react";
 
 function formatDate(v) {
   if (!v) return "—";
@@ -228,6 +229,10 @@ export default function ExternalGameDetailsPage() {
     }));
   }, [jogo]);
 
+  const movies = useMemo(() => {
+    return jogo?.movies || [];
+  }, [jogo]);
+
   const descricaoCurta = useMemo(() => {
     const text = safeStr(description).trim();
     if (!text) return "";
@@ -368,17 +373,17 @@ export default function ExternalGameDetailsPage() {
               
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 {released && (
-                  <span className="text-xs text-white/80 bg-white/10 rounded-lg px-2 py-1">
-                    📅 {formatDate(released)}
+                  <span className="text-xs text-white/80 bg-white/10 rounded-lg px-2 py-1 flex items-center gap-1">
+                    <Calendar size={12} /> {formatDate(released)}
                   </span>
                 )}
                 {metacritic && (
-                  <span className={`text-xs font-bold rounded-lg px-2 py-1 ${
+                  <span className={`text-xs font-bold rounded-lg px-2 py-1 flex items-center gap-1 ${
                     metacritic >= 75 ? 'bg-emerald-500/80 text-white' :
                     metacritic >= 50 ? 'bg-amber-500/80 text-white' :
                     'bg-red-500/80 text-white'
                   }`}>
-                    🎯 {metacritic}
+                    <Target size={12} /> {metacritic}
                   </span>
                 )}
               </div>
@@ -398,7 +403,7 @@ export default function ExternalGameDetailsPage() {
                       : "bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 hover:scale-105"
                   } ${aWishlist ? " opacity-60" : ""}`}
                 >
-                  {jaNaWishlist ? "💝 Na wishlist" : aWishlist ? "⏳ A adicionar..." : "💝 Wishlist"}
+                  {jaNaWishlist ? <><Heart size={16} fill="currentColor" /> Na wishlist</> : aWishlist ? <><Clock size={16} /> A adicionar...</> : <><Heart size={16} /> Wishlist</>}
                 </button>
               )}
 
@@ -409,7 +414,7 @@ export default function ExternalGameDetailsPage() {
                   onClick={() => navigate(`/app/jogo/${collectionId}`)} // Usa o ID da BD
                   className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white bg-emerald-500 hover:bg-emerald-600 shadow-lg hover:scale-105 transition-all"
                 >
-                  <span>✏️</span> Editar na Coleção
+                  <Pencil size={16} /> Editar na Coleção
                 </button>
               ) : (
                 <button
@@ -422,7 +427,7 @@ export default function ExternalGameDetailsPage() {
                       : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:shadow-xl hover:scale-105"
                   }`}
                 >
-                  {aImportar ? "⏳ A adicionar..." : "➕ Adicionar à coleção"}
+                  {aImportar ? <><Clock size={16} /> A adicionar...</> : <><Plus size={16} /> Adicionar à coleção</>}
                 </button>
               )}
             </div>
@@ -450,14 +455,14 @@ export default function ExternalGameDetailsPage() {
                   }}
                 />
               ) : (
-                <div className="flex h-60 w-full items-center justify-center text-4xl">🎮</div>
+                <div className="flex h-60 w-full items-center justify-center text-4xl"><Gamepad2 size={64} className="text-slate-400 dark:text-slate-600" /></div>
               )}
             </div>
           </div>
 
           {/* Resumo */}
           <div className="rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-5 shadow-xl">
-            <SectionTitle icon="📋">Resumo</SectionTitle>
+            <SectionTitle icon={<FileText size={14} />}>Resumo</SectionTitle>
             <div className="flex flex-wrap gap-2">
               {released && <Chip>Lançamento: {formatDate(released)}</Chip>}
               {playtime != null && <Chip>Tempo médio: {playtime}h</Chip>}
@@ -501,14 +506,32 @@ export default function ExternalGameDetailsPage() {
           <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
             <SectionTitle>Links</SectionTitle>
             <div className="space-y-2 text-sm">
-              {website ? <a href={website} target="_blank" rel="noreferrer" className="block rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs text-indigo-700 dark:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-600">🌐 Website oficial</a> : <div className="text-xs text-slate-400">Sem website.</div>}
-              {reddit ? <a href={reddit} target="_blank" rel="noreferrer" className="block rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs text-indigo-700 dark:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-600">💬 Reddit</a> : <div className="text-xs text-slate-400">Sem link do Reddit.</div>}
+              {website ? <a href={website} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs text-indigo-700 dark:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-600"><Globe size={14} /> Website oficial</a> : <div className="text-xs text-slate-400">Sem website.</div>}
+              {reddit ? <a href={reddit} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs text-indigo-700 dark:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-600"><MessageCircle size={14} /> Reddit</a> : <div className="text-xs text-slate-400">Sem link do Reddit.</div>}
             </div>
           </div>
         </div>
 
         {/* Main Content */}
         <div className="space-y-4">
+          {/* Trailer - YouTube */}
+          <div className="rounded-xl border-2 border-red-500/50 bg-white dark:bg-slate-800 p-4 shadow-sm">
+            <div className="mb-3 text-xs font-bold uppercase tracking-wide text-red-500 dark:text-red-400 flex items-center gap-2">
+              <Youtube size={16} /> Trailer
+            </div>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+              Vê o trailer oficial deste jogo no YouTube.
+            </p>
+            <a
+              href={`https://www.youtube.com/results?search_query=${encodeURIComponent(title + " official trailer")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 text-sm transition-all hover:scale-105"
+            >
+              <Play size={16} fill="currentColor" /> Ver no YouTube <ExternalLink size={14} />
+            </a>
+          </div>
+
           <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
             <SectionTitle>Descrição</SectionTitle>
             <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line">

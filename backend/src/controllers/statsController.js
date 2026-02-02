@@ -59,7 +59,7 @@ exports.getStats = async (req, res) => {
     const media_rating = avgRatingRaw == null ? null : Number(avgRatingRaw);
 
     // 5) Taxa de conclusão (jogos completos / total * 100)
-    const completosCount = jogos_por_estado["completo"] || jogos_por_estado["completed"] || 0;
+    const completosCount = jogos_por_estado["concluido"] || jogos_por_estado["completed"] || jogos_por_estado["completo"] || 0;
     const taxa_conclusao_percent = total_jogos > 0 
       ? Math.round((completosCount / total_jogos) * 100) 
       : 0;

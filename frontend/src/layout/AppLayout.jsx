@@ -6,6 +6,7 @@ import { useTheme } from "../context/ThemeContext";
 import { useToast } from "../components/Toast";
 import api from "../services/api";
 import AddGameModal from "../components/AddGameModal";
+import { Gamepad2, Search, Sun, Moon, User, Trophy, Settings as SettingsIcon, LogOut, GraduationCap, Shield } from "lucide-react";
 
 export default function AppLayout() {
   const { user, logout } = useAuth();
@@ -22,6 +23,7 @@ export default function AppLayout() {
     { to: "/app/wishlist", label: "Wishlist", icon: "" },
     { to: "/app/estatisticas", label: "Estatísticas", icon: "" },
     { to: "/app/conquistas", label: "Conquistas", icon: "" },
+    ...(user?.role === 'admin' ? [{ to: "/app/admin", label: "Admin", icon: "" }] : []),
   ];
 
   function handleLogout() {
@@ -125,7 +127,7 @@ export default function AppLayout() {
               className="group flex items-center gap-3 focus:outline-none"
             >
               <div className="flex h-10 w-10 items-center justify-center border-2 border-cyan-400 bg-cyan-400/10 text-xl text-cyan-600 dark:text-cyan-400 shadow-[3px_3px_0px_0px_rgba(34,211,238,0.6)] group-hover:bg-cyan-400 group-hover:text-slate-900 transition-all">
-                🎮
+                <Gamepad2 size={20} />
               </div>
               <div className="leading-tight text-left">
                 <div className="text-base font-black tracking-wider text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">GAMEVAULT</div>
@@ -165,7 +167,7 @@ export default function AppLayout() {
               className="group hidden items-center gap-2 border-2 border-yellow-400 bg-yellow-50 dark:bg-yellow-400/10 px-4 py-2 text-sm text-yellow-700 dark:text-yellow-400 font-bold uppercase tracking-wide shadow-[3px_3px_0px_0px_rgba(250,204,21,0.6)] hover:bg-yellow-400 hover:text-slate-900 transition-all sm:flex"
               title="Pesquisar e importar jogos (Ctrl+K)"
             >
-              <span className="text-base">🔍</span>
+              <Search size={16} />
               <span>Pesquisar</span>
               <span className="ml-2 border border-yellow-600/30 dark:border-yellow-400/50 px-1.5 py-0.5 text-[10px] bg-white/50 dark:bg-transparent">
                 Ctrl K
@@ -179,7 +181,7 @@ export default function AppLayout() {
               className="group flex h-10 w-10 items-center justify-center border-2 border-fuchsia-500 bg-fuchsia-50 dark:bg-fuchsia-500/10 text-lg text-fuchsia-600 dark:text-fuchsia-400 shadow-[3px_3px_0px_0px_rgba(217,70,239,0.6)] hover:bg-fuchsia-500 hover:text-white transition-all"
               title={theme === "dark" ? "Mudar para modo claro" : "Mudar para modo escuro"}
             >
-              {theme === "dark" ? "☀️" : "🌙"}
+              {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
             </button>
 
             <div className="flex items-center gap-3">
@@ -234,26 +236,26 @@ export default function AppLayout() {
                         onClick={() => { navigate(`/app/perfil/${user?.id}`); setShowUserMenu(false); }}
                         className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-cyan-400/20 hover:text-cyan-700 dark:hover:text-cyan-400 transition-colors font-medium rounded-md"
                       >
-                        <span>👤</span> O Meu Perfil
+                        <User size={16} /> O Meu Perfil
                       </button>
                       <button
                         onClick={() => { navigate("/app/conquistas"); setShowUserMenu(false); }}
                         className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-yellow-400/20 hover:text-yellow-700 dark:hover:text-yellow-400 transition-colors font-medium rounded-md"
                       >
-                        <span>🏆</span> Conquistas
+                        <Trophy size={16} /> Conquistas
                       </button>
                       <button
                         onClick={() => { navigate("/app/settings"); setShowUserMenu(false); }}
                         className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-fuchsia-400/20 hover:text-fuchsia-700 dark:hover:text-fuchsia-400 transition-colors font-medium rounded-md"
                       >
-                        <span>⚙️</span> Definições
+                        <SettingsIcon size={16} /> Definições
                       </button>
                       <hr className="my-2 border-slate-200 dark:border-slate-700" />
                       <button
                         onClick={() => { handleLogout(); setShowUserMenu(false); }}
                         className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/20 hover:text-rose-700 dark:hover:text-rose-300 transition-colors font-medium rounded-md"
                       >
-                        <span>🚪</span> Sair
+                        <LogOut size={16} /> Sair
                       </button>
                     </div>
                   </div>
@@ -282,7 +284,7 @@ export default function AppLayout() {
           <div className="flex flex-col gap-3 px-6 py-4 text-xs md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
-                <span className="h-8 w-8 border-2 border-fuchsia-500 bg-fuchsia-50 dark:bg-fuchsia-500/20 flex items-center justify-center text-fuchsia-600 dark:text-fuchsia-400 text-sm">🎮</span>
+                <span className="h-8 w-8 border-2 border-fuchsia-500 bg-fuchsia-50 dark:bg-fuchsia-500/20 flex items-center justify-center text-fuchsia-600 dark:text-fuchsia-400 text-sm"><Gamepad2 size={16} /></span>
                 <span className="text-slate-900 dark:text-white font-black uppercase tracking-wider">GameVault</span>
               </div>
               <span className="text-slate-300 dark:text-slate-700">|</span>
@@ -291,7 +293,7 @@ export default function AppLayout() {
 
             <div className="flex flex-wrap items-center gap-4">
               <span className="flex items-center gap-2 border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-slate-600 dark:text-slate-400 rounded">
-                <span>🎓</span> ISTEC 2026
+                <GraduationCap size={16} /> ISTEC 2026
               </span>
               <span className="flex items-center gap-2 border border-green-500/50 bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 px-3 py-1.5 rounded">
                 <span className="h-2 w-2 bg-green-500 dark:bg-green-400 animate-pulse rounded-full" />

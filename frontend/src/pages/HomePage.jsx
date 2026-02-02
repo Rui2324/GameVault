@@ -3,6 +3,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { rawgOriginal } from "../utils/rawgImages";
+import { 
+  Calendar,
+  Star,
+  Users,
+  Gamepad2
+} from "lucide-react";
 
 function safeImg(url) {
   const u = rawgOriginal(url || "");
@@ -112,8 +118,8 @@ function GameCard({ game, onClick }) {
           )}
 
           {rating != null && (
-            <div className="absolute top-2 right-2 bg-yellow-400 text-slate-900 text-xs font-black px-2 py-1 border-2 border-yellow-300 shadow-md">
-              ★ {Number(rating).toFixed(1)}
+            <div className="absolute top-2 right-2 bg-yellow-400 text-slate-900 text-xs font-black px-2 py-1 border-2 border-yellow-300 shadow-md flex items-center gap-1">
+              <Star size={12} fill="currentColor" /> {Number(rating).toFixed(1)}
             </div>
           )}
         </div>
@@ -176,7 +182,7 @@ function ActivityItem({ activity, onNavigate }) {
   const getConfig = () => {
     switch (type) {
       case "game_added": return { text: "adicionou", color: "text-cyan-600 dark:text-cyan-400" };
-      case "review": return { text: rating ? `avaliou ${Number(rating).toFixed(1)}★` : "review", color: "text-yellow-600 dark:text-yellow-400" };
+      case "review": return { text: rating ? <>avaliou <Star size={12} className="inline" /> {Number(rating).toFixed(1)}</> : "review", color: "text-yellow-600 dark:text-yellow-400" };
       case "status_change":
         if (["concluido", "completed", "completo"].includes(status?.toLowerCase())) {
           return { text: "completou", color: "text-green-600 dark:text-green-400" };
@@ -401,14 +407,6 @@ export default function HomePage() {
               ) : (
                 <div className="text-center py-6 text-slate-500">Sem sugestões de momento</div>
               )}
-            </div>
-          </section>
-
-          <section>
-            <SectionTitle>Ações</SectionTitle>
-            <div className="space-y-3">
-              <RetroButton color="cyan" onClick={() => navigate("/app/explorar")} className="w-full flex justify-center items-center gap-2">Explorar Jogos</RetroButton>
-              <RetroButton color="yellow" onClick={() => navigate("/app/conquistas")} className="w-full flex justify-center items-center gap-2">Conquistas</RetroButton>
             </div>
           </section>
         </div>

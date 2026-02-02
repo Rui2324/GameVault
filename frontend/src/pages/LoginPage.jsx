@@ -4,6 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../components/Toast";
 import ThemeToggle from "../components/ThemeToggle";
+import { Gamepad2, Eye, EyeOff, AlertTriangle, ChevronLeft, LogIn } from "lucide-react";
 
 // Componentes Retro Locais
 function RetroCard({ children, className = "", color = "fuchsia" }) {
@@ -79,10 +80,17 @@ export default function LoginPage() {
       <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.03)_2px,rgba(0,0,0,0.03)_4px)] pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-md p-4">
+        {/* Link voltar */}
+        <Link 
+          to="/" 
+          className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-cyan-600 dark:hover:text-cyan-400 mb-6 font-bold transition-colors"
+        >
+        </Link>
+
         {/* Logo/Brand */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 border-4 border-cyan-400 bg-white dark:bg-slate-900 shadow-[4px_4px_0px_0px_rgba(34,211,238,0.8)] mb-4">
-            <span className="text-4xl">🎮</span>
+            <Gamepad2 size={32} className="text-cyan-500" />
           </div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-wider">GameVault</h1>
           <p className="text-fuchsia-600 dark:text-fuchsia-400 font-bold text-sm tracking-widest mt-1">RETRO EDITION</p>
@@ -95,7 +103,7 @@ export default function LoginPage() {
 
           {erro && (
             <div className="mb-6 p-3 border-2 border-rose-500 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-bold flex items-center gap-2">
-              <span>⚠️</span> {erro}
+              <AlertTriangle size={14} /> {erro}
             </div>
           )}
 
@@ -128,7 +136,7 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 px-3 flex items-center text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
                 >
-                  {showPassword ? "👁️" : "🔒"}
+                  {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                 </button>
               </div>
             </div>
@@ -139,7 +147,7 @@ export default function LoginPage() {
               color="cyan" 
               className="w-full flex justify-center items-center gap-2 mt-4"
             >
-              {aCarregar ? "A carregar..." : "Entrar ➤"}
+              {aCarregar ? "A carregar..." : <><LogIn size={16} /> Entrar</>}
             </RetroButton>
           </form>
 

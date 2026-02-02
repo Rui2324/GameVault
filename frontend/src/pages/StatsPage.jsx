@@ -13,6 +13,14 @@ import {
   Cell,
   Legend,
 } from "recharts";
+import { 
+  Gamepad2, 
+  Clock, 
+  Trophy, 
+  Target, 
+  BarChart3,
+  PieChart as PieChartIcon
+} from "lucide-react";
 
 const CORES_ESTADO = ["#D946EF", "#22D3EE", "#4ADE80", "#FACC15"];
 const CORES_GENERO = ["#D946EF", "#22D3EE", "#4ADE80", "#FACC15", "#F472B6", "#2DD4BF"];
@@ -36,7 +44,7 @@ function RetroCard({ children, color = "fuchsia", className = "" }) {
   );
 }
 
-function StatCard({ titulo, valor, sufixo = "", icone, cor }) {
+function StatCard({ titulo, valor, sufixo = "", IconComponent, cor }) {
   const colors = {
     fuchsia: { border: "border-fuchsia-500", shadow: "shadow-[4px_4px_0px_0px_rgba(217,70,239,0.5)]", text: "text-fuchsia-600 dark:text-fuchsia-400" },
     cyan: { border: "border-cyan-400", shadow: "shadow-[4px_4px_0px_0px_rgba(34,211,238,0.5)]", text: "text-cyan-600 dark:text-cyan-400" },
@@ -55,7 +63,7 @@ function StatCard({ titulo, valor, sufixo = "", icone, cor }) {
             {valor}{sufixo}
           </span>
         </div>
-        <div className="text-3xl">{icone}</div>
+        <IconComponent size={32} className={style.text} />
       </div>
     </div>
   );
@@ -118,7 +126,7 @@ export default function StatsPage() {
             Análise
           </div>
           <h2 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-3">
-            📊 Estatísticas da coleção
+            <BarChart3 size={28} /> Estatísticas da coleção
           </h2>
           <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">
             Visão geral da tua biblioteca de jogos: distribuição por estado, género e plataforma.
@@ -147,17 +155,17 @@ export default function StatsPage() {
         <>
           {/* KPIs principais */}
           <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard titulo="Total de jogos" valor={totalJogos} icone="🎮" cor="cyan" />
-            <StatCard titulo="Horas jogadas" valor={totalHoras} sufixo="h" icone="⏱️" cor="green" />
-            <StatCard titulo="Taxa de conclusão" valor={taxaConclusao} sufixo="%" icone="🏆" cor="yellow" />
-            <StatCard titulo="Em progresso" valor={jogosPorEstado?.a_jogar ?? 0} icone="🎯" cor="fuchsia" />
+            <StatCard titulo="Total de jogos" valor={totalJogos} IconComponent={Gamepad2} cor="cyan" />
+            <StatCard titulo="Horas jogadas" valor={totalHoras} sufixo="h" IconComponent={Clock} cor="green" />
+            <StatCard titulo="Taxa de conclusão" valor={taxaConclusao} sufixo="%" IconComponent={Trophy} cor="yellow" />
+            <StatCard titulo="Em progresso" valor={jogosPorEstado?.a_jogar ?? 0} IconComponent={Target} cor="fuchsia" />
           </section>
 
           {/* Gráfico de barras: jogos por estado */}
           <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
             <RetroCard color="cyan" className="p-5">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">📈</span>
+                <BarChart3 size={20} className="text-cyan-500" />
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">Jogos por estado</h3>
               </div>
               <p className="text-xs text-slate-500 mb-4">Distribuição dos jogos que estão por jogar, em progresso, concluídos ou abandonados.</p>
@@ -182,7 +190,7 @@ export default function StatsPage() {
             {/* Pizza: jogos por género */}
             <RetroCard color="fuchsia" className="p-5">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">🥧</span>
+                <PieChartIcon size={20} className="text-fuchsia-500" />
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">Jogos por género</h3>
               </div>
               <p className="text-xs text-slate-500 mb-4">Que tipos de jogos jogas mais? RPG, ação, estratégia... vê a distribuição aqui.</p>

@@ -1,9 +1,22 @@
 // src/pages/CollectionPage.jsx
-// TODO: Teste de commit - verificar sincronização com Git
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { useToast } from "../components/Toast";
+import { 
+  Gamepad2, 
+  Check, 
+  X, 
+  Clock, 
+  Star, 
+  Trash2, 
+  Search, 
+  Cloud, 
+  Plus, 
+  FileText,
+  List,
+  Grid3x3
+} from "lucide-react";
 
 // ============ COMPONENTES VISUAIS (RETRO) ============
 
@@ -48,15 +61,16 @@ function RetroButton({ children, color = "fuchsia", onClick, className = "", dis
 function EstadoBadge({ estado }) {
   if (!estado) return null;
   const map = {
-    por_jogar: { label: "Por jogar", icon: "⏳", classes: "border-slate-400 text-slate-500 bg-slate-100 dark:bg-slate-800" },
-    a_jogar: { label: "A jogar", icon: "🎮", classes: "border-cyan-400 text-cyan-600 bg-cyan-50 dark:bg-cyan-900/20" },
-    concluido: { label: "Concluído", icon: "✅", classes: "border-green-400 text-green-600 bg-green-50 dark:bg-green-900/20" },
-    abandonado: { label: "Abandonado", icon: "❌", classes: "border-rose-500 text-rose-600 bg-rose-50 dark:bg-rose-900/20" },
+    por_jogar: { label: "Por jogar", Icon: Clock, classes: "border-slate-400 text-slate-500 bg-slate-100 dark:bg-slate-800" },
+    a_jogar: { label: "A jogar", Icon: Gamepad2, classes: "border-cyan-400 text-cyan-600 bg-cyan-50 dark:bg-cyan-900/20" },
+    concluido: { label: "Concluído", Icon: Check, classes: "border-green-400 text-green-600 bg-green-50 dark:bg-green-900/20" },
+    abandonado: { label: "Abandonado", Icon: X, classes: "border-rose-500 text-rose-600 bg-rose-50 dark:bg-rose-900/20" },
   };
   const cfg = map[estado] || map.por_jogar;
+  const IconComponent = cfg.Icon;
   return (
     <span className={`inline-flex items-center gap-1 border-2 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${cfg.classes}`}>
-      <span>{cfg.icon}</span> {cfg.label}
+      <IconComponent size={12} /> {cfg.label}
     </span>
   );
 }
@@ -65,7 +79,7 @@ function RatingChip({ rating }) {
   if (rating == null) {
     return (
       <span className="inline-flex items-center gap-1 border-2 border-slate-300 bg-slate-100 text-slate-500 dark:border-slate-600 dark:bg-slate-700/50 px-2 py-1 text-[10px] font-bold">
-        ⭐ --
+        <Star size={12} /> --
       </span>
     );
   }
@@ -76,7 +90,7 @@ function RatingChip({ rating }) {
 
   return (
     <span className={`inline-flex items-center gap-1 border-2 px-2 py-0.5 text-[10px] font-bold ${classes}`}>
-      ⭐ {n.toFixed(1)}
+      <Star size={12} fill="currentColor" /> {n.toFixed(1)}
     </span>
   );
 }
@@ -118,6 +132,9 @@ export default function CollectionPage() {
   // Paginação
   const PER_PAGE = 10;
   const [pagina, setPagina] = useState(1);
+  
+  // Vista (Lista vs Grid)
+  const [vistaGrid, setVistaGrid] = useState(false);
 
   // NOVO MODAL
   const [mostrarModal, setMostrarModal] = useState(false);
@@ -310,14 +327,14 @@ export default function CollectionPage() {
               <span className="inline-block w-3 h-3 bg-fuchsia-500 animate-pulse" />
               Biblioteca
             </div>
-            <h1 className="text-3xl font-black text-slate-900 dark:text-white">🎮 Minha Coleção</h1>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">📊 {jogos.length} jogos na tua biblioteca</p>
+            <h1 className="text-3xl font-black text-slate-900 dark:text-white flex items-center gap-2"><Gamepad2 size={32} /> Minha Coleção</h1>
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400 flex items-center gap-1"><FileText size={14} /> {jogos.length} jogos na tua biblioteca</p>
           </div>
           
           <div className="flex gap-2">
             {/* BOTÃO DA STEAM ADICIONADO AQUI */}
             <RetroButton color="slate" onClick={() => navigate("/app/steam-import")}>
-                ☁️ Steam
+                <Cloud size={14} /> Steam
             </RetroButton>
 
             <RetroButton color="cyan" onClick={() => {
@@ -325,7 +342,7 @@ export default function CollectionPage() {
                 setResultadosModal([]);
                 setTermoPesquisaModal("");
             }}>
-                ➕ Adicionar jogo
+                <Plus size={14} /> Adicionar jogo
             </RetroButton>
           </div>
         </div>
@@ -333,52 +350,71 @@ export default function CollectionPage() {
 
       {/* BARRA DE FILTROS */}
       <RetroCard color="cyan" className="p-4">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between text-xs">
-          <div className="flex flex-wrap gap-3">
-             <div className="flex items-center gap-2">
-                <span className="font-bold text-cyan-500 uppercase">Estado</span>
-                <select value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)} className="bg-slate-50 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-sm px-2 py-1 focus:border-cyan-400 outline-none">
-                    <option value="todos">Todos</option>
-                    <option value="por_jogar">Por Jogar</option>
-                    <option value="a_jogar">A Jogar</option>
-                    <option value="concluido">Concluído</option>
-                    <option value="abandonado">Abandonado</option>
-                </select>
-             </div>
-             <div className="flex items-center gap-2">
-                <span className="font-bold text-cyan-500 uppercase">Plataforma</span>
-                <select value={filtroPlataforma} onChange={e => setFiltroPlataforma(e.target.value)} className="bg-slate-50 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-sm px-2 py-1 focus:border-cyan-400 outline-none">
-                    <option value="todas">Todas</option>
-                    <option value="pc">PC</option>
-                    <option value="playstation">PlayStation</option>
-                    <option value="xbox">Xbox</option>
-                    <option value="nintendo">Nintendo</option>
-                </select>
-             </div>
-             <div className="flex items-center gap-2">
-                <span className="font-bold text-cyan-500 uppercase">Género</span>
-                <select value={filtroGenero} onChange={e => setFiltroGenero(e.target.value)} className="bg-slate-50 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-sm px-2 py-1 focus:border-cyan-400 outline-none max-w-[120px]">
-                    <option value="todos">Todos</option>
-                    {generos.map(g => <option key={g} value={g}>{g}</option>)}
-                </select>
-             </div>
-             {temFiltros && <RetroButton color="rose" onClick={limparFiltros} className="px-2 py-1 text-[10px]">Limpar</RetroButton>}
+        <div className="flex flex-col gap-4">
+          {/* Linha Superior: Filtros + Vista */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            {/* Filtros à esquerda */}
+            <div className="flex flex-wrap items-center gap-3 text-xs">
+               <div className="flex items-center gap-2">
+                  <span className="font-bold text-cyan-500 uppercase">Estado</span>
+                  <select value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)} className="bg-slate-50 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-sm px-2 py-1 focus:border-cyan-400 outline-none">
+                      <option value="todos">Todos</option>
+                      <option value="por_jogar">Por Jogar</option>
+                      <option value="a_jogar">A Jogar</option>
+                      <option value="concluido">Concluído</option>
+                      <option value="abandonado">Abandonado</option>
+                  </select>
+               </div>
+               <div className="flex items-center gap-2">
+                  <span className="font-bold text-cyan-500 uppercase">Plataforma</span>
+                  <select value={filtroPlataforma} onChange={e => setFiltroPlataforma(e.target.value)} className="bg-slate-50 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-sm px-2 py-1 focus:border-cyan-400 outline-none">
+                      <option value="todas">Todas</option>
+                      <option value="pc">PC</option>
+                      <option value="playstation">PlayStation</option>
+                      <option value="xbox">Xbox</option>
+                      <option value="nintendo">Nintendo</option>
+                  </select>
+               </div>
+               <div className="flex items-center gap-2">
+                  <span className="font-bold text-cyan-500 uppercase">Género</span>
+                  <select value={filtroGenero} onChange={e => setFiltroGenero(e.target.value)} className="bg-slate-50 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-sm px-2 py-1 focus:border-cyan-400 outline-none max-w-[120px]">
+                      <option value="todos">Todos</option>
+                      {generos.map(g => <option key={g} value={g}>{g}</option>)}
+                  </select>
+               </div>
+               {temFiltros && <RetroButton color="rose" onClick={limparFiltros} className="px-2 py-1 text-[10px]">Limpar</RetroButton>}
+            </div>
+            
+            {/* Vista à direita */}
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-cyan-500 uppercase text-[10px]">Vista:</span>
+              <div className="flex border-2 border-cyan-400 overflow-hidden">
+                <button onClick={() => setVistaGrid(false)} className={`px-3 py-1.5 text-xs font-bold transition-colors flex items-center gap-1 ${
+                  !vistaGrid ? 'bg-cyan-400 text-slate-900' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-cyan-50 dark:hover:bg-slate-700'
+                }`}><List size={14} /> Lista</button>
+                <button onClick={() => setVistaGrid(true)} className={`px-3 py-1.5 text-xs font-bold transition-colors border-l-2 border-cyan-400 flex items-center gap-1 ${
+                  vistaGrid ? 'bg-cyan-400 text-slate-900' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-cyan-50 dark:hover:bg-slate-700'
+                }`}><Grid3x3 size={14} /> Grid</button>
+              </div>
+            </div>
           </div>
-          
+
+          {/* Linha Inferior: Pesquisa + Contador */}
           <div className="flex gap-2 items-center">
-             <div className="relative w-full md:w-64">
-                <span className="absolute left-2 top-1/2 -translate-y-1/2">🔍</span>
-                <input type="text" placeholder="Filtrar coleção..." className="w-full pl-7 pr-2 py-1.5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 focus:border-fuchsia-500 outline-none rounded-sm" value={pesquisa} onChange={e => setPesquisa(e.target.value)} />
+             <div className="relative flex-1">
+                <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input type="text" placeholder="Filtrar coleção..." className="w-full pl-7 pr-2 py-1.5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 focus:border-fuchsia-500 outline-none rounded-sm text-xs" value={pesquisa} onChange={e => setPesquisa(e.target.value)} />
              </div>
-             <span className="font-bold text-fuchsia-500 bg-fuchsia-500/10 px-2 py-1 border border-fuchsia-500/30 text-[10px]">{total} jogos</span>
+             <span className="font-bold text-fuchsia-500 bg-fuchsia-500/10 px-3 py-1.5 border border-fuchsia-500/30 text-xs whitespace-nowrap">{total} jogos</span>
           </div>
         </div>
       </RetroCard>
 
-      {/* LISTA (TABELA) */}
+      {/* LISTA/GRID */}
       <RetroCard color="fuchsia" className="overflow-hidden">
         {loading ? <div className="p-8 text-center text-slate-500">A carregar...</div> :
          total === 0 ? <div className="p-16 text-center text-slate-500 font-bold">Nenhum jogo encontrado.</div> :
+         vistaGrid ? (
          <div>
             <div className="sticky top-0 z-10 grid grid-cols-12 gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-900 border-b-2 border-slate-200 dark:border-slate-700 text-[10px] font-bold uppercase text-slate-500 tracking-wider">
                <div className="col-span-5"><SortHeader label="JOGO" active={sort.key === "titulo"} dir={sort.dir} onClick={() => toggleSort("titulo")} /></div>
@@ -400,11 +436,11 @@ export default function CollectionPage() {
                     <div key={jogo.id} className="grid grid-cols-12 gap-3 px-4 py-3 items-center hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group cursor-pointer" onClick={() => navigate(`/app/jogo/${jogo.id}`)}>
                        <div className="col-span-5 flex items-center gap-3">
                           <div className="w-10 h-14 bg-slate-200 shrink-0 border border-slate-300 dark:border-slate-600 overflow-hidden">
-                             {capa ? <img src={capa} className="w-full h-full object-cover group-hover:scale-110 transition-transform" /> : <div className="flex items-center justify-center h-full text-xs">🎮</div>}
+                             {capa ? <img src={capa} className="w-full h-full object-cover group-hover:scale-110 transition-transform" /> : <div className="flex items-center justify-center h-full text-slate-400"><Gamepad2 size={16} /></div>}
                           </div>
                           <div className="min-w-0">
                              <div className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-fuchsia-500 transition-colors">{jogo.titulo}</div>
-                             {jogo.notas && <div className="text-[10px] text-slate-500 truncate">📝 {jogo.notas}</div>}
+                             {jogo.notas && <div className="text-[10px] text-slate-500 truncate flex items-center gap-1"><FileText size={10} /> {jogo.notas}</div>}
                           </div>
                        </div>
                        <div className="col-span-2 flex flex-col justify-center">
@@ -412,12 +448,29 @@ export default function CollectionPage() {
                           <div className="text-[10px] text-slate-500 truncate">{jogo.genero || "—"}</div>
                        </div>
                        <div className="col-span-2"><EstadoBadge estado={jogo.estado} /></div>
-                       <div className="col-span-2 flex flex-col gap-1">
-                          <RatingChip rating={jogo.rating} />
-                          <div className="text-right text-[10px] text-slate-500 font-mono font-bold">{formatHoras(jogo.horas_jogadas)}h</div>
+                       <div className="col-span-2 flex items-center gap-3">
+                          {/* Rating Visual */}
+                          <div className="flex-1">
+                             {jogo.rating != null ? (
+                                <div className="flex items-center gap-1.5">
+                                   <div className="flex gap-0.5">
+                                      {[1,2,3,4,5].map(star => (
+                                         <span key={star} className={`text-xs ${star <= Math.round(jogo.rating / 2) ? 'text-yellow-400' : 'text-slate-600'}`}>★</span>
+                                      ))}
+                                   </div>
+                                   <span className="text-xs font-bold text-yellow-500">{Number(jogo.rating).toFixed(1)}</span>
+                                </div>
+                             ) : (
+                                <span className="text-xs text-slate-500">Sem rating</span>
+                             )}
+                          </div>
+                          {/* Horas */}
+                          <div className="text-right">
+                             <div className="text-sm font-bold text-cyan-500 font-mono">{formatHoras(jogo.horas_jogadas)}h</div>
+                          </div>
                        </div>
                        <div className="col-span-1 text-right">
-                          <button onClick={(e) => { e.stopPropagation(); handleRemover(jogo.id, jogo.titulo); }} className="text-slate-400 hover:text-rose-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity border-2 border-transparent hover:border-rose-500/30 bg-transparent hover:bg-rose-500/10">🗑️</button>
+                          <button onClick={(e) => { e.stopPropagation(); handleRemover(jogo.id, jogo.titulo); }} className="text-slate-400 hover:text-rose-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity border-2 border-transparent hover:border-rose-500/30 bg-transparent hover:bg-rose-500/10"><Trash2 size={16} /></button>
                        </div>
                     </div>
                   )
@@ -432,6 +485,58 @@ export default function CollectionPage() {
                </div>
             </div>
          </div>
+         ) : (
+         // VISTA GRID
+         <div>
+            <div className="p-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+               {jogosPagina.map(jogo => {
+                  const capa = jogo.url_capa || jogo.cover_url;
+                  return (
+                    <button key={jogo.id} onClick={() => navigate(`/app/jogo/${jogo.id}`)} className="group text-left">
+                       <div className="border-2 border-cyan-400 bg-white dark:bg-slate-900 shadow-[4px_4px_0px_0px_rgba(34,211,238,0.5)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all overflow-hidden">
+                          {/* Capa */}
+                          <div className="relative aspect-video w-full bg-slate-900 overflow-hidden">
+                             {capa ? (
+                                <img src={capa} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt={jogo.titulo} />
+                             ) : (
+                                <div className="w-full h-full flex items-center justify-center text-slate-400"><Gamepad2 size={48} /></div>
+                             )}
+                             {/* Badge Estado no canto */}
+                             <div className="absolute top-2 right-2">
+                                {jogo.estado === 'concluido' && <span className="block w-8 h-8 bg-green-400 border-2 border-white shadow-lg flex items-center justify-center"><Check size={16} className="text-white" /></span>}
+                                {jogo.estado === 'a_jogar' && <span className="block w-8 h-8 bg-cyan-400 border-2 border-white shadow-lg flex items-center justify-center"><Gamepad2 size={16} className="text-white" /></span>}
+                                {jogo.estado === 'abandonado' && <span className="block w-8 h-8 bg-rose-500 border-2 border-white shadow-lg flex items-center justify-center"><X size={16} className="text-white" /></span>}
+                             </div>
+                          </div>
+                          {/* Info */}
+                          <div className="p-3 border-t-2 border-cyan-400 bg-slate-50 dark:bg-slate-800">
+                             <div className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors mb-1">{jogo.titulo}</div>
+                             <div className="flex items-center justify-between text-[10px]">
+                                <div className="flex items-center gap-1">
+                                   {jogo.rating != null ? (
+                                      <span className="font-bold text-yellow-500 flex items-center gap-0.5"><Star size={12} fill="currentColor" /> {Number(jogo.rating).toFixed(1)}</span>
+                                   ) : (
+                                      <span className="text-slate-400 flex items-center gap-0.5"><Star size={12} /> --</span>
+                                   )}
+                                </div>
+                                <span className="text-slate-500 font-mono font-bold">{formatHoras(jogo.horas_jogadas)}h</span>
+                             </div>
+                          </div>
+                       </div>
+                    </button>
+                  )
+               })}
+            </div>
+
+            <div className="p-4 bg-slate-50 dark:bg-slate-900 border-t-2 border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs">
+               <span className="font-bold text-fuchsia-600">Pág. {paginaAtual} de {totalPaginas}</span>
+               <div className="flex gap-2">
+                  <RetroButton color="cyan" disabled={paginaAtual <= 1} onClick={() => setPagina(p => Math.max(1, p-1))} className="px-2 py-1 text-[10px]">Anterior</RetroButton>
+                  <RetroButton color="cyan" disabled={paginaAtual >= totalPaginas} onClick={() => setPagina(p => Math.min(totalPaginas, p+1))} className="px-2 py-1 text-[10px]">Seguinte</RetroButton>
+               </div>
+            </div>
+         </div>
+         )
         }
       </RetroCard>
 
@@ -441,7 +546,7 @@ export default function CollectionPage() {
           <RetroCard color="cyan" className="w-full max-w-4xl max-h-[85vh] flex flex-col relative shadow-2xl">
             <div className="p-4 border-b-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
               <h3 className="text-xl font-black text-cyan-600 dark:text-cyan-400 flex items-center gap-2 uppercase tracking-wide">
-                <span>➕</span> Adicionar à Coleção
+                <Plus size={20} /> Adicionar à Coleção
               </h3>
               <button onClick={() => setMostrarModal(false)} className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-100 dark:hover:bg-rose-900/20 font-bold text-xl transition-colors">✕</button>
             </div>
@@ -487,7 +592,7 @@ export default function CollectionPage() {
                         <div className="flex-1 min-w-0">
                            <div className="font-bold text-slate-900 dark:text-white truncate">{nome}</div>
                            <div className="flex items-center gap-3 mt-1 text-xs text-slate-500 font-mono">
-                              <span>📅 {ano}</span>
+                              <span className="flex items-center gap-1"><Calendar size={12} /> {ano}</span>
                               {rating !== "-" && <span className="text-yellow-500 font-bold">★ {rating}</span>}
                            </div>
                         </div>
