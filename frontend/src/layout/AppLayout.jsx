@@ -156,9 +156,6 @@ export default function AppLayout() {
               </div>
               <div className="leading-tight text-left hidden sm:block">
                 <div className="text-base font-black tracking-wider text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">GAMEVAULT</div>
-                <div className="text-[10px] text-fuchsia-600 dark:text-fuchsia-400 font-bold uppercase tracking-widest">
-                  Retro Edition
-                </div>
               </div>
             </button>
 
@@ -348,8 +345,6 @@ export default function AppLayout() {
                 <span className="h-6 w-6 sm:h-8 sm:w-8 border-2 border-fuchsia-500 bg-fuchsia-50 dark:bg-fuchsia-500/20 flex items-center justify-center text-fuchsia-600 dark:text-fuchsia-400 text-sm"><Gamepad2 size={14} /></span>
                 <span className="text-slate-900 dark:text-white font-black uppercase tracking-wider text-xs sm:text-sm">GameVault</span>
               </div>
-              <span className="text-slate-300 dark:text-slate-700 hidden sm:inline">|</span>
-              <span className="text-slate-500 dark:text-slate-500 hidden sm:inline">Retro Gaming Collection</span>
             </div>
 
             <div className="flex flex-wrap items-center gap-2 sm:gap-4">

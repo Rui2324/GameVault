@@ -322,7 +322,7 @@ export default function CollectionPage() {
       {/* HEADER */}
       <RetroCard color="fuchsia" className="p-4 sm:p-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(rgba(217,70,239,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(217,70,239,0.1)_1px,transparent_1px)] bg-[size:20px_20px]" />
-        <div className="relative z-10 flex flex-col gap-4">
+        <div className="relative z-10 flex items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 text-fuchsia-600 dark:text-fuchsia-400 text-xs sm:text-sm font-bold uppercase tracking-widest mb-2">
               <span className="inline-block w-2 h-2 sm:w-3 sm:h-3 bg-fuchsia-500 animate-pulse" />
@@ -332,8 +332,8 @@ export default function CollectionPage() {
             <p className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-400 flex items-center gap-1"><FileText size={14} /> {jogos.length} jogos na tua biblioteca</p>
           </div>
           
-          <div className="flex flex-wrap gap-2">
-            {/* BOTÃO DA STEAM ADICIONADO AQUI */}
+          <div className="flex flex-col sm:flex-row gap-2 shrink-0">
+            {/* BOTÃO DA STEAM MOVIDO PARA DIREITA */}
             <RetroButton color="slate" onClick={() => navigate("/app/steam-import")} className="text-xs sm:text-sm">
                 <Cloud size={14} /> Steam
             </RetroButton>

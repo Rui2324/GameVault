@@ -275,7 +275,7 @@ export default function WishlistPage() {
       {/* HEADER */}
       <RetroCard color="rose" className="p-4 sm:p-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(rgba(244,63,94,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(244,63,94,0.1)_1px,transparent_1px)] bg-[size:20px_20px]" />
-        <div className="relative z-10 flex flex-col gap-4">
+        <div className="relative z-10 flex items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 text-xs sm:text-sm font-bold uppercase tracking-widest mb-1">
               <span className="inline-block w-2 h-2 sm:w-3 sm:h-3 bg-rose-500 animate-pulse" />
@@ -289,7 +289,7 @@ export default function WishlistPage() {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 shrink-0">
             <RetroButton color="yellow" onClick={handleFix} disabled={loading} className="text-xs sm:text-sm">
               <Wrench size={14} /> <span className="hidden sm:inline">Reparar</span> <span className="sm:hidden">Fix</span>
             </RetroButton>

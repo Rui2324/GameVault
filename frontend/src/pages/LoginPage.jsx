@@ -93,7 +93,6 @@ export default function LoginPage() {
             <Gamepad2 size={24} className="text-cyan-500 sm:w-8 sm:h-8" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-wider">GameVault</h1>
-          <p className="text-fuchsia-600 dark:text-fuchsia-400 font-bold text-xs sm:text-sm tracking-widest mt-1">RETRO EDITION</p>
         </div>
 
         <RetroCard color="fuchsia" className="p-4 sm:p-8">

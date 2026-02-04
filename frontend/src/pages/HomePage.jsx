@@ -347,30 +347,6 @@ export default function HomePage() {
               </RetroCard>
             )}
           </section>
-
-          <section>
-            <SectionTitle>Atividade</SectionTitle>
-            <RetroCard color="fuchsia" className="p-3 sm:p-4">
-              {loading ? (
-                <div className="space-y-3">
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} className="flex gap-3">
-                      <SkeletonRetro className="w-10 h-10 rounded-full" />
-                      <div className="flex-1 space-y-2"><SkeletonRetro className="h-4 w-3/4" /><SkeletonRetro className="h-3 w-1/4" /></div>
-                    </div>
-                  ))}
-                </div>
-              ) : activityFeed.length > 0 ? (
-                <div className="max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
-                  {activityFeed.map((act, idx) => (
-                    <ActivityItem key={`${act.type}-${act.user?.id}-${act.game?.id}-${idx}`} activity={act} onNavigate={navigate} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-slate-500">Sem atividade recente</div>
-              )}
-            </RetroCard>
-          </section>
         </div>
 
         {/* COLUNA DIREITA */}
@@ -385,7 +361,6 @@ export default function HomePage() {
                   <UpcomingCard 
                     key={game.id || game.external_id} 
                     game={game} 
-                    // CORREÇÃO: Garante que vai para /explorar
                     onClick={() => navigate(`/app/explorar/${game.external_id || game.id}`)} 
                   />
                 ))
@@ -394,22 +369,55 @@ export default function HomePage() {
               )}
             </div>
           </section>
-
-          <section>
-            <SectionTitle>Descobrir</SectionTitle>
-            <div className="space-y-3">
-              {loading ? (
-                [...Array(4)].map((_, i) => <SkeletonRetro key={i} className="h-20" />)
-              ) : discoverUsers.length > 0 ? (
-                discoverUsers.map((user) => (
-                  <UserCard key={user.id} user={user} onClick={() => navigate(`/app/perfil/${user.id}`)} />
-                ))
-              ) : (
-                <div className="text-center py-6 text-slate-500">Sem sugestões de momento</div>
-              )}
-            </div>
-          </section>
         </div>
+      </div>
+
+      {/* ATIVIDADE E DESCOBRIR - MESMA PROPORÇÃO QUE O GRID ACIMA */}
+      <div className="grid gap-6 md:gap-8 lg:grid-cols-3">
+        {/* ATIVIDADE - 2/3 da largura (como Top Avaliados) */}
+        <section className="lg:col-span-2">
+          <SectionTitle>Atividade</SectionTitle>
+          <RetroCard color="fuchsia" className="p-3 sm:p-4">
+            {loading ? (
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="flex gap-3">
+                    <SkeletonRetro className="w-10 h-10 rounded-full" />
+                    <div className="flex-1 space-y-2"><SkeletonRetro className="h-4 w-3/4" /><SkeletonRetro className="h-3 w-1/4" /></div>
+                  </div>
+                ))}
+              </div>
+            ) : activityFeed.length > 0 ? (
+              <div className="max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+                {activityFeed.map((act, idx) => (
+                  <ActivityItem key={`${act.type}-${act.user?.id}-${act.game?.id}-${idx}`} activity={act} onNavigate={navigate} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-slate-500">Sem atividade recente</div>
+            )}
+          </RetroCard>
+        </section>
+
+        {/* DESCOBRIR - 1/3 da largura (como Em Breve) */}
+        <section>
+          <SectionTitle>Descobrir</SectionTitle>
+          <RetroCard color="green" className="p-3 sm:p-4">
+            {loading ? (
+              <div className="space-y-3">
+                {[...Array(4)].map((_, i) => <SkeletonRetro key={i} className="h-16" />)}
+              </div>
+            ) : discoverUsers.length > 0 ? (
+              <div className="max-h-[400px] overflow-y-auto custom-scrollbar pr-2 space-y-2">
+                {discoverUsers.map((user) => (
+                  <UserCard key={user.id} user={user} onClick={() => navigate(`/app/perfil/${user.id}`)} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-slate-500">Sem sugestões de momento</div>
+            )}
+          </RetroCard>
+        </section>
       </div>
     </div>
   );
