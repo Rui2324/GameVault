@@ -1,6 +1,7 @@
 // src/controllers/adminController.js
 const userModel = require("../models/userModel");
 const pool = require("../config/db");
+const { logAdminAction, getAdminLogs, getLogStats } = require("../services/adminLogService");
 
 // Dashboard stats
 async function getDashboardStats(req, res) {
@@ -80,6 +81,8 @@ async function updateUserInfo(req, res) {
       [name, email, bio || null, is_public ? 1 : 0, userId]
     );
     
+    await logAdminAction(req.user.id, 'UPDATE_USER_INFO', 'user', userId, `Atualizou info de ${name}`, req.ip);
+    
     res.json({ message: "User atualizado com sucesso" });
   } catch (error) {
     console.error("Erro ao atualizar user:", error);
@@ -108,6 +111,8 @@ async function updateUserRole(req, res) {
       return res.status(404).json({ error: "User não encontrado" });
     }
 
+    await logAdminAction(req.user.id, 'UPDATE_USER_ROLE', 'user', userId, `Role alterado para ${role}`, req.ip);
+
     res.json({ message: `Role alterado para ${role}` });
   } catch (error) {
     console.error("Erro ao alterar role:", error);
@@ -130,6 +135,8 @@ async function deleteUser(req, res) {
     if (!success) {
       return res.status(404).json({ error: "User não encontrado" });
     }
+
+    await logAdminAction(req.user.id, 'DELETE_USER', 'user', userId, 'User eliminado', req.ip);
 
     res.json({ message: "User eliminado com sucesso" });
   } catch (error) {
@@ -184,6 +191,8 @@ async function updateCollectionEntry(req, res) {
       WHERE id = ?
     `, [status, rating, hours_played, notes, entryId]);
     
+    await logAdminAction(req.user.id, 'UPDATE_COLLECTION', 'collection_entry', entryId, `Status: ${status}`, req.ip);
+    
     res.json({ message: "Jogo atualizado" });
   } catch (error) {
     console.error("Erro ao atualizar jogo:", error);
@@ -197,7 +206,9 @@ async function removeFromCollection(req, res) {
     const { entryId } = req.params;
     
     await pool.query("DELETE FROM collection_entries WHERE id = ?", [entryId]);
-    
+
+    await logAdminAction(req.user.id, 'DELETE_COLLECTION_ENTRY', 'collection_entry', entryId, null, req.ip);
+
     res.json({ message: "Jogo removido da coleção" });
   } catch (error) {
     console.error("Erro ao remover jogo:", error);
@@ -254,6 +265,8 @@ async function removeFromWishlist(req, res) {
     
     await pool.query("DELETE FROM wishlist_entries WHERE id = ?", [entryId]);
     
+    await logAdminAction(req.user.id, 'DELETE_WISHLIST_ENTRY', 'wishlist_entry', entryId, null, req.ip);
+    
     res.json({ message: "Item removido da wishlist" });
   } catch (error) {
     console.error("Erro ao remover item:", error);
@@ -300,9 +313,73 @@ async function moveWishlistToCollection(req, res) {
     // Remover da wishlist
     await pool.query("DELETE FROM wishlist_entries WHERE id = ?", [entryId]);
     
+    await logAdminAction(req.user.id, 'MOVE_WISHLIST_TO_COLLECTION', 'wishlist_entry', entryId, `Movido para coleção`, req.ip);
+    
     res.json({ message: "Jogo movido para a coleção" });
   } catch (error) {
     console.error("Erro ao mover item:", error);
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
+}
+
+// Adicionar jogo à coleção de um user
+async function addGameToCollection(req, res) {
+  try {
+    const { userId } = req.params;
+    const { external_id, title, cover_url, platform, status = 'por_jogar' } = req.body;
+    
+    if (!external_id || !title) {
+      return res.status(400).json({ error: "external_id e title são obrigatórios" });
+    }
+    
+    // Verificar se o jogo já existe na tabela games
+    let [existingGame] = await pool.query(
+      "SELECT id FROM games WHERE external_id = ?",
+      [external_id]
+    );
+    
+    let gameId;
+    
+    if (existingGame.length === 0) {
+      // Criar slug a partir do título
+      const slug = title
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+      
+      // Criar o jogo
+      const [result] = await pool.query(
+        "INSERT INTO games (external_id, title, slug, cover_url, platform, source) VALUES (?, ?, ?, ?, ?, 'rawg')",
+        [external_id, title, slug, cover_url || null, platform || null]
+      );
+      gameId = result.insertId;
+    } else {
+      gameId = existingGame[0].id;
+    }
+    
+    // Verificar se já está na coleção do user
+    const [existingEntry] = await pool.query(
+      "SELECT id FROM collection_entries WHERE user_id = ? AND game_id = ?",
+      [userId, gameId]
+    );
+    
+    if (existingEntry.length > 0) {
+      return res.status(409).json({ error: "Jogo já está na coleção" });
+    }
+    
+    // Adicionar à coleção
+    await pool.query(
+      "INSERT INTO collection_entries (user_id, game_id, status) VALUES (?, ?, ?)",
+      [userId, gameId, status]
+    );
+    
+    await logAdminAction(req.user.id, 'ADD_GAME_TO_COLLECTION', 'game', gameId, `Adicionado a user ${userId}`, req.ip);
+    
+    res.json({ message: "Jogo adicionado à coleção" });
+  } catch (error) {
+    console.error("Erro ao adicionar jogo:", error);
     res.status(500).json({ error: "Erro interno do servidor" });
   }
 }
@@ -321,4 +398,5 @@ module.exports = {
   updateWishlistEntry,
   removeFromWishlist,
   moveWishlistToCollection,
+  addGameToCollection,
 };

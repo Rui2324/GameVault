@@ -6,7 +6,7 @@ import { useTheme } from "../context/ThemeContext";
 import { useToast } from "../components/Toast";
 import api from "../services/api";
 import AddGameModal from "../components/AddGameModal";
-import { Gamepad2, Search, Sun, Moon, User, Trophy, Settings as SettingsIcon, LogOut, GraduationCap, Shield } from "lucide-react";
+import { Gamepad2, Search, Sun, Moon, User, Trophy, Settings as SettingsIcon, LogOut, GraduationCap, Shield, Menu, X } from "lucide-react";
 
 export default function AppLayout() {
   const { user, logout } = useAuth();
@@ -15,6 +15,7 @@ export default function AppLayout() {
 
   const inicial = (user?.name || user?.email || "?")[0].toUpperCase();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const userMenuRef = useRef(null);
 
   const navLinks = [
@@ -41,6 +42,21 @@ export default function AppLayout() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Fechar menu mobile quando navegar
+  useEffect(() => {
+    setShowMobileMenu(false);
+  }, [navigate]);
+
+  // Bloquear scroll quando menu mobile está aberto
+  useEffect(() => {
+    if (showMobileMenu) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [showMobileMenu]);
 
   // Resolver URL do avatar
   let avatarSrc = null;
@@ -118,18 +134,27 @@ export default function AppLayout() {
         {/* Grid pattern - Aumentei opacidade no light mode para ver melhor o efeito retro */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(217,70,239,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(217,70,239,0.05)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(217,70,239,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(217,70,239,0.05)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
         
-        <div className="relative flex items-center justify-between px-6 py-3">
+        <div className="relative flex items-center justify-between px-4 sm:px-6 py-3">
+          {/* Mobile menu button */}
+          <button
+            type="button"
+            onClick={() => setShowMobileMenu(!showMobileMenu)}
+            className="md:hidden flex h-10 w-10 items-center justify-center border-2 border-fuchsia-500 bg-fuchsia-50 dark:bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400 shadow-[3px_3px_0px_0px_rgba(217,70,239,0.6)] hover:bg-fuchsia-500 hover:text-white transition-all"
+          >
+            {showMobileMenu ? <X size={20} /> : <Menu size={20} />}
+          </button>
+
           {/* Logo + nav */}
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-4 lg:gap-8">
             <button
               type="button"
               onClick={() => navigate("/app/home")}
-              className="group flex items-center gap-3 focus:outline-none"
+              className="group flex items-center gap-2 sm:gap-3 focus:outline-none"
             >
-              <div className="flex h-10 w-10 items-center justify-center border-2 border-cyan-400 bg-cyan-400/10 text-xl text-cyan-600 dark:text-cyan-400 shadow-[3px_3px_0px_0px_rgba(34,211,238,0.6)] group-hover:bg-cyan-400 group-hover:text-slate-900 transition-all">
+              <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center border-2 border-cyan-400 bg-cyan-400/10 text-xl text-cyan-600 dark:text-cyan-400 shadow-[3px_3px_0px_0px_rgba(34,211,238,0.6)] group-hover:bg-cyan-400 group-hover:text-slate-900 transition-all">
                 <Gamepad2 size={20} />
               </div>
-              <div className="leading-tight text-left">
+              <div className="leading-tight text-left hidden sm:block">
                 <div className="text-base font-black tracking-wider text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">GAMEVAULT</div>
                 <div className="text-[10px] text-fuchsia-600 dark:text-fuchsia-400 font-bold uppercase tracking-widest">
                   Retro Edition
@@ -137,14 +162,14 @@ export default function AppLayout() {
               </div>
             </button>
 
-            <nav className="hidden items-center gap-2 text-sm md:flex">
+            <nav className="hidden items-center gap-1 lg:gap-2 text-sm md:flex">
               {navLinks.map((link) => (
                 <NavLink
                   key={link.to}
                   to={link.to}
                   className={({ isActive }) =>
                     [
-                      "group flex items-center gap-2 px-4 py-2 border-2 font-bold text-sm uppercase tracking-wide transition-all",
+                      "group flex items-center gap-2 px-2 lg:px-4 py-2 border-2 font-bold text-xs lg:text-sm uppercase tracking-wide transition-all",
                       isActive
                         ? "border-cyan-400 bg-cyan-400 text-slate-900 shadow-[3px_3px_0px_0px_rgba(34,211,238,0.6)]"
                         : "border-transparent hover:border-fuchsia-500 text-slate-700 dark:text-slate-400 hover:text-fuchsia-600 dark:hover:text-fuchsia-400 hover:bg-fuchsia-50 dark:hover:bg-fuchsia-500/10",
@@ -159,17 +184,27 @@ export default function AppLayout() {
           </div>
 
           {/* Search + theme toggle + user */}
-          <div className="flex items-center gap-4">
-            {/* Pesquisa global */}
+          <div className="flex items-center gap-2 sm:gap-4">
+            {/* Pesquisa global - Mobile icon only */}
             <button
               type="button"
               onClick={handleOpenGlobalSearch}
-              className="group hidden items-center gap-2 border-2 border-yellow-400 bg-yellow-50 dark:bg-yellow-400/10 px-4 py-2 text-sm text-yellow-700 dark:text-yellow-400 font-bold uppercase tracking-wide shadow-[3px_3px_0px_0px_rgba(250,204,21,0.6)] hover:bg-yellow-400 hover:text-slate-900 transition-all sm:flex"
+              className="group flex sm:hidden h-10 w-10 items-center justify-center border-2 border-yellow-400 bg-yellow-50 dark:bg-yellow-400/10 text-yellow-700 dark:text-yellow-400 shadow-[3px_3px_0px_0px_rgba(250,204,21,0.6)] hover:bg-yellow-400 hover:text-slate-900 transition-all"
+              title="Pesquisar (Ctrl+K)"
+            >
+              <Search size={18} />
+            </button>
+
+            {/* Pesquisa global - Desktop full button */}
+            <button
+              type="button"
+              onClick={handleOpenGlobalSearch}
+              className="group hidden items-center gap-2 border-2 border-yellow-400 bg-yellow-50 dark:bg-yellow-400/10 px-3 lg:px-4 py-2 text-sm text-yellow-700 dark:text-yellow-400 font-bold uppercase tracking-wide shadow-[3px_3px_0px_0px_rgba(250,204,21,0.6)] hover:bg-yellow-400 hover:text-slate-900 transition-all sm:flex"
               title="Pesquisar e importar jogos (Ctrl+K)"
             >
               <Search size={16} />
-              <span>Pesquisar</span>
-              <span className="ml-2 border border-yellow-600/30 dark:border-yellow-400/50 px-1.5 py-0.5 text-[10px] bg-white/50 dark:bg-transparent">
+              <span className="hidden lg:inline">Pesquisar</span>
+              <span className="hidden lg:inline ml-2 border border-yellow-600/30 dark:border-yellow-400/50 px-1.5 py-0.5 text-[10px] bg-white/50 dark:bg-transparent">
                 Ctrl K
               </span>
             </button>
@@ -178,13 +213,13 @@ export default function AppLayout() {
             <button
               type="button"
               onClick={toggleTheme}
-              className="group flex h-10 w-10 items-center justify-center border-2 border-fuchsia-500 bg-fuchsia-50 dark:bg-fuchsia-500/10 text-lg text-fuchsia-600 dark:text-fuchsia-400 shadow-[3px_3px_0px_0px_rgba(217,70,239,0.6)] hover:bg-fuchsia-500 hover:text-white transition-all"
+              className="group flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center border-2 border-fuchsia-500 bg-fuchsia-50 dark:bg-fuchsia-500/10 text-lg text-fuchsia-600 dark:text-fuchsia-400 shadow-[3px_3px_0px_0px_rgba(217,70,239,0.6)] hover:bg-fuchsia-500 hover:text-white transition-all"
               title={theme === "dark" ? "Mudar para modo claro" : "Mudar para modo escuro"}
             >
-              {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+              {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
             </button>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <div className="text-right leading-tight hidden sm:block">
                 <div className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wide">
                   {user?.name || "Utilizador"}
@@ -264,15 +299,41 @@ export default function AppLayout() {
             </div>
           </div>
         </div>
+
+        {/* Mobile Menu Overlay */}
+        {showMobileMenu && (
+          <div className="md:hidden fixed inset-0 top-[65px] z-40 bg-white dark:bg-slate-900 border-t-2 border-fuchsia-500">
+            <nav className="flex flex-col p-4 space-y-2">
+              {navLinks.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setShowMobileMenu(false)}
+                  className={({ isActive }) =>
+                    [
+                      "flex items-center gap-3 px-4 py-3 border-2 font-bold text-sm uppercase tracking-wide transition-all",
+                      isActive
+                        ? "border-cyan-400 bg-cyan-400 text-slate-900 shadow-[3px_3px_0px_0px_rgba(34,211,238,0.6)]"
+                        : "border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-400 hover:border-fuchsia-500 hover:text-fuchsia-600 dark:hover:text-fuchsia-400",
+                    ].join(" ")
+                  }
+                >
+                  <span className="text-lg">{link.icon}</span>
+                  <span>{link.label}</span>
+                </NavLink>
+              ))}
+            </nav>
+          </div>
+        )}
       </header>
 
       {/* CONTEÚDO PRINCIPAL - RETRO */}
-      <main className="flex-1 px-4 sm:px-6 py-6 bg-slate-100 dark:bg-slate-950">
+      <main className="flex-1 px-3 sm:px-4 md:px-6 py-4 sm:py-6 bg-slate-100 dark:bg-slate-950">
         {/* Scanline effect (mais subtil no claro) */}
         <div className="fixed inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.01)_2px,rgba(0,0,0,0.01)_4px)] dark:bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.03)_2px,rgba(0,0,0,0.03)_4px)] pointer-events-none z-10" />
         
         {/* Container Principal: Branco Puro no Light Mode com borda definida */}
-        <div className="relative z-0 w-full border-2 border-slate-200 dark:border-cyan-500/30 bg-white dark:bg-slate-900 p-5 shadow-sm dark:shadow-[0_0_30px_rgba(34,211,238,0.1)] rounded-xl">
+        <div className="relative z-0 w-full border-2 border-slate-200 dark:border-cyan-500/30 bg-white dark:bg-slate-900 p-3 sm:p-5 shadow-sm dark:shadow-[0_0_30px_rgba(34,211,238,0.1)] rounded-xl">
           <Outlet />
         </div>
       </main>
@@ -281,21 +342,21 @@ export default function AppLayout() {
       <footer className="mt-0">
         <div className="h-1 bg-gradient-to-r from-fuchsia-500 via-cyan-400 to-yellow-400" />
         <div className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700">
-          <div className="flex flex-col gap-3 px-6 py-4 text-xs md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-3 px-4 sm:px-6 py-4 text-xs md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
               <div className="flex items-center gap-2">
-                <span className="h-8 w-8 border-2 border-fuchsia-500 bg-fuchsia-50 dark:bg-fuchsia-500/20 flex items-center justify-center text-fuchsia-600 dark:text-fuchsia-400 text-sm"><Gamepad2 size={16} /></span>
-                <span className="text-slate-900 dark:text-white font-black uppercase tracking-wider">GameVault</span>
+                <span className="h-6 w-6 sm:h-8 sm:w-8 border-2 border-fuchsia-500 bg-fuchsia-50 dark:bg-fuchsia-500/20 flex items-center justify-center text-fuchsia-600 dark:text-fuchsia-400 text-sm"><Gamepad2 size={14} /></span>
+                <span className="text-slate-900 dark:text-white font-black uppercase tracking-wider text-xs sm:text-sm">GameVault</span>
               </div>
-              <span className="text-slate-300 dark:text-slate-700">|</span>
-              <span className="text-slate-500 dark:text-slate-500">Retro Gaming Collection</span>
+              <span className="text-slate-300 dark:text-slate-700 hidden sm:inline">|</span>
+              <span className="text-slate-500 dark:text-slate-500 hidden sm:inline">Retro Gaming Collection</span>
             </div>
 
-            <div className="flex flex-wrap items-center gap-4">
-              <span className="flex items-center gap-2 border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-slate-600 dark:text-slate-400 rounded">
-                <GraduationCap size={16} /> ISTEC 2026
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+              <span className="flex items-center gap-1 sm:gap-2 border border-slate-300 dark:border-slate-700 px-2 sm:px-3 py-1 sm:py-1.5 text-slate-600 dark:text-slate-400 rounded text-[10px] sm:text-xs">
+                <GraduationCap size={14} /> ISTEC 2026
               </span>
-              <span className="flex items-center gap-2 border border-green-500/50 bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 px-3 py-1.5 rounded">
+              <span className="flex items-center gap-1 sm:gap-2 border border-green-500/50 bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 px-2 sm:px-3 py-1 sm:py-1.5 rounded text-[10px] sm:text-xs">
                 <span className="h-2 w-2 bg-green-500 dark:bg-green-400 animate-pulse rounded-full" />
                 <span>ONLINE</span>
               </span>

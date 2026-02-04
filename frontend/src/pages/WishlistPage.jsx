@@ -273,28 +273,28 @@ export default function WishlistPage() {
     <div className="h-full flex flex-col gap-6">
 
       {/* HEADER */}
-      <RetroCard color="rose" className="p-6 relative overflow-hidden">
+      <RetroCard color="rose" className="p-4 sm:p-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(rgba(244,63,94,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(244,63,94,0.1)_1px,transparent_1px)] bg-[size:20px_20px]" />
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="relative z-10 flex flex-col gap-4">
           <div>
-            <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 text-sm font-bold uppercase tracking-widest mb-1">
-              <span className="inline-block w-3 h-3 bg-rose-500 animate-pulse" />
+            <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 text-xs sm:text-sm font-bold uppercase tracking-widest mb-1">
+              <span className="inline-block w-2 h-2 sm:w-3 sm:h-3 bg-rose-500 animate-pulse" />
               Lista de Desejos
             </div>
-            <h2 className="text-3xl font-black text-slate-900 dark:text-white flex items-center gap-3">
-              <Heart size={32} className="text-rose-500" /> Wishlist
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 dark:text-white flex items-center gap-2 sm:gap-3">
+              <Heart size={24} className="text-rose-500 sm:w-8 sm:h-8" /> Wishlist
             </h2>
-            <p className="text-slate-600 dark:text-slate-400 text-sm mt-1 font-mono">
+            <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm mt-1 font-mono">
               {wishlist.length} jogos que queres comprar.
             </p>
           </div>
 
-          <div className="flex gap-2">
-            <RetroButton color="yellow" onClick={handleFix} disabled={loading}>
-              <Wrench size={14} /> Reparar Nomes
+          <div className="flex flex-wrap gap-2">
+            <RetroButton color="yellow" onClick={handleFix} disabled={loading} className="text-xs sm:text-sm">
+              <Wrench size={14} /> <span className="hidden sm:inline">Reparar</span> <span className="sm:hidden">Fix</span>
             </RetroButton>
 
-            <RetroButton color="slate" onClick={() => navigate("/app/steam-wishlist-import")}>
+            <RetroButton color="slate" onClick={() => navigate("/app/steam-wishlist-import")} className="text-xs sm:text-sm">
               <Cloud size={14} /> Steam
             </RetroButton>
 
@@ -302,8 +302,8 @@ export default function WishlistPage() {
               setMostrarModal(true);
               setResultadosExternos([]);
               setTermoPesquisa("");
-            }}>
-              <Plus size={14} /> Adicionar jogo
+            }} className="text-xs sm:text-sm">
+              <Plus size={14} /> Adicionar
             </RetroButton>
           </div>
         </div>
@@ -313,13 +313,13 @@ export default function WishlistPage() {
       <RetroCard color="fuchsia" className="flex-1 overflow-hidden">
         {loading ? <div className="text-center py-10 text-slate-500">A carregar...</div> :
           wishlist.length === 0 ? (
-            <div className="text-center py-20 text-slate-500">
-              <Heart size={64} className="mx-auto mb-4 opacity-50 text-slate-400" />
-              <p className="font-bold text-lg">A tua wishlist está vazia.</p>
-              <p className="text-sm">Adiciona jogos para começar.</p>
+            <div className="text-center py-12 sm:py-20 text-slate-500">
+              <Heart size={48} className="mx-auto mb-4 opacity-50 text-slate-400 sm:w-16 sm:h-16" />
+              <p className="font-bold text-base sm:text-lg">A tua wishlist está vazia.</p>
+              <p className="text-xs sm:text-sm">Adiciona jogos para começar.</p>
             </div>
           ) : (
-            <div className="p-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="p-3 sm:p-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4">
               {wishlist.map(item => {
                 const game = item.game || item;
                 const titulo = item.titulo || item.title || game.title || "Sem título";
@@ -336,17 +336,17 @@ export default function WishlistPage() {
                         {capa ? (
                           <img src={capa} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt={titulo} />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-slate-400"><Gamepad2 size={48} /></div>
+                          <div className="w-full h-full flex items-center justify-center text-slate-400"><Gamepad2 size={32} className="sm:w-12 sm:h-12" /></div>
                         )}
                         {/* Badge Wishlist */}
-                        <div className="absolute top-2 right-2">
-                          <span className="block w-8 h-8 bg-rose-500 border-2 border-white shadow-lg flex items-center justify-center"><Heart size={16} className="text-white" fill="white" /></span>
+                        <div className="absolute top-1 right-1 sm:top-2 sm:right-2">
+                          <span className="block w-6 h-6 sm:w-8 sm:h-8 bg-rose-500 border-2 border-white shadow-lg flex items-center justify-center"><Heart size={12} className="text-white sm:w-4 sm:h-4" fill="white" /></span>
                         </div>
                       </div>
                       {/* Info */}
-                      <div className="p-3 border-t-2 border-rose-400 bg-slate-50 dark:bg-slate-800">
+                      <div className="p-2 sm:p-3 border-t-2 border-rose-400 bg-slate-50 dark:bg-slate-800">
                         <div 
-                          className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-rose-500 transition-colors mb-2 cursor-pointer"
+                          className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate group-hover:text-rose-500 transition-colors mb-2 cursor-pointer"
                           onClick={() => irParaDetalhes(item)}
                         >
                           {titulo}
@@ -379,22 +379,22 @@ export default function WishlistPage() {
 
       {/* MODAL PESQUISA */}
       {mostrarModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/90 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <RetroCard color="cyan" className="w-full max-w-4xl max-h-[85vh] flex flex-col relative shadow-2xl">
-            <div className="p-4 border-b-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
-              <h3 className="text-xl font-black text-cyan-600 dark:text-cyan-400 flex items-center gap-2 uppercase tracking-wide">
-                <Search size={20} /> Adicionar à Wishlist
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/90 backdrop-blur-sm p-2 sm:p-4 animate-in fade-in duration-200">
+          <RetroCard color="cyan" className="w-full max-w-4xl max-h-[90vh] sm:max-h-[85vh] flex flex-col relative shadow-2xl">
+            <div className="p-3 sm:p-4 border-b-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
+              <h3 className="text-base sm:text-xl font-black text-cyan-600 dark:text-cyan-400 flex items-center gap-2 uppercase tracking-wide">
+                <Search size={18} /> <span className="hidden sm:inline">Adicionar à</span> Wishlist
               </h3>
               <button onClick={() => setMostrarModal(false)} className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-100 dark:hover:bg-rose-900/20 font-bold text-xl transition-colors"><X size={20} /></button>
             </div>
 
-            <div className="p-6 flex flex-col flex-1 overflow-hidden bg-white dark:bg-slate-900">
-              <form onSubmit={handleManualSearch} className="flex gap-3 mb-6">
+            <div className="p-3 sm:p-6 flex flex-col flex-1 overflow-hidden bg-white dark:bg-slate-900">
+              <form onSubmit={handleManualSearch} className="flex gap-2 sm:gap-3 mb-4 sm:mb-6">
                 <input
                   type="text"
                   autoFocus
-                  placeholder="Escreve o nome do jogo..."
-                  className="flex-1 border-2 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800 pl-4 pr-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors font-mono text-slate-900 dark:text-white"
+                  placeholder="Nome do jogo..."
+                  className="flex-1 border-2 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800 pl-3 sm:pl-4 pr-3 sm:pr-4 py-2 sm:py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors font-mono text-slate-900 dark:text-white"
                   value={termoPesquisa}
                   onChange={e => setTermoPesquisa(e.target.value)}
                 />

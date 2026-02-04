@@ -20,6 +20,11 @@ function EstadoBadge({ estado }) {
       icon: Gamepad2,
       classes: "bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:border-sky-700",
     },
+    em_pausa: {
+      label: "Em Pausa",
+      icon: Clock,
+      classes: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700",
+    },
     concluido: {
       label: "Concluído",
       icon: Check,
@@ -512,6 +517,7 @@ export default function GameDetailsPage() {
                 >
                   <option value="por_jogar">Por jogar</option>
                   <option value="a_jogar">A jogar</option>
+                  <option value="em_pausa">Em Pausa</option>
                   <option value="concluido">Concluído</option>
                   <option value="abandonado">Abandonado</option>
                 </select>

@@ -17,6 +17,9 @@ import SteamImportPage from "./pages/SteamImportPage";
 import SteamWishlistImportPage from "./pages/SteamWishlistImportPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminUserPage from "./pages/AdminUserPage";
+import AdminLogsPage from "./pages/AdminLogsPage";
+import AdminReviewsPage from "./pages/AdminReviewsPage";
+import AdminAnalyticsPage from "./pages/AdminAnalyticsPage";
 import AppLayout from "./layout/AppLayout";
 
 function RotaProtegida({ children }) {
@@ -65,6 +68,9 @@ export default function App() {
         {/* Admin Dashboard */}
         <Route path="admin" element={<AdminDashboardPage />} />
         <Route path="admin/user/:userId" element={<AdminUserPage />} />
+        <Route path="admin/logs" element={<AdminLogsPage />} />
+        <Route path="admin/reviews" element={<AdminReviewsPage />} />
+        <Route path="admin/analytics" element={<AdminAnalyticsPage />} />
         
         {/* Steam Import */}
         <Route path="steam-import" element={<SteamImportPage />} />

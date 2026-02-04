@@ -55,15 +55,15 @@ function StatCard({ titulo, valor, sufixo = "", IconComponent, cor }) {
   const style = colors[cor] || colors.fuchsia;
 
   return (
-    <div className={`relative overflow-hidden bg-white dark:bg-slate-900 border-2 ${style.border} ${style.shadow} p-5 transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none`}>
+    <div className={`relative overflow-hidden bg-white dark:bg-slate-900 border-2 ${style.border} ${style.shadow} p-3 sm:p-5 transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none`}>
       <div className="relative flex items-center justify-between">
         <div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wide mb-1">{titulo}</p>
-          <span className={`text-3xl font-black ${style.text}`}>
+          <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wide mb-1">{titulo}</p>
+          <span className={`text-xl sm:text-3xl font-black ${style.text}`}>
             {valor}{sufixo}
           </span>
         </div>
-        <IconComponent size={32} className={style.text} />
+        <IconComponent size={24} className={`${style.text} sm:w-8 sm:h-8`} />
       </div>
     </div>
   );
@@ -73,6 +73,7 @@ function mapEstadoLabel(estado) {
   switch (estado) {
     case "por_jogar": return "Por jogar";
     case "a_jogar": return "A jogar";
+    case "em_pausa": return "Em Pausa";
     case "concluido": return "Concluído";
     case "abandonado": return "Abandonado";
     default: return estado || "—";
@@ -118,18 +119,18 @@ export default function StatsPage() {
   return (
     <div className="space-y-6">
       {/* Header Retro */}
-      <RetroCard color="fuchsia" className="p-6 relative overflow-hidden">
+      <RetroCard color="fuchsia" className="p-4 sm:p-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(rgba(217,70,239,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(217,70,239,0.1)_1px,transparent_1px)] bg-[size:20px_20px]" />
         <div className="relative">
-          <div className="flex items-center gap-2 text-fuchsia-600 dark:text-fuchsia-400 text-sm font-bold uppercase tracking-widest mb-2">
-            <span className="inline-block w-3 h-3 bg-fuchsia-500 animate-pulse" />
+          <div className="flex items-center gap-2 text-fuchsia-600 dark:text-fuchsia-400 text-xs sm:text-sm font-bold uppercase tracking-widest mb-2">
+            <span className="inline-block w-2 h-2 sm:w-3 sm:h-3 bg-fuchsia-500 animate-pulse" />
             Análise
           </div>
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-3">
-            <BarChart3 size={28} /> Estatísticas da coleção
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2 sm:gap-3">
+            <BarChart3 size={24} className="sm:w-7 sm:h-7" /> Estatísticas da coleção
           </h2>
-          <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">
-            Visão geral da tua biblioteca de jogos: distribuição por estado, género e plataforma.
+          <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm mt-1">
+            Visão geral da tua biblioteca de jogos.
           </p>
         </div>
       </RetroCard>
@@ -154,7 +155,7 @@ export default function StatsPage() {
       {!loading && !erro && (
         <>
           {/* KPIs principais */}
-          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <section className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
             <StatCard titulo="Total de jogos" valor={totalJogos} IconComponent={Gamepad2} cor="cyan" />
             <StatCard titulo="Horas jogadas" valor={totalHoras} sufixo="h" IconComponent={Clock} cor="green" />
             <StatCard titulo="Taxa de conclusão" valor={taxaConclusao} sufixo="%" IconComponent={Trophy} cor="yellow" />
@@ -162,22 +163,22 @@ export default function StatsPage() {
           </section>
 
           {/* Gráfico de barras: jogos por estado */}
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
-            <RetroCard color="cyan" className="p-5">
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 items-stretch">
+            <RetroCard color="cyan" className="p-3 sm:p-5">
               <div className="flex items-center gap-2 mb-2">
-                <BarChart3 size={20} className="text-cyan-500" />
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Jogos por estado</h3>
+                <BarChart3 size={18} className="text-cyan-500" />
+                <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Jogos por estado</h3>
               </div>
-              <p className="text-xs text-slate-500 mb-4">Distribuição dos jogos que estão por jogar, em progresso, concluídos ou abandonados.</p>
+              <p className="text-[10px] sm:text-xs text-slate-500 mb-3 sm:mb-4">Distribuição dos jogos por estado.</p>
               {dataEstado.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-48 text-slate-400"><span className="text-4xl mb-2">📭</span><p className="text-sm">Ainda não há dados suficientes</p></div>
+                <div className="flex flex-col items-center justify-center h-36 sm:h-48 text-slate-400"><span className="text-3xl sm:text-4xl mb-2">📭</span><p className="text-xs sm:text-sm">Ainda não há dados suficientes</p></div>
               ) : (
-                <div className="w-full h-64">
+                <div className="w-full h-48 sm:h-64">
                   <ResponsiveContainer>
                     <BarChart data={dataEstado}>
-                      <XAxis dataKey="estado" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                      <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                      <Tooltip contentStyle={{ fontSize: 12, borderRadius: 0, border: '2px solid #22d3ee', backgroundColor: '#0f172a', color: '#fff' }} />
+                      <XAxis dataKey="estado" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                      <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                      <Tooltip contentStyle={{ fontSize: 11, borderRadius: 0, border: '2px solid #22d3ee', backgroundColor: '#0f172a', color: '#fff' }} />
                       <Bar dataKey="quantidade" radius={0}>
                         {dataEstado.map((_, index) => <Cell key={`cell-estado-${index}`} fill={CORES_ESTADO[index % CORES_ESTADO.length]} />)}
                       </Bar>
@@ -188,23 +189,23 @@ export default function StatsPage() {
             </RetroCard>
 
             {/* Pizza: jogos por género */}
-            <RetroCard color="fuchsia" className="p-5">
+            <RetroCard color="fuchsia" className="p-3 sm:p-5">
               <div className="flex items-center gap-2 mb-2">
-                <PieChartIcon size={20} className="text-fuchsia-500" />
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Jogos por género</h3>
+                <PieChartIcon size={18} className="text-fuchsia-500" />
+                <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Jogos por género</h3>
               </div>
-              <p className="text-xs text-slate-500 mb-4">Que tipos de jogos jogas mais? RPG, ação, estratégia... vê a distribuição aqui.</p>
+              <p className="text-[10px] sm:text-xs text-slate-500 mb-3 sm:mb-4">Distribuição por tipo de jogo.</p>
               {dataGenero.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-48 text-slate-400"><span className="text-4xl mb-2">📭</span><p className="text-sm">Ainda não há dados suficientes</p></div>
+                <div className="flex flex-col items-center justify-center h-36 sm:h-48 text-slate-400"><span className="text-3xl sm:text-4xl mb-2">📭</span><p className="text-xs sm:text-sm">Ainda não há dados suficientes</p></div>
               ) : (
-                <div className="w-full h-64">
+                <div className="w-full h-48 sm:h-64">
                   <ResponsiveContainer>
                     <PieChart>
-                      <Pie data={dataGenero} dataKey="quantidade" nameKey="nome" outerRadius={80} innerRadius={45} paddingAngle={3} stroke="none">
+                      <Pie data={dataGenero} dataKey="quantidade" nameKey="nome" outerRadius={60} innerRadius={35} paddingAngle={3} stroke="none">
                         {dataGenero.map((_, index) => <Cell key={`cell-genero-${index}`} fill={CORES_GENERO[index % CORES_GENERO.length]} />)}
                       </Pie>
-                      <Tooltip contentStyle={{ fontSize: 12, borderRadius: 0, border: '2px solid #d946ef', backgroundColor: '#0f172a', color: '#fff' }} />
-                      <Legend layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ fontSize: 11, color: '#94a3b8' }} />
+                      <Tooltip contentStyle={{ fontSize: 11, borderRadius: 0, border: '2px solid #d946ef', backgroundColor: '#0f172a', color: '#fff' }} />
+                      <Legend layout="horizontal" align="center" verticalAlign="bottom" wrapperStyle={{ fontSize: 10, color: '#94a3b8' }} />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
@@ -213,21 +214,21 @@ export default function StatsPage() {
           </section>
 
           {/* Gráfico barras horizontais: jogos por plataforma */}
-          <RetroCard color="yellow" className="p-5">
+          <RetroCard color="yellow" className="p-3 sm:p-5">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-xl">🖥️</span>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Jogos por plataforma</h3>
+              <span className="text-lg sm:text-xl">🖥️</span>
+              <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Jogos por plataforma</h3>
             </div>
-            <p className="text-xs text-slate-500 mb-4">Em que plataformas tens mais jogos registados (PC, PS5, Switch, etc.).</p>
+            <p className="text-[10px] sm:text-xs text-slate-500 mb-3 sm:mb-4">Em que plataformas tens mais jogos.</p>
             {dataPlataforma.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-48 text-slate-400"><span className="text-4xl mb-2">📭</span><p className="text-sm">Ainda não há dados suficientes</p></div>
+              <div className="flex flex-col items-center justify-center h-36 sm:h-48 text-slate-400"><span className="text-3xl sm:text-4xl mb-2">📭</span><p className="text-xs sm:text-sm">Ainda não há dados suficientes</p></div>
             ) : (
-              <div className="w-full h-72">
+              <div className="w-full h-56 sm:h-72">
                 <ResponsiveContainer>
-                  <BarChart data={dataPlataforma} layout="vertical" margin={{ left: 50, right: 20 }}>
-                    <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                    <YAxis type="category" dataKey="nome" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                    <Tooltip contentStyle={{ fontSize: 12, borderRadius: 0, border: '2px solid #facc15', backgroundColor: '#0f172a', color: '#fff' }} />
+                  <BarChart data={dataPlataforma} layout="vertical" margin={{ left: 40, right: 10 }}>
+                    <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                    <YAxis type="category" dataKey="nome" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={35} />
+                    <Tooltip contentStyle={{ fontSize: 11, borderRadius: 0, border: '2px solid #facc15', backgroundColor: '#0f172a', color: '#fff' }} />
                     <Bar dataKey="quantidade" radius={0}>
                       {dataPlataforma.map((_, index) => <Cell key={`cell-plat-${index}`} fill={CORES_PLATAFORMA[index % CORES_PLATAFORMA.length]} />)}
                     </Bar>

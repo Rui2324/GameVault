@@ -92,7 +92,7 @@ export default function RegistoPage() {
 
   return (
     // Fundo alterado para bg-slate-200 no modo claro
-    <div className="min-h-screen flex items-center justify-center bg-slate-200 dark:bg-slate-950 relative overflow-hidden font-sans py-10 transition-colors duration-300">
+    <div className="min-h-screen flex items-center justify-center bg-slate-200 dark:bg-slate-950 relative overflow-hidden font-sans py-6 sm:py-10 transition-colors duration-300 px-4">
       
       <div className="absolute top-4 right-4 z-50">
         <ThemeToggle />
@@ -108,41 +108,41 @@ export default function RegistoPage() {
       {/* Scanline */}
       <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.03)_2px,rgba(0,0,0,0.03)_4px)] pointer-events-none" />
 
-      <div className="relative z-10 w-full max-w-md p-4">
+      <div className="relative z-10 w-full max-w-md p-2 sm:p-4">
         {/* Link voltar */}
         <Link 
           to="/" 
-          className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-fuchsia-600 dark:hover:text-fuchsia-400 mb-6 font-bold transition-colors"
+          className="inline-flex items-center gap-1 text-xs sm:text-sm text-slate-500 hover:text-fuchsia-600 dark:hover:text-fuchsia-400 mb-4 sm:mb-6 font-bold transition-colors"
         >
           <ChevronLeft size={16} /> Voltar ao início
         </Link>
 
         {/* Logo/Brand */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 border-4 border-fuchsia-500 bg-white dark:bg-slate-900 shadow-[4px_4px_0px_0px_rgba(217,70,239,0.8)] mb-4">
-            <Gamepad2 size={32} className="text-fuchsia-500" />
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 border-4 border-fuchsia-500 bg-white dark:bg-slate-900 shadow-[4px_4px_0px_0px_rgba(217,70,239,0.8)] mb-3 sm:mb-4">
+            <Gamepad2 size={24} className="text-fuchsia-500 sm:w-8 sm:h-8" />
           </div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-wider">GameVault</h1>
-          <p className="text-cyan-600 dark:text-cyan-400 font-bold text-sm tracking-widest mt-1">PLAYER ONE START</p>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-wider">GameVault</h1>
+          <p className="text-cyan-600 dark:text-cyan-400 font-bold text-xs sm:text-sm tracking-widest mt-1">PLAYER ONE START</p>
         </div>
 
-        <RetroCard color="cyan" className="p-8">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6 uppercase tracking-wide border-b-2 border-cyan-500/30 pb-2">
+        <RetroCard color="cyan" className="p-4 sm:p-8">
+          <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-4 sm:mb-6 uppercase tracking-wide border-b-2 border-cyan-500/30 pb-2">
             Criar Conta
           </h2>
 
           {erro && (
-            <div className="mb-6 p-3 border-2 border-rose-500 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-bold flex items-center gap-2">
+            <div className="mb-4 sm:mb-6 p-2 sm:p-3 border-2 border-rose-500 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[10px] sm:text-xs font-bold flex items-center gap-2">
               <AlertTriangle size={14} /> {erro}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             <div>
-              <label className="block text-xs font-bold text-cyan-600 dark:text-cyan-400 uppercase mb-2">Nome</label>
+              <label className="block text-[10px] sm:text-xs font-bold text-cyan-600 dark:text-cyan-400 uppercase mb-1 sm:mb-2">Nome</label>
               <input
                 type="text"
-                className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white px-4 py-3 text-sm focus:outline-none focus:border-fuchsia-500 transition-colors placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white px-3 sm:px-4 py-2 sm:py-3 text-sm focus:outline-none focus:border-fuchsia-500 transition-colors placeholder:text-slate-400 dark:placeholder:text-slate-600"
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
                 placeholder="O teu nome"

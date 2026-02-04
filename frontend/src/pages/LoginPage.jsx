@@ -63,7 +63,7 @@ export default function LoginPage() {
 
   return (
     // Fundo alterado para bg-slate-200 no modo claro para reduzir o brilho
-    <div className="min-h-screen flex items-center justify-center bg-slate-200 dark:bg-slate-950 relative overflow-hidden font-sans transition-colors duration-300">
+    <div className="min-h-screen flex items-center justify-center bg-slate-200 dark:bg-slate-950 relative overflow-hidden font-sans transition-colors duration-300 px-4">
       
       <div className="absolute top-4 right-4 z-50">
         <ThemeToggle />
@@ -79,25 +79,25 @@ export default function LoginPage() {
       {/* Scanline */}
       <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.03)_2px,rgba(0,0,0,0.03)_4px)] pointer-events-none" />
 
-      <div className="relative z-10 w-full max-w-md p-4">
+      <div className="relative z-10 w-full max-w-md p-2 sm:p-4">
         {/* Link voltar */}
         <Link 
           to="/" 
-          className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-cyan-600 dark:hover:text-cyan-400 mb-6 font-bold transition-colors"
+          className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-cyan-600 dark:hover:text-cyan-400 mb-4 sm:mb-6 font-bold transition-colors"
         >
         </Link>
 
         {/* Logo/Brand */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 border-4 border-cyan-400 bg-white dark:bg-slate-900 shadow-[4px_4px_0px_0px_rgba(34,211,238,0.8)] mb-4">
-            <Gamepad2 size={32} className="text-cyan-500" />
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 border-4 border-cyan-400 bg-white dark:bg-slate-900 shadow-[4px_4px_0px_0px_rgba(34,211,238,0.8)] mb-3 sm:mb-4">
+            <Gamepad2 size={24} className="text-cyan-500 sm:w-8 sm:h-8" />
           </div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-wider">GameVault</h1>
-          <p className="text-fuchsia-600 dark:text-fuchsia-400 font-bold text-sm tracking-widest mt-1">RETRO EDITION</p>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-wider">GameVault</h1>
+          <p className="text-fuchsia-600 dark:text-fuchsia-400 font-bold text-xs sm:text-sm tracking-widest mt-1">RETRO EDITION</p>
         </div>
 
-        <RetroCard color="fuchsia" className="p-8">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6 uppercase tracking-wide border-b-2 border-fuchsia-500/30 pb-2">
+        <RetroCard color="fuchsia" className="p-4 sm:p-8">
+          <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-4 sm:mb-6 uppercase tracking-wide border-b-2 border-fuchsia-500/30 pb-2">
             Iniciar Sessão
           </h2>
 

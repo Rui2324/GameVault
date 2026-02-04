@@ -299,39 +299,39 @@ export default function HomePage() {
   return (
     <div className="space-y-10 pb-10">
       {/* HERO BANNER */}
-      <RetroCard color="fuchsia" className="p-8 relative overflow-hidden">
+      <RetroCard color="fuchsia" className="p-4 sm:p-6 md:p-8 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(rgba(217,70,239,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(217,70,239,0.1)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
         
         <div className="relative z-10">
-          <div className="flex items-center gap-2 text-fuchsia-600 dark:text-fuchsia-400 text-sm font-bold uppercase tracking-widest mb-2">
-            <span className="inline-block w-3 h-3 bg-fuchsia-500 animate-pulse" />
+          <div className="flex items-center gap-2 text-fuchsia-600 dark:text-fuchsia-400 text-xs sm:text-sm font-bold uppercase tracking-widest mb-2">
+            <span className="inline-block w-2 h-2 sm:w-3 sm:h-3 bg-fuchsia-500 animate-pulse" />
             GameVault
           </div>
-          <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-4 tracking-tight drop-shadow-sm">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white mb-2 sm:mb-4 tracking-tight drop-shadow-sm">
             Bem-vindo de volta!
           </h1>
-          <p className="text-slate-600 dark:text-slate-300 text-lg max-w-xl font-medium">
+          <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base md:text-lg max-w-xl font-medium">
             Descobre novos jogos, acompanha a comunidade e expande a tua coleção.
           </p>
         </div>
 
-        <div className="absolute top-4 right-4 w-4 h-4 bg-cyan-400 shadow-lg" />
-        <div className="absolute top-4 right-10 w-2 h-2 bg-yellow-400 shadow-lg" />
-        <div className="absolute bottom-4 right-6 w-3 h-3 bg-fuchsia-500 shadow-lg" />
+        <div className="absolute top-4 right-4 w-3 h-3 sm:w-4 sm:h-4 bg-cyan-400 shadow-lg" />
+        <div className="absolute top-4 right-10 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-yellow-400 shadow-lg" />
+        <div className="absolute bottom-4 right-6 w-2 h-2 sm:w-3 sm:h-3 bg-fuchsia-500 shadow-lg" />
       </RetroCard>
 
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid gap-6 md:gap-8 lg:grid-cols-3">
         {/* COLUNA ESQUERDA - JOGOS */}
-        <div className="lg:col-span-2 space-y-10">
+        <div className="lg:col-span-2 space-y-8 md:space-y-10">
           <section>
             <SectionTitle>Top Avaliados</SectionTitle>
             
             {loading ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                 {[...Array(8)].map((_, i) => <SkeletonRetro key={i} className="aspect-[4/3]" />)}
               </div>
             ) : featuredGames.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                 {featuredGames.slice(0, 8).map((game) => (
                   <GameCard 
                     key={game.id || game.external_id} 
@@ -342,7 +342,7 @@ export default function HomePage() {
                 ))}
               </div>
             ) : (
-              <RetroCard color="cyan" className="p-8 text-center text-slate-500 font-medium">
+              <RetroCard color="cyan" className="p-6 sm:p-8 text-center text-slate-500 font-medium">
                 Ainda não há jogos avaliados.
               </RetroCard>
             )}
@@ -350,7 +350,7 @@ export default function HomePage() {
 
           <section>
             <SectionTitle>Atividade</SectionTitle>
-            <RetroCard color="fuchsia" className="p-4">
+            <RetroCard color="fuchsia" className="p-3 sm:p-4">
               {loading ? (
                 <div className="space-y-3">
                   {[...Array(5)].map((_, i) => (
