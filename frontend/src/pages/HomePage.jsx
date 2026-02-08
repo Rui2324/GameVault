@@ -1,13 +1,18 @@
 // src/pages/HomePage.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 import { rawgOriginal } from "../utils/rawgImages";
 import { 
   Calendar,
   Star,
   Users,
-  Gamepad2
+  Bookmark,
+  BookmarkCheck,
+  ChevronRight,
+  Library,
+  Loader2,
 } from "lucide-react";
 
 function safeImg(url) {
@@ -39,6 +44,33 @@ function getTimeAgo(dateValue) {
   if (diffDays === 1) return "ontem";
   if (diffDays < 7) return `há ${diffDays} dias`;
   return d.toLocaleDateString("pt-PT", { day: "2-digit", month: "short" });
+}
+
+// ============ HOOK: INTERSECTION OBSERVER ============
+
+function useInView(options = {}) {
+  const ref = useRef(null);
+  const [isInView, setIsInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.1, rootMargin: "50px", ...options }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return [ref, isInView];
 }
 
 // ============ COMPONENTES RETRO ============
@@ -87,6 +119,24 @@ function SectionTitle({ children }) {
   );
 }
 
+function AnimatedSection({ children, className = "", delay = 0 }) {
+  const [ref, isInView] = useInView();
+
+  return (
+    <div
+      ref={ref}
+      className={`transition-all duration-700 ease-out ${
+        isInView
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 translate-y-8"
+      } ${className}`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+}
+
 function GameCard({ game, onClick }) {
   const title = game?.titulo || game?.title || game?.name || "Sem título";
   const img = safeImg(game?.url_capa || game?.cover_url || game?.background_image);
@@ -102,13 +152,13 @@ function GameCard({ game, onClick }) {
       className="group text-left w-full"
     >
       <RetroCard color="cyan" className="overflow-hidden transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none">
-        <div className="relative aspect-[4/3] w-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+        <div className="relative aspect-video w-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
           {img ? (
             <img
               src={img}
               alt={title}
               referrerPolicy="no-referrer"
-              className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-110"
+              className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
               onError={(e) => (e.currentTarget.style.display = "none")}
             />
           ) : (
@@ -144,34 +194,36 @@ function GameCard({ game, onClick }) {
   );
 }
 
-function UpcomingCard({ game, onClick }) {
+function UpcomingCardCompact({ game, onClick, onWishlist, isInWishlist, wishlistLoading }) {
   const title = game?.title || game?.name || "Sem título";
   const released = game?.release_date || game?.released || null;
   const img = safeImg(game?.background_image || game?.cover_url);
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="group text-left w-full"
-    >
-      <RetroCard color="yellow" className="overflow-hidden flex transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none">
-        <div className="w-20 h-24 bg-slate-200 dark:bg-slate-800 flex-shrink-0 overflow-hidden border-r-2 border-yellow-400/20">
+    <button type="button" onClick={onClick} className="group text-left w-full">
+      <div className="flex items-center gap-3 py-3 px-3 border-b border-yellow-400/10 last:border-0 hover:bg-yellow-400/5 transition rounded">
+        <div className="w-18 h-14 bg-slate-200 dark:bg-slate-800 overflow-hidden border border-yellow-400/30 flex-shrink-0 rounded-sm">
           {img ? (
             <img src={img} alt={title} referrerPolicy="no-referrer" className="h-full w-full object-cover" />
           ) : (
-            <div className="flex h-full items-center justify-center font-bold text-xs text-slate-400">DATA</div>
+            <div className="flex h-full items-center justify-center font-bold text-[9px] text-slate-400">—</div>
           )}
         </div>
-        <div className="p-3 flex-1 min-w-0 bg-white dark:bg-slate-900">
-          <div className="text-sm font-bold text-slate-900 dark:text-white truncate group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors">
-            {title}
-          </div>
-          <div className="text-xs text-slate-500 dark:text-yellow-400/70 mt-1 font-bold uppercase">
-            {released ? formatDateShort(released) : "A confirmar"}
-          </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-bold text-slate-900 dark:text-white truncate group-hover:text-yellow-500 dark:group-hover:text-yellow-400 transition-colors">{title}</div>
+          <div className="text-[11px] text-yellow-500 dark:text-yellow-400/70 font-bold uppercase">{released ? formatDateShort(released) : "TBA"}</div>
         </div>
-      </RetroCard>
+        {onWishlist && (
+          <button
+            type="button"
+            title={isInWishlist ? "Na tua wishlist" : "Adicionar à wishlist"}
+            onClick={(e) => { e.stopPropagation(); if (!isInWishlist && !wishlistLoading) onWishlist(game); }}
+            className={`p-1 transition-all flex-shrink-0 ${isInWishlist ? "text-green-400" : "text-slate-500 hover:text-yellow-400"}`}
+          >
+            {wishlistLoading ? <Loader2 size={13} className="animate-spin" /> : isInWishlist ? <BookmarkCheck size={13} /> : <Bookmark size={13} />}
+          </button>
+        )}
+      </div>
     </button>
   );
 }
@@ -255,169 +307,315 @@ function SkeletonRetro({ className = "" }) {
   return <div className={`bg-slate-200 dark:bg-slate-800 animate-pulse border-2 border-slate-300 dark:border-slate-700 ${className}`} />;
 }
 
+
+
+function RecentGameCard({ game, onClick }) {
+  const title = game?.titulo || game?.title || game?.name || "Sem título";
+  const img = safeImg(game?.url_capa || game?.cover_url || game?.background_image);
+  const status = game?.estado || game?.status || "";
+
+  const statusColors = {
+    concluido: "bg-green-400 text-slate-900",
+    completed: "bg-green-400 text-slate-900",
+    "a jogar": "bg-cyan-400 text-slate-900",
+    a_jogar: "bg-cyan-400 text-slate-900",
+    playing: "bg-cyan-400 text-slate-900",
+    "por jogar": "bg-yellow-400 text-slate-900",
+    por_jogar: "bg-yellow-400 text-slate-900",
+    backlog: "bg-yellow-400 text-slate-900",
+    abandonado: "bg-red-400 text-white",
+    dropped: "bg-red-400 text-white",
+  };
+
+  const statusLabel = {
+    concluido: "Concluído",
+    completed: "Concluído",
+    "a jogar": "A Jogar",
+    a_jogar: "A Jogar",
+    playing: "A Jogar",
+    "por jogar": "Por Jogar",
+    por_jogar: "Por Jogar",
+    backlog: "Backlog",
+    abandonado: "Abandonado",
+    dropped: "Abandonado",
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group text-left flex-shrink-0 w-32 sm:w-36"
+    >
+      <div className="relative aspect-video w-full bg-slate-200 dark:bg-slate-800 overflow-hidden border-2 border-fuchsia-500/40 group-hover:border-fuchsia-500 transition-all shadow-[3px_3px_0px_0px_rgba(217,70,239,0.3)] group-hover:shadow-none group-hover:translate-x-[2px] group-hover:translate-y-[2px]">
+        {img ? (
+          <img
+            src={img}
+            alt={title}
+            referrerPolicy="no-referrer"
+            className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+            onError={(e) => (e.currentTarget.style.display = "none")}
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center text-slate-400 dark:text-slate-600 font-bold text-xs">
+            SEM IMAGEM
+          </div>
+        )}
+
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+
+        {/* Status badge */}
+        {status && statusColors[status.toLowerCase()] && (
+          <div className={`absolute top-2 left-2 text-[10px] font-black px-1.5 py-0.5 uppercase tracking-wider ${statusColors[status.toLowerCase()]}`}>
+            {statusLabel[status.toLowerCase()] || status}
+          </div>
+        )}
+
+        {/* Title overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-2.5">
+          <div className="text-xs font-bold text-white truncate drop-shadow-lg">
+            {title}
+          </div>
+        </div>
+      </div>
+    </button>
+  );
+}
+
 // ============ PÁGINA PRINCIPAL ============
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   
   const [featuredGames, setFeaturedGames] = useState([]);
   const [upcomingGames, setUpcomingGames] = useState([]);
   const [activityFeed, setActivityFeed] = useState([]);
   const [discoverUsers, setDiscoverUsers] = useState([]);
+  const [recentGames, setRecentGames] = useState([]);
+
+  // Wishlist state for upcoming cards
+  const [wishlistedIds, setWishlistedIds] = useState(new Set());
+  const [wishlistLoadingId, setWishlistLoadingId] = useState(null);
 
   useEffect(() => {
     async function loadData() {
       setLoading(true);
       try {
-        const [topRated, upcoming, feed, users] = await Promise.allSettled([
+        const [topRated, upcoming, feed, users, collection] = await Promise.allSettled([
           api.get("/stats/top-games", { params: { limit: 8 } }),
-          api.get("/external-games/upcoming", { params: { page_size: 4 } }),
+          api.get("/external-games/upcoming", { params: { page_size: 6 } }),
           api.get("/activity/feed", { params: { limit: 10 } }),
           api.get("/profile/users/discover", { params: { limit: 4 } }),
+          api.get("/collection"),
         ]);
 
         if (topRated.status === "fulfilled") setFeaturedGames(topRated.value?.data?.topGames || []);
         if (upcoming.status === "fulfilled") setUpcomingGames(upcoming.value?.data?.jogos || []);
         if (feed.status === "fulfilled") setActivityFeed(feed.value?.data?.activities || []);
         if (users.status === "fulfilled") setDiscoverUsers(users.value?.data?.users || []);
+
+        if (collection.status === "fulfilled") {
+          const colecao = collection.value?.data?.colecao || [];
+          // Sort by most recently added and take first 10
+          const sorted = [...colecao].sort((a, b) => {
+            const da = new Date(a.criado_em || 0).getTime();
+            const db = new Date(b.criado_em || 0).getTime();
+            return db - da;
+          });
+          setRecentGames(sorted.slice(0, 10));
+        }
+
+        // Load existing wishlist to know which upcoming games are already wishlisted
+        try {
+          const wlRes = await api.get("/wishlist");
+          const wlExternalIds = new Set(
+            (wlRes.data?.wishlist || [])
+              .map(w => w.external_id)
+              .filter(Boolean)
+          );
+          setWishlistedIds(wlExternalIds);
+        } catch { /* ignore */ }
+
       } finally {
         setLoading(false);
       }
     }
     loadData();
-  }, []);
+  }, [user?.id]);
 
   // Handler seguro para navegação
   const handleGameClick = (game) => {
-    // PRIORIDADE: Usar o external_id para ir para a página pública de detalhes (Explorar)
-    // Assim funciona mesmo se o user não tiver o jogo na coleção.
     const targetId = game.external_id || game.id;
     navigate(`/app/explorar/${targetId}`);
   };
 
+  // Handler para adicionar upcoming game à wishlist
+  const handleAddToWishlist = useCallback(async (game) => {
+    const externalId = game.external_id || game.id;
+    if (!externalId || wishlistedIds.has(externalId)) return;
+
+    setWishlistLoadingId(externalId);
+    try {
+      await api.post("/external-games/import/wishlist", { external_id: externalId });
+      setWishlistedIds(prev => new Set([...prev, externalId]));
+    } catch (err) {
+      if (err?.response?.status === 409) {
+        // Already in wishlist
+        setWishlistedIds(prev => new Set([...prev, externalId]));
+      }
+      console.error("Erro ao adicionar à wishlist:", err);
+    } finally {
+      setWishlistLoadingId(null);
+    }
+  }, [wishlistedIds]);
+
+  const userName = user?.name || "Jogador";
+
   return (
     <div className="space-y-10 pb-10">
-      {/* HERO BANNER */}
-      <RetroCard color="fuchsia" className="p-4 sm:p-6 md:p-8 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(217,70,239,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(217,70,239,0.1)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
-        
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 text-fuchsia-600 dark:text-fuchsia-400 text-xs sm:text-sm font-bold uppercase tracking-widest mb-2">
-            <span className="inline-block w-2 h-2 sm:w-3 sm:h-3 bg-fuchsia-500 animate-pulse" />
-            GameVault
+      {/* ========== HERO BANNER PERSONALIZADO ========== */}
+      <AnimatedSection>
+        <RetroCard color="fuchsia" className="p-4 sm:p-6 md:p-8 relative overflow-hidden">
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(217,70,239,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(217,70,239,0.1)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
+          
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 text-fuchsia-600 dark:text-fuchsia-400 text-xs sm:text-sm font-bold uppercase tracking-widest mb-2">
+              <span className="inline-block w-2 h-2 sm:w-3 sm:h-3 bg-fuchsia-500 animate-pulse" />
+            </div>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white mb-2 sm:mb-4 tracking-tight drop-shadow-sm">
+              Bem-vindo de volta, <span className="text-fuchsia-500 dark:text-fuchsia-400">{userName}</span>!
+            </h1>
+            <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base max-w-xl font-medium">
+              Descobre novos jogos, acompanha a comunidade e expande a tua coleção.
+            </p>
           </div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white mb-2 sm:mb-4 tracking-tight drop-shadow-sm">
-            Bem-vindo de volta!
-          </h1>
-          <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base md:text-lg max-w-xl font-medium">
-            Descobre novos jogos, acompanha a comunidade e expande a tua coleção.
-          </p>
-        </div>
 
-        <div className="absolute top-4 right-4 w-3 h-3 sm:w-4 sm:h-4 bg-cyan-400 shadow-lg" />
-        <div className="absolute top-4 right-10 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-yellow-400 shadow-lg" />
-        <div className="absolute bottom-4 right-6 w-2 h-2 sm:w-3 sm:h-3 bg-fuchsia-500 shadow-lg" />
-      </RetroCard>
+          <div className="absolute top-4 right-4 w-3 h-3 sm:w-4 sm:h-4 bg-cyan-400 shadow-lg" />
+          <div className="absolute top-4 right-10 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-yellow-400 shadow-lg" />
+          <div className="absolute bottom-4 right-6 w-2 h-2 sm:w-3 sm:h-3 bg-fuchsia-500 shadow-lg" />
+        </RetroCard>
+      </AnimatedSection>
 
+      
+
+      {/* ========== TOP AVALIADOS + EM BREVE ========== */}
       <div className="grid gap-6 md:gap-8 lg:grid-cols-3">
         {/* COLUNA ESQUERDA - JOGOS */}
         <div className="lg:col-span-2 space-y-8 md:space-y-10">
-          <section>
-            <SectionTitle>Top Avaliados</SectionTitle>
-            
-            {loading ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                {[...Array(8)].map((_, i) => <SkeletonRetro key={i} className="aspect-[4/3]" />)}
-              </div>
-            ) : featuredGames.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                {featuredGames.slice(0, 8).map((game) => (
-                  <GameCard 
-                    key={game.id || game.external_id} 
-                    game={game} 
-                    // CORREÇÃO AQUI: Usa a função segura que vai para /explorar
-                    onClick={() => handleGameClick(game)} 
-                  />
-                ))}
-              </div>
-            ) : (
-              <RetroCard color="cyan" className="p-6 sm:p-8 text-center text-slate-500 font-medium">
-                Ainda não há jogos avaliados.
-              </RetroCard>
-            )}
-          </section>
+          <AnimatedSection delay={200}>
+            <section>
+              <SectionTitle>Top Avaliados</SectionTitle>
+              
+              {loading ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
+                {[...Array(8)].map((_, i) => <SkeletonRetro key={i} className="aspect-video" />)}
+                </div>
+              ) : featuredGames.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
+                  {featuredGames.slice(0, 8).map((game) => (
+                    <GameCard 
+                      key={game.id || game.external_id} 
+                      game={game} 
+                      onClick={() => handleGameClick(game)} 
+                    />
+                  ))}
+                </div>
+              ) : (
+                <RetroCard color="cyan" className="p-6 sm:p-8 text-center text-slate-500 font-medium">
+                  Ainda não há jogos avaliados.
+                </RetroCard>
+              )}
+            </section>
+          </AnimatedSection>
         </div>
 
         {/* COLUNA DIREITA */}
         <div className="space-y-8">
-          <section>
-            <SectionTitle>Em Breve</SectionTitle>
-            <div className="space-y-3">
-              {loading ? (
-                [...Array(4)].map((_, i) => <SkeletonRetro key={i} className="h-24" />)
-              ) : upcomingGames.length > 0 ? (
-                upcomingGames.slice(0, 4).map((game) => (
-                  <UpcomingCard 
-                    key={game.id || game.external_id} 
-                    game={game} 
-                    onClick={() => navigate(`/app/explorar/${game.external_id || game.id}`)} 
-                  />
-                ))
-              ) : (
-                <div className="text-center py-6 text-slate-500">Sem lançamentos próximos</div>
-              )}
-            </div>
-          </section>
+          <AnimatedSection delay={300}>
+            <section>
+              <SectionTitle>Em Breve</SectionTitle>
+              <div className="space-y-2">
+                {loading ? (
+                  <>
+                    {[...Array(6)].map((_, i) => <SkeletonRetro key={i} className="h-14" />)}
+                  </>
+                ) : upcomingGames.length > 0 ? (
+                  <RetroCard color="yellow" className="overflow-hidden">
+                    {upcomingGames.slice(0, 6).map((game) => {
+                      const eid = game.external_id || game.id;
+                      return (
+                        <UpcomingCardCompact
+                          key={eid}
+                          game={game}
+                          onClick={() => navigate(`/app/explorar/${eid}`)}
+                          onWishlist={handleAddToWishlist}
+                          isInWishlist={wishlistedIds.has(eid)}
+                          wishlistLoading={wishlistLoadingId === eid}
+                        />
+                      );
+                    })}
+                  </RetroCard>
+                ) : (
+                  <div className="text-center py-6 text-slate-500">Sem lançamentos próximos</div>
+                )}
+              </div>
+            </section>
+          </AnimatedSection>
         </div>
       </div>
 
-      {/* ATIVIDADE E DESCOBRIR - MESMA PROPORÇÃO QUE O GRID ACIMA */}
+      {/* ========== ATIVIDADE + DESCOBRIR ========== */}
       <div className="grid gap-6 md:gap-8 lg:grid-cols-3">
-        {/* ATIVIDADE - 2/3 da largura (como Top Avaliados) */}
-        <section className="lg:col-span-2">
-          <SectionTitle>Atividade</SectionTitle>
-          <RetroCard color="fuchsia" className="p-3 sm:p-4">
-            {loading ? (
-              <div className="space-y-3">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="flex gap-3">
-                    <SkeletonRetro className="w-10 h-10 rounded-full" />
-                    <div className="flex-1 space-y-2"><SkeletonRetro className="h-4 w-3/4" /><SkeletonRetro className="h-3 w-1/4" /></div>
-                  </div>
-                ))}
-              </div>
-            ) : activityFeed.length > 0 ? (
-              <div className="max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
-                {activityFeed.map((act, idx) => (
-                  <ActivityItem key={`${act.type}-${act.user?.id}-${act.game?.id}-${idx}`} activity={act} onNavigate={navigate} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-slate-500">Sem atividade recente</div>
-            )}
-          </RetroCard>
-        </section>
+        {/* ATIVIDADE - 2/3 da largura */}
+        <AnimatedSection delay={100} className="lg:col-span-2">
+          <section>
+            <SectionTitle>Atividade</SectionTitle>
+            <RetroCard color="fuchsia" className="p-3 sm:p-4">
+              {loading ? (
+                <div className="space-y-3">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="flex gap-3">
+                      <SkeletonRetro className="w-10 h-10 rounded-full" />
+                      <div className="flex-1 space-y-2"><SkeletonRetro className="h-4 w-3/4" /><SkeletonRetro className="h-3 w-1/4" /></div>
+                    </div>
+                  ))}
+                </div>
+              ) : activityFeed.length > 0 ? (
+                <div className="max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+                  {activityFeed.map((act, idx) => (
+                    <ActivityItem key={`${act.type}-${act.user?.id}-${act.game?.id}-${idx}`} activity={act} onNavigate={navigate} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-slate-500">Sem atividade recente</div>
+              )}
+            </RetroCard>
+          </section>
+        </AnimatedSection>
 
-        {/* DESCOBRIR - 1/3 da largura (como Em Breve) */}
-        <section>
-          <SectionTitle>Descobrir</SectionTitle>
-          <RetroCard color="green" className="p-3 sm:p-4">
-            {loading ? (
-              <div className="space-y-3">
-                {[...Array(4)].map((_, i) => <SkeletonRetro key={i} className="h-16" />)}
-              </div>
-            ) : discoverUsers.length > 0 ? (
-              <div className="max-h-[400px] overflow-y-auto custom-scrollbar pr-2 space-y-2">
-                {discoverUsers.map((user) => (
-                  <UserCard key={user.id} user={user} onClick={() => navigate(`/app/perfil/${user.id}`)} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-slate-500">Sem sugestões de momento</div>
-            )}
-          </RetroCard>
-        </section>
+        {/* DESCOBRIR - 1/3 da largura */}
+        <AnimatedSection delay={200}>
+          <section>
+            <SectionTitle>Descobrir</SectionTitle>
+            <RetroCard color="green" className="p-3 sm:p-4">
+              {loading ? (
+                <div className="space-y-3">
+                  {[...Array(4)].map((_, i) => <SkeletonRetro key={i} className="h-16" />)}
+                </div>
+              ) : discoverUsers.length > 0 ? (
+                <div className="max-h-[400px] overflow-y-auto custom-scrollbar pr-2 space-y-2">
+                  {discoverUsers.map((user) => (
+                    <UserCard key={user.id} user={user} onClick={() => navigate(`/app/perfil/${user.id}`)} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-slate-500">Sem sugestões de momento</div>
+              )}
+            </RetroCard>
+          </section>
+        </AnimatedSection>
       </div>
     </div>
   );

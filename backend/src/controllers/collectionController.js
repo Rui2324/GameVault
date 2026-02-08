@@ -34,6 +34,8 @@ async function listMyCollection(req, res) {
       achievements_unlocked: e.achievements_unlocked ?? null,
       achievements_completed: e.achievements_completed ?? null,
       achievements_last_sync: e.achievements_last_sync ?? null,
+      criado_em: e.created_at ?? null,
+      atualizado_em: e.updated_at ?? null,
     }));
 
     return res.json({ colecao });

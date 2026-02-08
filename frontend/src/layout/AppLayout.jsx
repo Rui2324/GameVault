@@ -151,11 +151,13 @@ export default function AppLayout() {
               onClick={() => navigate("/app/home")}
               className="group flex items-center gap-2 sm:gap-3 focus:outline-none"
             >
-              <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center border-2 border-cyan-400 bg-cyan-400/10 text-xl text-cyan-600 dark:text-cyan-400 shadow-[3px_3px_0px_0px_rgba(34,211,238,0.6)] group-hover:bg-cyan-400 group-hover:text-slate-900 transition-all">
-                <Gamepad2 size={20} />
-              </div>
+              <img 
+                src="/logo-neon.png" 
+                alt="GameVault" 
+                className="h-10 w-10 sm:h-12 sm:w-12 object-contain drop-shadow-lg group-hover:drop-shadow-xl transition-all"
+              />
               <div className="leading-tight text-left hidden sm:block">
-                <div className="text-base font-black tracking-wider text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">GAMEVAULT</div>
+                <div className="text-base font-black tracking-wider text-slate-900 dark:text-white group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400 transition-colors">GAMEVAULT</div>
               </div>
             </button>
 
@@ -342,15 +344,16 @@ export default function AppLayout() {
           <div className="flex flex-col gap-3 px-4 sm:px-6 py-4 text-xs md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
               <div className="flex items-center gap-2">
-                <span className="h-6 w-6 sm:h-8 sm:w-8 border-2 border-fuchsia-500 bg-fuchsia-50 dark:bg-fuchsia-500/20 flex items-center justify-center text-fuchsia-600 dark:text-fuchsia-400 text-sm"><Gamepad2 size={14} /></span>
+                <img 
+                  src="/logo-neon.png" 
+                  alt="GameVault" 
+                  className="h-6 w-6 sm:h-8 sm:w-8 object-contain"
+                />
                 <span className="text-slate-900 dark:text-white font-black uppercase tracking-wider text-xs sm:text-sm">GameVault</span>
               </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-              <span className="flex items-center gap-1 sm:gap-2 border border-slate-300 dark:border-slate-700 px-2 sm:px-3 py-1 sm:py-1.5 text-slate-600 dark:text-slate-400 rounded text-[10px] sm:text-xs">
-                <GraduationCap size={14} /> ISTEC 2026
-              </span>
               <span className="flex items-center gap-1 sm:gap-2 border border-green-500/50 bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 px-2 sm:px-3 py-1 sm:py-1.5 rounded text-[10px] sm:text-xs">
                 <span className="h-2 w-2 bg-green-500 dark:bg-green-400 animate-pulse rounded-full" />
                 <span>ONLINE</span>

@@ -132,7 +132,8 @@ export default function CollectionPage() {
   const [sort, setSort] = useState({ key: "atualizado", dir: "desc" });
   
   // Paginação
-  const PER_PAGE = 10;
+  const PER_PAGE_LIST = 10;
+  const PER_PAGE_GRID = 15; // 3 linhas no grid (5 colunas no xl)
   const [pagina, setPagina] = useState(1);
   
   // Vista (Lista vs Grid)
@@ -220,12 +221,14 @@ export default function CollectionPage() {
     return arr;
   }, [jogosFiltrados, sort]);
 
-  useEffect(() => setPagina(1), [filtroPlataforma, filtroEstado, filtroGenero, pesquisa, sort]);
+  const perPage = vistaGrid ? PER_PAGE_LIST : PER_PAGE_GRID;
+
+  useEffect(() => setPagina(1), [filtroPlataforma, filtroEstado, filtroGenero, pesquisa, sort, vistaGrid]);
   const total = jogosOrdenados.length;
-  const totalPaginas = Math.max(1, Math.ceil(total / PER_PAGE));
+  const totalPaginas = Math.max(1, Math.ceil(total / perPage));
   const paginaAtual = Math.min(pagina, totalPaginas);
-  const jogosPagina = jogosOrdenados.slice((paginaAtual - 1) * PER_PAGE, paginaAtual * PER_PAGE);
-  const rangeText = `${(paginaAtual - 1) * PER_PAGE + 1}–${Math.min(paginaAtual * PER_PAGE, total)} de ${total}`;
+  const jogosPagina = jogosOrdenados.slice((paginaAtual - 1) * perPage, paginaAtual * perPage);
+  const rangeText = `${(paginaAtual - 1) * perPage + 1}–${Math.min(paginaAtual * perPage, total)} de ${total}`;
 
   function toggleSort(key) {
     setSort(prev => ({ key, dir: prev.key === key && prev.dir === "desc" ? "asc" : "desc" }));
@@ -456,7 +459,7 @@ export default function CollectionPage() {
                     {/* Desktop Row */}
                     <div key={jogo.id} className="hidden md:grid grid-cols-12 gap-3 px-4 py-3 items-center hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group cursor-pointer" onClick={() => navigate(`/app/jogo/${jogo.id}`)}>
                        <div className="col-span-5 flex items-center gap-3">
-                          <div className="w-10 h-14 bg-slate-200 shrink-0 border border-slate-300 dark:border-slate-600 overflow-hidden">
+                          <div className="w-17 h-20 bg-slate-200 shrink-0 border border-slate-300 dark:border-slate-600 overflow-hidden">
                              {capa ? <img src={capa} className="w-full h-full object-cover group-hover:scale-110 transition-transform" /> : <div className="flex items-center justify-center h-full text-slate-400"><Gamepad2 size={16} /></div>}
                           </div>
                           <div className="min-w-0">

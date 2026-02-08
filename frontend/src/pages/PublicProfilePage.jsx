@@ -292,7 +292,7 @@ export default function PublicProfilePage() {
               <span className="w-8 h-8 border-2 border-cyan-400 bg-cyan-50 dark:bg-cyan-400/20 flex items-center justify-center text-base">🕐</span> Recentes
             </h2>
             {recentGames.length === 0 ? <p className="text-slate-500 text-sm text-center py-6 font-mono">Sem jogos recentes</p> : 
-              <div className="space-y-2">{recentGames.map(g => <GameCard key={g.id} game={g} navigate={navigate} showDate />)}</div>}
+                <div className="space-y-2">{recentGames.slice(0, 4).map(g => <GameCard key={g.id} game={g} navigate={navigate} showDate />)}</div>}
           </RetroCard>
 
           <RetroCard color="fuchsia" className="p-5">
@@ -351,14 +351,14 @@ export default function PublicProfilePage() {
           
           {allGamesLoading ? (
             <div className="text-center py-10">
-              <div className="w-10 h-10 border-4 border-cyan-400/30 border-t-cyan-400 animate-spin mx-auto"></div>
+              <div className="w-14 h-10 border-4 border-cyan-400/30 border-t-cyan-400 animate-spin mx-auto"></div>
               <p className="text-slate-500 text-sm mt-3">A carregar jogos...</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-4">
               {(showAllGames ? allGames : allGames.slice(0, 12)).map(g => (
                 <div key={g.id} onClick={() => navigate(`/app/explorar/${g.external_id || g.id}`)} className="cursor-pointer group bg-white dark:bg-slate-800 border-2 border-cyan-400/30 hover:border-cyan-400 transition-all shadow-sm hover:shadow-md">
-                  <div className="aspect-[3/4] overflow-hidden bg-slate-200 dark:bg-slate-700">
+                  <div className="aspect-video overflow-hidden bg-slate-200 dark:bg-slate-700">
                     {g.cover_url ? <img src={g.cover_url} alt={g.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform" /> : <div className="w-full h-full flex items-center justify-center text-3xl">🎮</div>}
                   </div>
                   <div className="p-2">
