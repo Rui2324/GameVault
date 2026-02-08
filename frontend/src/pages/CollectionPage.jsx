@@ -15,7 +15,8 @@ import {
   Plus, 
   FileText,
   List,
-  Grid3x3
+  Grid3x3,
+  Calendar
 } from "lucide-react";
 
 // ============ COMPONENTES VISUAIS (RETRO) ============
@@ -663,5 +664,4 @@ export default function CollectionPage() {
   );
 }
 
-// Fim src/pages/CollectionPage.jsx
-// testesfnaliflaifqloiajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfajfa
+// Fim src/page.jsx

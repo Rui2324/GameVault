@@ -6,7 +6,7 @@ import { useToast } from "../components/Toast";
 // --- Componentes Visuais ---
 function RetroCard({ children, className = "" }) {
   return (
-    <div className={`bg-slate-900 border-2 border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)] p-6 ${className}`}>
+    <div className={`bg-white dark:bg-slate-900 border-2 border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)] p-6 ${className}`}>
       {children}
     </div>
   );
@@ -17,7 +17,7 @@ function RetroButton({ children, onClick, disabled, className = "" }) {
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`px-6 py-2 border-2 border-cyan-400 bg-cyan-900/20 text-cyan-400 font-bold uppercase hover:bg-cyan-400 hover:text-slate-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      className={`px-6 py-2 border-2 border-cyan-400 bg-cyan-50 text-cyan-700 dark:bg-cyan-900/20 dark:text-cyan-400 font-bold uppercase hover:bg-cyan-400 hover:text-slate-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     >
       {children}
     </button>
@@ -92,12 +92,12 @@ export default function SteamImportPage() {
     <div className="max-w-6xl mx-auto space-y-8 pb-10">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black text-white flex items-center gap-3">
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white flex items-center gap-3">
             <span className="text-4xl">☁️</span> Importar da Steam
           </h1>
-          <p className="text-slate-400 mt-2">Sincroniza a tua biblioteca e horas jogadas automaticamente.</p>
+          <p className="text-slate-600 dark:text-slate-400 mt-2">Sincroniza a tua biblioteca e horas jogadas automaticamente.</p>
         </div>
-        <button onClick={() => navigate("/app/colecao")} className="text-slate-500 hover:text-white font-bold">
+        <button onClick={() => navigate("/app/colecao")} className="text-slate-500 hover:text-slate-900 dark:hover:text-white font-bold">
           VOLTAR
         </button>
       </div>
@@ -107,7 +107,7 @@ export default function SteamImportPage() {
           <input
             type="text"
             placeholder="O teu Username ou Steam ID (ex: gaben)"
-            className="flex-1 bg-slate-800 border-2 border-slate-600 text-white px-4 py-3 focus:border-cyan-400 outline-none font-mono"
+            className="flex-1 bg-slate-50 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white px-4 py-3 focus:border-cyan-400 outline-none font-mono"
             value={steamInput}
             onChange={(e) => setSteamInput(e.target.value)}
           />
@@ -116,29 +116,29 @@ export default function SteamImportPage() {
           </RetroButton>
         </form>
 
-        <div className="mt-4 p-3 bg-cyan-900/10 border border-cyan-900/50 text-xs text-cyan-200">
+        <div className="mt-4 p-3 bg-cyan-50 dark:bg-cyan-900/10 border border-cyan-200 dark:border-cyan-900/50 text-xs text-cyan-700 dark:text-cyan-200">
           <strong>Nota:</strong> O teu perfil da Steam tem de estar definido como <strong>"Público"</strong> (incluindo{" "}
           <strong>"Detalhes do jogo"</strong>) para isto funcionar.
         </div>
 
         {!!steamId64 && (
-          <div className="mt-3 text-xs text-slate-400 font-mono">
-            steamId64: <span className="text-cyan-300 font-bold">{steamId64}</span>
+          <div className="mt-3 text-xs text-slate-500 dark:text-slate-400 font-mono">
+            steamId64: <span className="text-cyan-600 dark:text-cyan-300 font-bold">{steamId64}</span>
           </div>
         )}
       </RetroCard>
 
       {gamesFound.length > 0 && (
         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="sticky top-4 z-10 flex items-center justify-between bg-slate-900/95 backdrop-blur-md p-4 border-2 border-slate-700 shadow-xl">
-            <span className="text-cyan-400 font-bold">{selectedGames.size} jogos selecionados</span>
+          <div className="sticky top-4 z-10 flex items-center justify-between bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 border-2 border-slate-200 dark:border-slate-700 shadow-xl">
+            <span className="text-cyan-700 dark:text-cyan-400 font-bold">{selectedGames.size} jogos selecionados</span>
             <div className="flex gap-3">
-              <button onClick={() => setSelectedGames(new Set())} className="text-xs text-slate-400 hover:text-white font-bold uppercase">
+              <button onClick={() => setSelectedGames(new Set())} className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-bold uppercase">
                 Desmarcar Todos
               </button>
               <button
                 onClick={() => setSelectedGames(new Set(gamesFound.map((g) => g.steam_appid)))}
-                className="text-xs text-slate-400 hover:text-white font-bold uppercase"
+                className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-bold uppercase"
               >
                 Marcar Todos
               </button>
@@ -160,17 +160,19 @@ export default function SteamImportPage() {
                   key={game.steam_appid}
                   onClick={() => toggleGame(game.steam_appid)}
                   className={`cursor-pointer border-2 transition-all relative group overflow-hidden ${
-                    isSelected ? "border-cyan-400 bg-cyan-900/20" : "border-slate-700 bg-slate-800 opacity-60 hover:opacity-100 hover:border-slate-500"
+                    isSelected
+                      ? "border-cyan-400 bg-cyan-50 dark:bg-cyan-900/20"
+                      : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 opacity-80 hover:opacity-100 hover:border-slate-300 dark:hover:border-slate-500"
                   }`}
                 >
-                  <div className="aspect-[16/9] bg-black relative">
+                  <div className="aspect-[16/9] bg-slate-900 relative">
                     <img src={game.cover_url} alt={game.title} className="w-full h-full object-cover" />
                     <div className="absolute bottom-0 right-0 bg-black/80 text-white text-[10px] font-mono px-2 py-0.5">
                       {game.hours_played}h
                     </div>
                   </div>
                   <div className="p-3">
-                    <h4 className="font-bold text-white text-xs truncate leading-tight" title={game.title}>
+                    <h4 className="font-bold text-slate-900 dark:text-white text-xs truncate leading-tight" title={game.title}>
                       {game.title}
                     </h4>
                   </div>

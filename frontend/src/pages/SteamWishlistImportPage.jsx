@@ -5,14 +5,14 @@ import { useToast } from "../components/Toast";
 
 // --- Componentes Visuais ---
 function RetroCard({ children, className = "" }) {
-  return <div className={`bg-slate-900 border-2 border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.2)] p-6 ${className}`}>{children}</div>;
+  return <div className={`bg-white dark:bg-slate-900 border-2 border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.2)] p-6 ${className}`}>{children}</div>;
 }
 
 function RetroButton({ children, onClick, disabled, className="" }) {
   return (
     <button 
       onClick={onClick} disabled={disabled}
-      className={`px-6 py-2 border-2 border-rose-500 bg-rose-900/20 text-rose-400 font-bold uppercase hover:bg-rose-500 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      className={`px-6 py-2 border-2 border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-400 font-bold uppercase hover:bg-rose-500 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     >
       {children}
     </button>
@@ -88,12 +88,12 @@ export default function SteamWishlistImportPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-            <h1 className="text-3xl font-black text-white flex items-center gap-3">
+            <h1 className="text-3xl font-black text-slate-900 dark:text-white flex items-center gap-3">
                 <span className="text-4xl">☁️</span> Importar Wishlist Steam
             </h1>
-            <p className="text-slate-400 mt-2">Sincroniza os teus desejos da Steam para o GameVault.</p>
+            <p className="text-slate-600 dark:text-slate-400 mt-2">Sincroniza os teus desejos da Steam para o GameVault.</p>
         </div>
-        <button onClick={() => navigate("/app/wishlist")} className="text-slate-500 hover:text-white font-bold">VOLTAR</button>
+        <button onClick={() => navigate("/app/wishlist")} className="text-slate-500 hover:text-slate-900 dark:hover:text-white font-bold">VOLTAR</button>
       </div>
 
       {/* Input */}
@@ -102,7 +102,7 @@ export default function SteamWishlistImportPage() {
             <input 
                 type="text" 
                 placeholder="O teu Username ou Steam ID (ex: gaben)"
-                className="flex-1 bg-slate-800 border-2 border-slate-600 text-white px-4 py-3 focus:border-rose-500 outline-none font-mono"
+            className="flex-1 bg-slate-50 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white px-4 py-3 focus:border-rose-500 outline-none font-mono"
                 value={steamInput}
                 onChange={e => setSteamInput(e.target.value)}
             />
@@ -110,7 +110,7 @@ export default function SteamWishlistImportPage() {
                 {loading ? "A carregar..." : "Procurar Wishlist"}
             </RetroButton>
         </form>
-        <div className="mt-4 p-3 bg-rose-900/10 border border-rose-900/50 text-xs text-rose-200">
+        <div className="mt-4 p-3 bg-rose-50 dark:bg-rose-900/10 border border-rose-200 dark:border-rose-900/50 text-xs text-rose-700 dark:text-rose-200">
             <strong>Nota Importante:</strong> Nas definições de privacidade da Steam, a opção <strong>"Game Details"</strong> (Detalhes dos Jogos) tem de estar como <strong>Pública</strong> para lermos a Wishlist.
         </div>
       </RetroCard>
@@ -120,11 +120,11 @@ export default function SteamWishlistImportPage() {
         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
             
             {/* Barra de Ações */}
-            <div className="sticky top-4 z-10 flex items-center justify-between bg-slate-900/95 backdrop-blur-md p-4 border-2 border-slate-700 shadow-xl">
-                <span className="text-rose-400 font-bold">{selectedGames.size} jogos selecionados</span>
+          <div className="sticky top-4 z-10 flex items-center justify-between bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 border-2 border-slate-200 dark:border-slate-700 shadow-xl">
+            <span className="text-rose-700 dark:text-rose-400 font-bold">{selectedGames.size} jogos selecionados</span>
                 <div className="flex gap-3">
-                    <button onClick={() => setSelectedGames(new Set())} className="text-xs text-slate-400 hover:text-white font-bold uppercase">Desmarcar Todos</button>
-                    <button onClick={() => setSelectedGames(new Set(gamesFound.map(g => g.steam_appid)))} className="text-xs text-slate-400 hover:text-white font-bold uppercase">Marcar Todos</button>
+              <button onClick={() => setSelectedGames(new Set())} className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-bold uppercase">Desmarcar Todos</button>
+              <button onClick={() => setSelectedGames(new Set(gamesFound.map(g => g.steam_appid)))} className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-bold uppercase">Marcar Todos</button>
                     <button 
                         onClick={handleImport} 
                         disabled={loading || selectedGames.size === 0}
@@ -143,13 +143,17 @@ export default function SteamWishlistImportPage() {
                         <div 
                             key={game.steam_appid}
                             onClick={() => toggleGame(game.steam_appid)}
-                            className={`cursor-pointer border-2 transition-all relative group overflow-hidden ${isSelected ? "border-rose-500 bg-rose-900/20" : "border-slate-700 bg-slate-800 opacity-60 hover:opacity-100 hover:border-slate-500"}`}
+                      className={`cursor-pointer border-2 transition-all relative group overflow-hidden ${
+                        isSelected
+                        ? "border-rose-500 bg-rose-50 dark:bg-rose-900/20"
+                        : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 opacity-80 hover:opacity-100 hover:border-slate-300 dark:hover:border-slate-500"
+                      }`}
                         >
-                            <div className="aspect-[16/9] bg-black relative">
+                      <div className="aspect-[16/9] bg-slate-900 relative">
                                 <img src={game.cover_url} alt={game.title} className="w-full h-full object-cover" />
                             </div>
                             <div className="p-3">
-                                <h4 className="font-bold text-white text-xs truncate leading-tight" title={game.title}>{game.title}</h4>
+                        <h4 className="font-bold text-slate-900 dark:text-white text-xs truncate leading-tight" title={game.title}>{game.title}</h4>
                             </div>
                             {/* Checkmark */}
                             {isSelected && (
