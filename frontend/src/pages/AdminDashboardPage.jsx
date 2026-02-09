@@ -6,7 +6,7 @@ import { useToast } from "../components/Toast";
 import { 
   Users, Database, Heart, TrendingUp, Crown, Shield, 
   AlertTriangle, Settings, Search, ChevronLeft, ChevronRight,
-  X, Trash2, FileText, MessageSquare, BarChart3
+  X, Trash2, FileText, MessageSquare, BarChart3, Gamepad2, RefreshCw
 } from "lucide-react";
 import api from "../services/api";
 
@@ -196,6 +196,9 @@ export default function AdminDashboardPage() {
   
   // Modal de confirmação
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, user: null });
+  
+  // Estado para enriquecer jogos Steam
+  const [enrichingGames, setEnrichingGames] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -280,6 +283,36 @@ export default function AdminDashboardPage() {
     navigate(`/app/admin/user/${userId}`);
   }
 
+  async function handleEnrichSteamGames() {
+    if (enrichingGames) return;
+    
+    try {
+      setEnrichingGames(true);
+      toast.info('A atualizar jogos Steam com dados da RAWG... Isto pode demorar alguns minutos.');
+      
+      const response = await api.post('/admin/games/enrich-steam');
+      const { updated, failed, total, errors } = response.data;
+      
+      if (updated > 0) {
+        toast.success(`${updated} jogos atualizados com sucesso!`);
+      }
+      
+      if (failed > 0) {
+        toast.warning(`${failed} jogos não foram encontrados na RAWG`);
+      }
+      
+      if (total === 0) {
+        toast.info('Não há jogos para atualizar. Todos já têm dados completos.');
+      }
+      
+    } catch (error) {
+      console.error('Erro ao enriquecer jogos:', error);
+      toast.error('Erro ao atualizar jogos Steam');
+    } finally {
+      setEnrichingGames(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -317,7 +350,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Quick Links */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <button
           onClick={() => navigate('/app/admin/logs')}
           className="p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:shadow-lg transition-all flex items-center gap-4"
@@ -354,6 +387,22 @@ export default function AdminDashboardPage() {
           <div className="text-left">
             <h3 className="font-semibold text-slate-900 dark:text-white">Analytics</h3>
             <p className="text-sm text-slate-500 dark:text-slate-400">Estatísticas e gráficos</p>
+          </div>
+        </button>
+
+        <button
+          onClick={handleEnrichSteamGames}
+          disabled={enrichingGames}
+          className="p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:shadow-lg transition-all flex items-center gap-4 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <div className={`p-3 bg-emerald-500 text-white rounded-lg ${enrichingGames ? 'animate-pulse' : ''}`}>
+            {enrichingGames ? <RefreshCw size={24} className="animate-spin" /> : <Gamepad2 size={24} />}
+          </div>
+          <div className="text-left">
+            <h3 className="font-semibold text-slate-900 dark:text-white">
+              {enrichingGames ? 'A atualizar...' : 'Enriquecer Jogos Steam'}
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Adicionar plataformas e géneros</p>
           </div>
         </button>
       </div>

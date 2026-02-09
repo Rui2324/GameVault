@@ -8,6 +8,7 @@ const {
   markAllAsRead, 
   deleteNotification 
 } = require("../services/adminNotificationService");
+const externalGamesService = require("../services/externalGamesService");
 
 // ========== LOGS ==========
 
@@ -389,6 +390,115 @@ async function deleteNotificationById(req, res) {
   }
 }
 
+// ========== ENRIQUECER JOGOS STEAM COM RAWG ==========
+
+/**
+ * Atualiza jogos importados da Steam que têm dados incompletos
+ * (platform = 'PC', genre/external_id = NULL) com informações da RAWG.
+ */
+async function enrichSteamGames(req, res) {
+  try {
+    // Buscar jogos Steam com dados incompletos
+    const [games] = await pool.query(`
+      SELECT id, title, steam_appid, platform, genre, external_id
+      FROM games
+      WHERE steam_appid IS NOT NULL
+        AND (external_id IS NULL OR genre IS NULL OR platform = 'PC')
+      ORDER BY id
+    `);
+
+    if (!games.length) {
+      return res.json({
+        message: "Nenhum jogo para atualizar",
+        updated: 0,
+        failed: 0,
+        total: 0
+      });
+    }
+
+    let updated = 0;
+    let failed = 0;
+    const errors = [];
+
+    // Função para normalizar nomes para comparação
+    const norm = (s) => String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+    for (const game of games) {
+      try {
+        // Buscar na RAWG pelo título
+        const results = await externalGamesService.searchGames(game.title, 1);
+        
+        if (!results || !results.length) {
+          failed++;
+          errors.push({ id: game.id, title: game.title, reason: "Não encontrado na RAWG" });
+          continue;
+        }
+
+        // Tentar match exato primeiro
+        const target = norm(game.title);
+        const exact = results.find((g) => norm(g.title || g.name) === target);
+        const best = exact || results[0];
+
+        if (!best) {
+          failed++;
+          errors.push({ id: game.id, title: game.title, reason: "Nenhum resultado válido" });
+          continue;
+        }
+
+        // Atualizar o jogo com dados da RAWG
+        await pool.query(`
+          UPDATE games
+          SET 
+            platform = COALESCE(?, platform),
+            genre = COALESCE(?, genre),
+            external_id = COALESCE(external_id, ?),
+            rawg_id = COALESCE(rawg_id, ?),
+            cover_url = COALESCE(cover_url, ?),
+            updated_at = NOW()
+          WHERE id = ?
+        `, [
+          best.platforms || null,
+          best.genres || null,
+          best.external_id || best.id || null,
+          best.external_id || best.id || null,
+          best.cover_url || null,
+          game.id
+        ]);
+
+        updated++;
+
+        // Delay para não sobrecarregar a API da RAWG
+        await new Promise(resolve => setTimeout(resolve, 250));
+
+      } catch (err) {
+        failed++;
+        errors.push({ id: game.id, title: game.title, reason: err.message });
+      }
+    }
+
+    await logAdminAction(
+      req.user.id, 
+      'ENRICH_STEAM_GAMES', 
+      'games', 
+      null, 
+      `Enriqueceu ${updated} jogos Steam com dados RAWG`, 
+      req.ip
+    );
+
+    res.json({
+      message: `Atualização concluída: ${updated} jogos atualizados, ${failed} falharam`,
+      updated,
+      failed,
+      total: games.length,
+      errors: errors.slice(0, 20) // Mostrar só os primeiros 20 erros
+    });
+
+  } catch (error) {
+    console.error("Erro ao enriquecer jogos:", error);
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
+}
+
 module.exports = {
   getLogs,
   getLogsStats,
@@ -402,5 +512,6 @@ module.exports = {
   getUnread,
   markNotificationAsRead,
   markAllNotificationsAsRead,
-  deleteNotificationById
+  deleteNotificationById,
+  enrichSteamGames
 };

@@ -56,4 +56,7 @@ router.put("/notifications/:notificationId/read", adminAdvancedController.markNo
 router.put("/notifications/read-all", adminAdvancedController.markAllNotificationsAsRead);
 router.delete("/notifications/:notificationId", adminAdvancedController.deleteNotificationById);
 
+// Manutenção de Games
+router.post("/games/enrich-steam", adminAdvancedController.enrichSteamGames);
+
 module.exports = router;

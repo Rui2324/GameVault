@@ -292,7 +292,7 @@ export default function PublicProfilePage() {
               <span className="w-8 h-8 border-2 border-cyan-400 bg-cyan-50 dark:bg-cyan-400/20 flex items-center justify-center text-base">🕐</span> Recentes
             </h2>
             {recentGames.length === 0 ? <p className="text-slate-500 text-sm text-center py-6 font-mono">Sem jogos recentes</p> : 
-                <div className="space-y-2">{recentGames.slice(0, 4).map(g => <GameCard key={g.id} game={g} navigate={navigate} showDate />)}</div>}
+              <div className="space-y-2">{recentGames.map(g => <GameCard key={g.id} game={g} navigate={navigate} showDate />)}</div>}
           </RetroCard>
 
           <RetroCard color="fuchsia" className="p-5">

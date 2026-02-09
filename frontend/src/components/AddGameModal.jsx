@@ -1,7 +1,63 @@
 // src/components/AddGameModal.jsx
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Search, Calendar, Star } from "lucide-react";
 import api from "../services/api";
+
+const retroColors = {
+  fuchsia: "border-fuchsia-500 shadow-[4px_4px_0px_0px_rgba(217,70,239,0.5)]",
+  cyan: "border-cyan-400 shadow-[4px_4px_0px_0px_rgba(34,211,238,0.5)]",
+  yellow: "border-yellow-400 shadow-[4px_4px_0px_0px_rgba(250,204,21,0.5)]",
+  green: "border-green-400 shadow-[4px_4px_0px_0px_rgba(74,222,128,0.5)]",
+  rose: "border-rose-500 shadow-[4px_4px_0px_0px_rgba(244,63,94,0.5)]",
+  slate: "border-slate-400 shadow-[4px_4px_0px_0px_rgba(148,163,184,0.4)]",
+};
+
+function RetroCard({ children, color = "fuchsia", className = "" }) {
+  const palette = retroColors[color] || retroColors.fuchsia;
+  return (
+    <div className={`bg-white dark:bg-slate-900 border-2 ${palette} ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+function RetroButton({
+  children,
+  color = "fuchsia",
+  className = "",
+  disabled = false,
+  type = "button",
+  onClick,
+}) {
+  const palettes = {
+    fuchsia:
+      "border-fuchsia-500 bg-fuchsia-50 text-fuchsia-600 dark:bg-fuchsia-500/20 dark:text-fuchsia-400 hover:bg-fuchsia-500 hover:text-white",
+    cyan:
+      "border-cyan-400 bg-cyan-50 text-cyan-600 dark:bg-cyan-400/20 dark:text-cyan-400 hover:bg-cyan-400 hover:text-slate-900",
+    green:
+      "border-green-400 bg-green-50 text-green-600 dark:bg-green-400/20 dark:text-green-400 hover:bg-green-400 hover:text-slate-900",
+    rose:
+      "border-rose-500 bg-rose-50 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400 hover:bg-rose-500 hover:text-white",
+    yellow:
+      "border-yellow-400 bg-yellow-50 text-yellow-600 dark:bg-yellow-400/20 dark:text-yellow-400 hover:bg-yellow-400 hover:text-slate-900",
+    slate:
+      "border-slate-400 bg-slate-50 text-slate-600 dark:bg-slate-700 dark:text-slate-200 hover:bg-slate-500 hover:text-white",
+  };
+
+  const scheme = palettes[color] || palettes.fuchsia;
+
+  return (
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className={`px-4 py-2 border-2 font-bold text-[11px] uppercase tracking-wide transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none disabled:opacity-50 disabled:cursor-not-allowed ${scheme} ${className}`}
+    >
+      {children}
+    </button>
+  );
+}
 
 function formatDate(v) {
   if (!v) return "—";
@@ -38,6 +94,15 @@ export default function AddGameModal({
     setCount(0);
     setPage(1);
     // não limpo q para poderes abrir e continuar a pesquisa
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow || "";
+    };
   }, [open]);
 
   async function pesquisar(p = 1) {
@@ -179,74 +244,93 @@ export default function AddGameModal({
     navigate(`/app/explorar/${externalId}`);
   }
 
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (podePesquisar) {
+      pesquisar(1);
+    }
+  }
+
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* overlay */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <button
         type="button"
         onClick={onClose}
-        className="absolute inset-0 bg-black/40"
+        className="absolute inset-0 bg-slate-900/90 backdrop-blur-sm"
         aria-label="Fechar"
       />
 
-      {/* modal */}
-      <div className="relative z-10 w-[min(980px,92vw)] max-h-[85vh] overflow-hidden rounded-2xl bg-white dark:bg-slate-800 shadow-2xl border border-slate-200 dark:border-slate-700">
-        <div className="flex items-start justify-between gap-3 border-b border-slate-100 dark:border-slate-700 px-5 py-4">
-          <div>
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-              Adicionar jogo (RAWG)
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Pesquisa pelo nome, vê detalhes e importa para a tua coleção.
-            </p>
+      <div className="relative z-10 w-full max-w-4xl">
+        <RetroCard color="yellow" className="w-full max-h-[85vh] flex flex-col relative shadow-2xl">
+          <div className="p-4 border-b-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
+            <h3 className="text-xl font-black text-yellow-600 dark:text-yellow-300 flex items-center gap-2 uppercase tracking-[0.15em]">
+              <Search size={18} /> Pesquisar jogos
+            </h3>
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-100 dark:hover:bg-rose-900/20 font-bold text-xl transition-colors"
+            >
+              ✕
+            </button>
           </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600"
-          >
-            Fechar
-          </button>
-        </div>
+          <div className="p-6 flex flex-col flex-1 overflow-hidden bg-white dark:bg-slate-900">
+            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 mb-4">
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Nome do jogo..."
+                className="flex-1 border-2 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800 pl-4 pr-4 py-2.5 text-sm focus:outline-none focus:border-yellow-400 transition-colors font-mono text-slate-900 dark:text-white"
+              />
+              <RetroButton type="submit" color="yellow" disabled={!podePesquisar || loading}>
+                {loading ? "A pesquisar..." : "Pesquisar"}
+              </RetroButton>
+            </form>
 
-        <div className="px-5 py-4">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Ex.: red dead"
-              className="w-full sm:w-[520px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-            <div className="text-xs text-slate-500 dark:text-slate-400">{totalResultadosTexto}</div>
-          </div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-[11px] sm:text-xs font-mono uppercase text-slate-500 dark:text-slate-400 mb-3">
+              <span>{totalResultadosTexto}</span>
+              {podePesquisar && resultados.length > 0 && (
+                <span>Pág. {page}</span>
+              )}
+            </div>
 
-          {erro && <div className="mt-3 text-sm text-rose-700 dark:text-rose-400">{erro}</div>}
+            {erro && (
+              <div className="p-3 mb-3 bg-rose-50 dark:bg-rose-900/30 border-2 border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-300 font-bold text-sm">
+                ⚠️ {erro}
+              </div>
+            )}
 
-          <div className="mt-4 max-h-[55vh] overflow-auto rounded-xl border border-slate-200 dark:border-slate-700">
-            {(!podePesquisar && resultados.length === 0) ? (
-              <div className="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
-                Escreve para começar a pesquisar.
-              </div>
-            ) : loading && resultados.length === 0 ? (
-              <div className="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
-                A pesquisar…
-              </div>
-            ) : resultados.length === 0 ? (
-              <div className="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
-                Sem resultados.
-              </div>
-            ) : (
-              <div className="divide-y divide-slate-100 dark:divide-slate-700">
-                {resultados.map((item) => {
+            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3">
+              {!podePesquisar && resultados.length === 0 && !loading && !erro && (
+                <div className="text-center py-10 text-slate-500 border-2 border-dashed border-slate-300 dark:border-slate-700 font-mono text-sm">
+                  Escreve pelo menos 2 letras...
+                </div>
+              )}
+
+              {loading && resultados.length === 0 && (
+                <div className="text-center py-10 text-slate-500 border-2 border-dashed border-slate-300 dark:border-slate-700 font-mono text-sm">
+                  A pesquisar...
+                </div>
+              )}
+
+              {!loading && podePesquisar && resultados.length === 0 && !erro && (
+                <div className="text-center py-10 text-slate-500 border-2 border-dashed border-slate-300 dark:border-slate-700 font-mono text-sm">
+                  Sem resultados.
+                </div>
+              )}
+
+              {resultados.length > 0 && (
+                resultados.map((item) => {
                   const externalId = getExternalId(item);
                   const title = getTitle(item);
                   const cover = getCover(item);
                   const platforms = getPlatforms(item);
                   const genres = getGenres(item);
                   const released = getRelease(item);
+                  const rating = item?.rating ?? item?.metacritic ?? null;
 
                   const jaNaColecao =
                     externalId != null && collectionExternalIds?.has(externalId);
@@ -254,94 +338,91 @@ export default function AddGameModal({
                   const importing = aImportarId === externalId;
 
                   return (
-                    <div key={String(externalId ?? title)} className="flex gap-3 px-4 py-3">
-                      <div className="h-16 w-12 overflow-hidden rounded-md bg-slate-200 dark:bg-slate-700 flex-shrink-0">
+                    <div
+                      key={String(externalId ?? title)}
+                      className="flex flex-col sm:flex-row sm:items-center gap-4 p-3 border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/60 hover:border-yellow-400 transition-colors"
+                    >
+                      <div className="w-16 h-20 bg-slate-200 shrink-0 overflow-hidden border border-slate-300 dark:border-slate-600">
                         {cover ? (
-                          <img
-                            src={cover}
-                            alt={title}
-                            className="h-full w-full object-cover"
-                          />
+                          <img src={cover} className="w-full h-full object-cover" alt={title} />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center text-[10px] text-slate-500 dark:text-slate-400">
-                            Sem capa
+                          <div className="w-full h-full flex items-center justify-center text-[10px] text-slate-400">
+                            IMG
                           </div>
                         )}
                       </div>
 
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <div className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
-                              {title}
-                            </div>
-                            <div className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                              {formatDate(released)}{" "}
-                              {platforms ? ` · ${platforms}` : ""}{" "}
-                              {genres ? ` · ${genres}` : ""}
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => verDetalhes(item)}
-                              className="rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600"
-                            >
-                              Detalhes
-                            </button>
-
-                            <button
-                              type="button"
-                              disabled={jaNaColecao || importing}
-                              onClick={() => importarParaColecao(item)}
-                              className={
-                                "rounded-lg px-3 py-2 text-xs font-medium text-white " +
-                                (jaNaColecao
-                                  ? "bg-slate-300 cursor-not-allowed"
-                                  : "bg-emerald-600 hover:bg-emerald-500") +
-                                (importing ? " opacity-70" : "")
-                              }
-                            >
-                              {jaNaColecao
-                                ? "Já na coleção"
-                                : importing
-                                ? "A importar…"
-                                : "Importar p/ coleção"}
-                            </button>
-                          </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-bold text-slate-900 dark:text-white truncate">
+                          {title}
                         </div>
+                        <div className="flex flex-wrap items-center gap-3 mt-1 text-[11px] text-slate-500 font-mono">
+                          <span className="flex items-center gap-1">
+                            <Calendar size={12} /> {released ? formatDate(released) : "----"}
+                          </span>
+                          {platforms && <span>{platforms}</span>}
+                          {genres && <span>{genres}</span>}
+                          {rating != null && (
+                            <span className="flex items-center gap-1 text-yellow-500 font-bold">
+                              <Star size={12} fill="currentColor" />
+                              {Number.isFinite(Number(rating)) ? Number(rating).toFixed(1) : rating}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2 flex-shrink-0">
+                        <RetroButton
+                          color="slate"
+                          className="px-3 py-1.5 text-[10px]"
+                          onClick={() => verDetalhes(item)}
+                        >
+                          Detalhes
+                        </RetroButton>
+                        <RetroButton
+                          color={jaNaColecao ? "slate" : "green"}
+                          className="px-4 py-1.5 text-[10px] min-w-[120px]"
+                          onClick={() => importarParaColecao(item)}
+                          disabled={jaNaColecao || importing}
+                        >
+                          {jaNaColecao ? "Já tens" : importing ? "A importar..." : "Importar"}
+                        </RetroButton>
                       </div>
                     </div>
                   );
-                })}
+                })
+              )}
+            </div>
+
+            {podePesquisar && resultados.length > 0 && (
+              <div className="pt-4 mt-4 border-t-2 border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-3 text-[10px] sm:text-xs">
+                <span className="font-bold text-yellow-500 tracking-[0.35em]">CTRL + K</span>
+                <div className="flex gap-2">
+                  <RetroButton
+                    color="cyan"
+                    className="px-3 py-1.5 text-[10px]"
+                    disabled={page <= 1 || loading}
+                    onClick={() => pesquisar(page - 1)}
+                  >
+                    ◀ Anterior
+                  </RetroButton>
+                  <RetroButton
+                    color="cyan"
+                    className="px-3 py-1.5 text-[10px]"
+                    disabled={loading}
+                    onClick={() => pesquisar(page + 1)}
+                  >
+                    Próxima ▶
+                  </RetroButton>
+                </div>
               </div>
             )}
           </div>
 
-          {/* Paginação simples */}
-          {podePesquisar && resultados.length > 0 && (
-            <div className="mt-3 flex items-center justify-end gap-2">
-              <button
-                type="button"
-                disabled={page <= 1 || loading}
-                onClick={() => pesquisar(page - 1)}
-                className="rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 disabled:opacity-60"
-              >
-                ◀ Anterior
-              </button>
-
-              <button
-                type="button"
-                disabled={loading}
-                onClick={() => pesquisar(page + 1)}
-                className="rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 disabled:opacity-60"
-              >
-                Mais resultados ▶
-              </button>
-            </div>
-          )}
-        </div>
+          <div className="p-3 bg-slate-50 dark:bg-slate-800 border-t-2 border-slate-200 dark:border-slate-700 text-right text-[10px] text-slate-500 font-mono uppercase">
+            Powered by RAWG
+          </div>
+        </RetroCard>
       </div>
     </div>
   );

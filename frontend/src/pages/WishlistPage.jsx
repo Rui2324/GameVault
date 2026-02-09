@@ -68,6 +68,17 @@ export default function WishlistPage() {
   const [loadingPesquisa, setLoadingPesquisa] = useState(false);
   const [erroPesquisa, setErroPesquisa] = useState("");
   const [aImportarId, setAImportarId] = useState(null);
+  const [paginaPesquisa, setPaginaPesquisa] = useState(1);
+  const [totalResultadosPesquisa, setTotalResultadosPesquisa] = useState(0);
+  const [pesquisaEfetuada, setPesquisaEfetuada] = useState(false);
+  const podePesquisar = termoPesquisa.trim().length >= 2;
+  const resumoPesquisa = useMemo(() => {
+    if (!podePesquisar) return "Escreve pelo menos 2 letras...";
+    if (loadingPesquisa) return "A pesquisar...";
+    if (totalResultadosPesquisa) return `${totalResultadosPesquisa} resultado(s)`;
+    if (pesquisaEfetuada) return `${resultadosExternos.length} resultado(s)`;
+    return "";
+  }, [podePesquisar, loadingPesquisa, totalResultadosPesquisa, pesquisaEfetuada, resultadosExternos.length]);
 
   // Estados de gestão
   const [aMoverId, setAMoverId] = useState(null);
@@ -124,42 +135,64 @@ export default function WishlistPage() {
   }
 
   // --- Live Search ---
-  async function executarPesquisa(termo) {
+  async function executarPesquisa(termo, pagina = 1) {
+    if (!termo || termo.trim().length < 2) return;
+
     try {
       setLoadingPesquisa(true);
       setErroPesquisa("");
+      setPesquisaEfetuada(true);
 
       const res = await api.get("/external-games/search", {
-        params: { q: termo, page: 1 }
+        params: { q: termo.trim(), page }
       });
 
-      const lista = res.data.jogos || res.data.results || res.data.resultados || [];
-      if (Array.isArray(lista)) setResultadosExternos(lista);
-      else {
-        setResultadosExternos([]);
-        if (termo.length > 0) setErroPesquisa("Formato inválido.");
-      }
+      const data = res.data || {};
+      const lista =
+        data.jogos ||
+        data.resultados?.results ||
+        data.resultados ||
+        data.results ||
+        [];
 
+      const total =
+        (Array.isArray(data.jogos) ? data.jogos.length : 0) ||
+        data.resultados?.count ||
+        data.count ||
+        data.total ||
+        0;
+
+      const arr = Array.isArray(lista) ? lista : [];
+      setResultadosExternos(arr);
+      setPaginaPesquisa(pagina);
+      setTotalResultadosPesquisa(Number(total) || 0);
     } catch (err) {
       console.error(err);
       setErroPesquisa("Erro ao pesquisar.");
+      setResultadosExternos([]);
+      setTotalResultadosPesquisa(0);
     } finally {
       setLoadingPesquisa(false);
     }
   }
 
   useEffect(() => {
-    if (termoPesquisa.trim().length < 2) {
+    if (!podePesquisar) {
       setResultadosExternos([]);
+      setPaginaPesquisa(1);
+      setTotalResultadosPesquisa(0);
+      setPesquisaEfetuada(false);
+      setErroPesquisa("");
       return;
     }
-    const timer = setTimeout(() => executarPesquisa(termoPesquisa), 500);
+
+    const timer = setTimeout(() => executarPesquisa(termoPesquisa, 1), 500);
     return () => clearTimeout(timer);
-  }, [termoPesquisa]);
+  }, [termoPesquisa, podePesquisar]);
 
   function handleManualSearch(e) {
     e.preventDefault();
-    if (termoPesquisa.trim().length >= 2) executarPesquisa(termoPesquisa);
+    if (podePesquisar) executarPesquisa(termoPesquisa, 1);
   }
 
   async function importarParaWishlist(jogo) {
@@ -302,6 +335,10 @@ export default function WishlistPage() {
               setMostrarModal(true);
               setResultadosExternos([]);
               setTermoPesquisa("");
+              setPaginaPesquisa(1);
+              setTotalResultadosPesquisa(0);
+              setPesquisaEfetuada(false);
+              setErroPesquisa("");
             }} className="text-xs sm:text-sm">
               <Plus size={14} /> Adicionar
             </RetroButton>
@@ -403,10 +440,29 @@ export default function WishlistPage() {
                 </RetroButton>
               </form>
 
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-[11px] sm:text-xs font-mono uppercase text-slate-500 dark:text-slate-400 mb-4">
+                <span>{resumoPesquisa}</span>
+                {podePesquisar && pesquisaEfetuada && (
+                  <span>Pág. {paginaPesquisa}</span>
+                )}
+              </div>
+
               <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3">
                 {erroPesquisa && <div className="p-3 bg-rose-50 dark:bg-rose-900/30 border-2 border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 mb-2 font-bold text-sm">⚠️ {erroPesquisa}</div>}
 
-                {!loadingPesquisa && resultadosExternos.length === 0 && termoPesquisa && !erroPesquisa && (
+                {!podePesquisar && (
+                  <div className="text-center py-10 text-slate-500 border-2 border-dashed border-slate-300 dark:border-slate-700">
+                    <p className="font-mono text-sm">Escreve pelo menos 2 letras...</p>
+                  </div>
+                )}
+
+                {podePesquisar && loadingPesquisa && (
+                  <div className="text-center py-10 text-slate-500 border-2 border-dashed border-slate-300 dark:border-slate-700">
+                    <p className="font-mono text-sm">A pesquisar...</p>
+                  </div>
+                )}
+
+                {podePesquisar && !loadingPesquisa && pesquisaEfetuada && resultadosExternos.length === 0 && !erroPesquisa && (
                   <div className="text-center py-10 text-slate-500 border-2 border-dashed border-slate-300 dark:border-slate-700">
                     <p className="font-mono text-sm">Sem resultados.</p>
                   </div>
@@ -443,6 +499,30 @@ export default function WishlistPage() {
                 })}
               </div>
             </div>
+
+            {podePesquisar && resultadosExternos.length > 0 && (
+              <div className="p-3 pt-0 sm:pt-4 border-t-0 sm:border-t-2 sm:border-slate-200 sm:dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-3 text-[10px] sm:text-xs">
+                <span className="font-bold text-cyan-500 tracking-[0.35em]">CTRL + K</span>
+                <div className="flex gap-2">
+                  <RetroButton
+                    color="cyan"
+                    className="px-3 py-1.5 text-[10px]"
+                    disabled={paginaPesquisa <= 1 || loadingPesquisa}
+                    onClick={() => executarPesquisa(termoPesquisa, Math.max(1, paginaPesquisa - 1))}
+                  >
+                    ◀ Anterior
+                  </RetroButton>
+                  <RetroButton
+                    color="cyan"
+                    className="px-3 py-1.5 text-[10px]"
+                    disabled={loadingPesquisa}
+                    onClick={() => executarPesquisa(termoPesquisa, paginaPesquisa + 1)}
+                  >
+                    Próxima ▶
+                  </RetroButton>
+                </div>
+              </div>
+            )}
 
             <div className="p-3 bg-slate-50 dark:bg-slate-800 border-t-2 border-slate-200 dark:border-slate-700 text-right text-[10px] text-slate-500 font-mono uppercase">
               Powered by RAWG

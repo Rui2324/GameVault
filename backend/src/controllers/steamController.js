@@ -34,7 +34,7 @@ async function resolveSteamId(input) {
 }
 
 // Tenta mapear um título Steam para um id da RAWG (best effort).
-// Devolve { id, cover_url } ou null se não encontrar.
+// Devolve { id, cover_url, platforms, genres } ou null se não encontrar.
 async function findRawgByTitle(title) {
   const q = String(title || "").trim();
   if (!q) return null;
@@ -52,7 +52,9 @@ async function findRawgByTitle(title) {
 
     return {
       id: best?.external_id || best?.id || null,
-      cover_url: best?.cover_url || best?.background_image || null
+      cover_url: best?.cover_url || best?.background_image || null,
+      platforms: best?.platforms || null,
+      genres: best?.genres || null
     };
   } catch (e) {
     return null;
@@ -115,19 +117,38 @@ async function ensureSteamGame(conn, { steam_appid, title, cover_url }) {
   }
 
   // 3) Não existe: cria novo
-  // ✅ NOTA: external_id/rawg_id ficam NULL.
+  // Tenta buscar plataformas e gêneros da RAWG para enriquecer o jogo
+  let platform = "PC";
+  let genre = null;
+  let rawgId = null;
+
+  const rawgInfo = await findRawgByTitle(title);
+  if (rawgInfo) {
+    platform = rawgInfo.platforms || "PC";
+    genre = rawgInfo.genres || null;
+    rawgId = rawgInfo.id || null;
+    // Usa cover da RAWG se não tiver cover do Steam
+    if (!cover_url && rawgInfo.cover_url) {
+      cover_url = rawgInfo.cover_url;
+    }
+  }
+
+  // ✅ NOTA: external_id/rawg_id ficam preenchidos se encontrou na RAWG.
   const [ins] = await conn.query(
     `
-    INSERT INTO games (steam_appid, source, title, slug, platform, cover_url, external_id, rawg_id)
-    VALUES (?, 'steam', ?, ?, ?, ?, NULL, NULL)
+    INSERT INTO games (steam_appid, source, title, slug, platform, genre, cover_url, external_id, rawg_id)
+    VALUES (?, 'steam', ?, ?, ?, ?, ?, ?, ?)
     `,
     [
       appid,
       title || `Steam Game ${appid}`,
       slug,
-      "PC",
+      platform,
+      genre,
       cover_url ||
         `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
+      rawgId,
+      rawgId,
     ]
   );
 

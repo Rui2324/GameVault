@@ -194,14 +194,14 @@ function GameCard({ game, onClick }) {
   );
 }
 
-function UpcomingCardCompact({ game, onClick, onWishlist, isInWishlist, wishlistLoading }) {
+function UpcomingCardCompact({ game, onClick, onWishlist, isInWishlist, wishlistLoading, showDivider = false }) {
   const title = game?.title || game?.name || "Sem título";
   const released = game?.release_date || game?.released || null;
   const img = safeImg(game?.background_image || game?.cover_url);
 
   return (
     <button type="button" onClick={onClick} className="group text-left w-full">
-      <div className="flex items-center gap-3 py-3 px-3 border-b border-yellow-400/10 last:border-0 hover:bg-yellow-400/5 transition rounded">
+      <div className="relative flex items-center gap-3 py-3 px-3 border-b border-yellow-400/10 last:border-0 hover:bg-yellow-400/5 transition rounded">
         <div className="w-18 h-14 bg-slate-200 dark:bg-slate-800 overflow-hidden border border-yellow-400/30 flex-shrink-0 rounded-sm">
           {img ? (
             <img src={img} alt={title} referrerPolicy="no-referrer" className="h-full w-full object-cover" />
@@ -222,6 +222,9 @@ function UpcomingCardCompact({ game, onClick, onWishlist, isInWishlist, wishlist
           >
             {wishlistLoading ? <Loader2 size={13} className="animate-spin" /> : isInWishlist ? <BookmarkCheck size={13} /> : <Bookmark size={13} />}
           </button>
+        )}
+        {showDivider && (
+          <span className="pointer-events-none absolute left-3 right-3 -bottom-px h-px bg-gradient-to-r from-transparent via-yellow-400 to-transparent opacity-70" aria-hidden="true" />
         )}
       </div>
     </button>
@@ -543,7 +546,7 @@ export default function HomePage() {
                   </>
                 ) : upcomingGames.length > 0 ? (
                   <RetroCard color="yellow" className="overflow-hidden">
-                    {upcomingGames.slice(0, 6).map((game) => {
+                    {upcomingGames.slice(0, 6).map((game, idx, arr) => {
                       const eid = game.external_id || game.id;
                       return (
                         <UpcomingCardCompact
@@ -553,6 +556,7 @@ export default function HomePage() {
                           onWishlist={handleAddToWishlist}
                           isInWishlist={wishlistedIds.has(eid)}
                           wishlistLoading={wishlistLoadingId === eid}
+                          showDivider={idx < arr.length - 1}
                         />
                       );
                     })}

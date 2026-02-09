@@ -1,5 +1,5 @@
 // src/pages/CollectionPage.jsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { useToast } from "../components/Toast";
@@ -146,6 +146,18 @@ export default function CollectionPage() {
   const [loadingModal, setLoadingModal] = useState(false);
   const [erroModal, setErroModal] = useState("");
   const [aAdicionarId, setAAdicionarId] = useState(null);
+  const [paginaModalResultados, setPaginaModalResultados] = useState(1);
+  const [totalResultadosModal, setTotalResultadosModal] = useState(0);
+  const [pesquisaEfetuadaModal, setPesquisaEfetuadaModal] = useState(false);
+  const resultadosModalRef = useRef(null);
+  const podePesquisarModal = termoPesquisaModal.trim().length >= 2;
+  const resumoResultadosModal = useMemo(() => {
+    if (!podePesquisarModal) return "Escreve pelo menos 2 letras...";
+    if (loadingModal) return "A pesquisar...";
+    if (totalResultadosModal) return `${totalResultadosModal} resultado(s)`;
+    if (pesquisaEfetuadaModal) return `${resultadosModal.length} resultado(s)`;
+    return "";
+  }, [podePesquisarModal, loadingModal, totalResultadosModal, pesquisaEfetuadaModal, resultadosModal.length]);
 
   // --- BLOQUEAR SCROLL ---
   useEffect(() => {
@@ -255,38 +267,77 @@ export default function CollectionPage() {
 
   // --- LÓGICA DO MODAL (LIVE SEARCH) ---
   
-  async function executarPesquisa(termo) {
+  async function executarPesquisa(termo, paginaResultados = 1) {
+    if (!termo || termo.trim().length < 2) return;
+
     try {
-        setLoadingModal(true);
-        setErroModal("");
-        const res = await api.get("/external-games/search", { params: { q: termo, page: 1 } });
-        const lista = res.data.jogos || res.data.results || res.data.resultados || [];
-        setResultadosModal(Array.isArray(lista) ? lista : []);
-        if(lista.length === 0) setErroModal("Sem resultados.");
+      setLoadingModal(true);
+      setErroModal("");
+      setPesquisaEfetuadaModal(true);
+
+      const res = await api.get("/external-games/search", {
+        params: { q: termo.trim(), page: paginaResultados },
+      });
+
+      const data = res.data || {};
+      const lista =
+        data.jogos ||
+        data.resultados?.results ||
+        data.resultados ||
+        data.results ||
+        [];
+
+      const total =
+        (Array.isArray(data.jogos) ? data.jogos.length : 0) ||
+        data.resultados?.count ||
+        data.count ||
+        data.total ||
+        0;
+
+      const arr = Array.isArray(lista) ? lista : [];
+      setResultadosModal(arr);
+      setTotalResultadosModal(Number(total) || 0);
+      setPaginaModalResultados(paginaResultados);
+
     } catch (err) {
-        console.error(err);
-        setErroModal("Erro na pesquisa.");
+      console.error(err);
+      setErroModal("Erro na pesquisa.");
+      setResultadosModal([]);
+      setTotalResultadosModal(0);
     } finally {
-        setLoadingModal(false);
+      setLoadingModal(false);
     }
   }
 
   // Live Search (debounce)
   useEffect(() => {
-    if (termoPesquisaModal.trim().length < 2) {
-        setResultadosModal([]);
-        return;
+    if (!podePesquisarModal) {
+      setResultadosModal([]);
+      setTotalResultadosModal(0);
+      setPaginaModalResultados(1);
+      setPesquisaEfetuadaModal(false);
+      setErroModal("");
+      return;
     }
+
     const timer = setTimeout(() => {
-        executarPesquisa(termoPesquisaModal);
+      executarPesquisa(termoPesquisaModal, 1);
     }, 500);
+
     return () => clearTimeout(timer);
-  }, [termoPesquisaModal]);
+  }, [termoPesquisaModal, podePesquisarModal]);
+
+  useEffect(() => {
+    if (!mostrarModal) return;
+    if (resultadosModalRef.current) {
+      resultadosModalRef.current.scrollTop = 0;
+    }
+  }, [paginaModalResultados, resultadosModal, mostrarModal]);
 
   function handleManualSearch(e) {
     e.preventDefault();
-    if(termoPesquisaModal.trim().length >= 2) {
-        executarPesquisa(termoPesquisaModal);
+    if (podePesquisarModal) {
+      executarPesquisa(termoPesquisaModal, 1);
     }
   }
 
@@ -346,6 +397,10 @@ export default function CollectionPage() {
                 setMostrarModal(true);
                 setResultadosModal([]);
                 setTermoPesquisaModal("");
+              setPaginaModalResultados(1);
+              setTotalResultadosModal(0);
+              setPesquisaEfetuadaModal(false);
+              setErroModal("");
             }} className="text-xs sm:text-sm">
                 <Plus size={14} /> Adicionar jogo
             </RetroButton>
@@ -615,13 +670,32 @@ export default function CollectionPage() {
                 </RetroButton>
               </form>
 
-              <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-[11px] sm:text-xs font-mono uppercase text-slate-500 dark:text-slate-400 mb-4">
+                <span>{resumoResultadosModal}</span>
+                {podePesquisarModal && pesquisaEfetuadaModal && (
+                  <span>Pág. {paginaModalResultados}</span>
+                )}
+              </div>
+
+              <div ref={resultadosModalRef} className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3">
                 {erroModal && <div className="p-3 bg-rose-50 dark:bg-rose-900/30 border-2 border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 mb-2 font-bold text-sm">⚠️ {erroModal}</div>}
-                
-                {!loadingModal && resultadosModal.length === 0 && termoPesquisaModal && !erroModal && (
-                   <div className="text-center py-10 text-slate-500 border-2 border-dashed border-slate-300 dark:border-slate-700">
-                     <p className="font-mono text-sm">A escrever...</p>
-                   </div>
+
+                {!podePesquisarModal && (
+                  <div className="text-center py-10 text-slate-500 border-2 border-dashed border-slate-300 dark:border-slate-700">
+                    <p className="font-mono text-sm">Escreve pelo menos 2 letras...</p>
+                  </div>
+                )}
+
+                {podePesquisarModal && loadingModal && (
+                  <div className="text-center py-10 text-slate-500 border-2 border-dashed border-slate-300 dark:border-slate-700">
+                    <p className="font-mono text-sm">A pesquisar...</p>
+                  </div>
+                )}
+
+                {podePesquisarModal && !loadingModal && pesquisaEfetuadaModal && resultadosModal.length === 0 && !erroModal && (
+                  <div className="text-center py-10 text-slate-500 border-2 border-dashed border-slate-300 dark:border-slate-700">
+                    <p className="font-mono text-sm">Sem resultados.</p>
+                  </div>
                 )}
 
                 {resultadosModal.map(jogo => {
@@ -655,6 +729,30 @@ export default function CollectionPage() {
                    )
                 })}
               </div>
+
+              {podePesquisarModal && resultadosModal.length > 0 && (
+                <div className="pt-4 mt-4 border-t-2 border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-3 text-[10px] sm:text-xs">
+                  <span className="font-bold text-cyan-500 tracking-[0.35em]">CTRL + K</span>
+                  <div className="flex gap-2">
+                    <RetroButton
+                      color="cyan"
+                      className="px-3 py-1.5 text-[10px]"
+                      disabled={paginaModalResultados <= 1 || loadingModal}
+                      onClick={() => executarPesquisa(termoPesquisaModal, Math.max(1, paginaModalResultados - 1))}
+                    >
+                      ◀ Anterior
+                    </RetroButton>
+                    <RetroButton
+                      color="cyan"
+                      className="px-3 py-1.5 text-[10px]"
+                      disabled={loadingModal}
+                      onClick={() => executarPesquisa(termoPesquisaModal, paginaModalResultados + 1)}
+                    >
+                      Próxima ▶
+                    </RetroButton>
+                  </div>
+                </div>
+              )}
             </div>
             
              <div className="p-3 bg-slate-50 dark:bg-slate-800 border-t-2 border-slate-200 dark:border-slate-700 text-right text-[10px] text-slate-500 font-mono uppercase">
