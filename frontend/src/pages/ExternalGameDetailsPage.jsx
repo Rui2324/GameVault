@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import api from "../services/api";
 import { rawgImage, rawgOriginal } from "../utils/rawgImages";
 import { useToast } from "../components/Toast";
+import ReviewSection from "../components/ReviewSection";
 import { Calendar, Target, Heart, Clock, Plus, Pencil, Gamepad2, FileText, Globe, MessageCircle, Play, Image, Youtube, ExternalLink } from "lucide-react";
 
 function formatDate(v) {
@@ -65,6 +66,8 @@ export default function ExternalGameDetailsPage() {
   // --- ALTERAÇÃO IMPORTANTE: Guardar o ID da coleção ---
   const [collectionId, setCollectionId] = useState(null); // Guarda o ID interno (ex: 30) se existir
   const [jaNaWishlist, setJaNaWishlist] = useState(false);
+  const [userCollectionData, setUserCollectionData] = useState(null); // Dados do jogo na coleção do user
+  const [internalGameId, setInternalGameId] = useState(null); // game_id na tabela games (sempre existe)
 
   async function carregar() {
     try {
@@ -111,6 +114,12 @@ export default function ExternalGameDetailsPage() {
         if (itemEncontrado) {
           console.log("✅ ENCONTRADO! ID Interno:", itemEncontrado.id);
           setCollectionId(itemEncontrado.id);
+          // Guardar dados completos para usar no ReviewSection
+          setUserCollectionData({
+            game_id: itemEncontrado.game_id,
+            rating: itemEncontrado.rating,
+            horas_jogadas: itemEncontrado.horas_jogadas
+          });
         } else {
           console.warn("❌ Não encontrado. IDs disponíveis na lista:", 
             listaColecao.map(i => i.external_id || i.game?.external_id).slice(0, 5) // Mostra só os primeiros 5 para não poluir
@@ -129,6 +138,17 @@ export default function ExternalGameDetailsPage() {
             return Number(wId) === extId;
         });
         setJaNaWishlist(foundInWishlist);
+      }
+
+      // 3. SEMPRE buscar o game_id da tabela games (para mostrar reviews)
+      try {
+        const resGameId = await api.get(`/external-games/game-id/${extId}`);
+        if (resGameId.data?.game_id) {
+          setInternalGameId(resGameId.data.game_id);
+          console.log("🎮 Game ID interno:", resGameId.data.game_id);
+        }
+      } catch (err) {
+        console.warn("Não foi possível obter game_id:", err);
       }
 
     } catch (e) {
@@ -563,6 +583,16 @@ export default function ExternalGameDetailsPage() {
               </div>
             ) : <div className="text-xs text-slate-400">Sem screenshots disponíveis.</div>}
           </div>
+
+          {/* Reviews da Comunidade - SEMPRE MOSTRA se tiver game_id */}
+          {internalGameId && (
+            <ReviewSection 
+              gameId={internalGameId} 
+              gameTitle={title}
+              userRating={userCollectionData?.rating || null}
+              userHoursPlayed={userCollectionData?.horas_jogadas || 0}
+            />
+          )}
         </div>
       </div>
     </div>

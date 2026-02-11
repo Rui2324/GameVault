@@ -15,6 +15,7 @@ router.get("/list", authMiddleware, dashboardController.list);
 
 // --- RAWG / external (PRIVADAS - pesquisa e detalhes requerem login) ---
 router.get("/search", authMiddleware, externalGamesController.searchExternalGames);
+router.get("/game-id/:externalId", authMiddleware, externalGamesController.getGameIdByExternalId);
 router.get("/:externalId", authMiddleware, externalGamesController.getExternalGameDetails);
 
 // --- Ações que requerem autenticação ---

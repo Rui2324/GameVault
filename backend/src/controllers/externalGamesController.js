@@ -413,10 +413,49 @@ async function linkRawg(req, res) {
   }
 }
 
+/**
+ * GET /external-games/game-id/:externalId
+ * Retorna apenas o game_id interno, mesmo que o user não tenha o jogo na coleção
+ */
+async function getGameIdByExternalId(req, res) {
+  try {
+    const { externalId } = req.params;
+    const extId = Number(externalId);
+    
+    if (!extId) {
+      return res.status(400).json({ mensagem: "external_id inválido." });
+    }
+
+    const conn = await pool.getConnection();
+    try {
+      // Procura na tabela games
+      const [rows] = await conn.query(
+        "SELECT id as game_id FROM games WHERE external_id = ? LIMIT 1",
+        [extId]
+      );
+      
+      if (rows.length > 0) {
+        return res.json({ game_id: rows[0].game_id, found: true });
+      }
+      
+      // Se não existir, cria o jogo na base de dados
+      const gameId = await ensureGameInLocalDb(conn, extId);
+      return res.json({ game_id: gameId, found: false, created: true });
+      
+    } finally {
+      conn.release();
+    }
+  } catch (e) {
+    console.error("getGameIdByExternalId error:", e);
+    return res.status(500).json({ mensagem: "Erro ao obter game_id." });
+  }
+}
+
 module.exports = {
   searchExternalGames,
   getExternalGameDetails,
   importExternalToCollection,
   importExternalToWishlist,
   linkRawg, // ✅ IMPORTANTE
+  getGameIdByExternalId,
 };
