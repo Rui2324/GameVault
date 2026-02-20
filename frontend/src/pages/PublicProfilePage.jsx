@@ -65,6 +65,9 @@ export default function PublicProfilePage() {
   const [allGamesTotal, setAllGamesTotal] = useState(0);
   const [showAllGames, setShowAllGames] = useState(false);
   
+  // Estado para mostrar todos os recentes
+  const [showAllRecents, setShowAllRecents] = useState(false);
+  
   const [isFollowing, setIsFollowing] = useState(false);
   const [followCounts, setFollowCounts] = useState({ followers: 0, following: 0 });
   const [followLoading, setFollowLoading] = useState(false);
@@ -288,11 +291,45 @@ export default function PublicProfilePage() {
           </RetroCard>
 
           <RetroCard color="cyan" className="p-5">
-            <h2 className="text-sm font-bold text-cyan-600 dark:text-cyan-400 mb-4 flex items-center gap-2 uppercase tracking-wide">
-              <span className="w-8 h-8 border-2 border-cyan-400 bg-cyan-50 dark:bg-cyan-400/20 flex items-center justify-center text-base">🕐</span> Recentes
-            </h2>
-            {recentGames.length === 0 ? <p className="text-slate-500 text-sm text-center py-6 font-mono">Sem jogos recentes</p> : 
-              <div className="space-y-2">{recentGames.map(g => <GameCard key={g.id} game={g} navigate={navigate} showDate />)}</div>}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-bold text-cyan-600 dark:text-cyan-400 flex items-center gap-2 uppercase tracking-wide">
+                <span className="w-8 h-8 border-2 border-cyan-400 bg-cyan-50 dark:bg-cyan-400/20 flex items-center justify-center text-base">🕐</span> Recentes
+              </h2>
+              {!showAllRecents && recentGames.length > 4 && (
+                <button 
+                  onClick={() => setShowAllRecents(true)} 
+                  className="text-xs font-bold text-cyan-600 dark:text-cyan-400 hover:underline"
+                >
+                  Ver mais →
+                </button>
+              )}
+              {showAllRecents && recentGames.length > 4 && (
+                <button 
+                  onClick={() => setShowAllRecents(false)} 
+                  className="text-xs font-bold text-cyan-600 dark:text-cyan-400 hover:underline"
+                >
+                  Mostrar menos ↑
+                </button>
+              )}
+            </div>
+            {recentGames.length === 0 ? <p className="text-slate-500 text-sm text-center py-6 font-mono">Sem jogos recentes</p> : (
+              <div className="space-y-2">
+                {(showAllRecents ? recentGames : recentGames.slice(0, 4)).map(g => 
+                  <GameCard key={g.id} game={g} navigate={navigate} showDate />
+                )}
+              </div>
+            )}
+            
+            {!showAllRecents && recentGames.length > 4 && (
+              <div className="text-center mt-4">
+                <button 
+                  onClick={() => setShowAllRecents(true)} 
+                  className="px-4 py-2 border-2 border-cyan-400 text-cyan-600 dark:text-cyan-400 font-bold text-xs hover:bg-cyan-400 hover:text-slate-900 transition-all"
+                >
+                  Ver todos os {recentGames.length} recentes
+                </button>
+              </div>
+            )}
           </RetroCard>
 
           <RetroCard color="fuchsia" className="p-5">
