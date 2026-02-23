@@ -121,25 +121,65 @@ async function ensureSteamGame(conn, { steam_appid, title, cover_url }) {
   }
 
   // external_id/rawg_id ficam preenchidos se encontrou na RAWG.
-  const [ins] = await conn.query(
-    `
-    INSERT INTO games (steam_appid, source, title, slug, platform, genre, cover_url, external_id, rawg_id)
-    VALUES (?, 'steam', ?, ?, ?, ?, ?, ?, ?)
-    `,
-    [
-      appid,
-      title || `Steam Game ${appid}`,
-      slug,
-      platform,
-      genre,
-      cover_url ||
-        `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
-      rawgId,
-      rawgId,
-    ]
-  );
+  try {
+    const [ins] = await conn.query(
+      `
+      INSERT INTO games (steam_appid, source, title, slug, platform, genre, cover_url, external_id, rawg_id)
+      VALUES (?, 'steam', ?, ?, ?, ?, ?, ?, ?)
+      `,
+      [
+        appid,
+        title || `Steam Game ${appid}`,
+        slug,
+        platform,
+        genre,
+        cover_url ||
+          `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
+        rawgId,
+        rawgId,
+      ]
+    );
 
-  return ins.insertId;
+    return ins.insertId;
+  } catch (err) {
+    if (err?.code !== "ER_DUP_ENTRY") throw err;
+
+    const [fallback] = await conn.query(
+      `
+      SELECT id
+      FROM games
+      WHERE steam_appid = ?
+         OR slug = ?
+         OR (rawg_id IS NOT NULL AND rawg_id = ?)
+      ORDER BY id ASC
+      LIMIT 1
+      `,
+      [appid, slug, rawgId]
+    );
+
+    if (!fallback.length) throw err;
+
+    const gameId = fallback[0].id;
+
+    await conn.query(
+      `
+      UPDATE games
+      SET steam_appid = COALESCE(steam_appid, ?),
+          source = COALESCE(source, 'steam'),
+          cover_url = COALESCE(cover_url, ?),
+          updated_at = NOW()
+      WHERE id = ?
+      `,
+      [
+        appid,
+        cover_url ||
+          `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
+        gameId,
+      ]
+    );
+
+    return gameId;
+  }
 }
 
 // --- CONTROLADORES ---
