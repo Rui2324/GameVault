@@ -1,5 +1,3 @@
-// src/utils/cropUtils.js
-
 export const createImage = (url) =>
   new Promise((resolve, reject) => {
     const image = new Image();
@@ -51,6 +49,6 @@ export async function getCroppedImg(imageSrc, pixelCrop, rotation = 0) {
   return new Promise((resolve) => {
     canvas.toBlob((blob) => {
       resolve(blob);
-    }, 'image/jpeg', 0.95); // Qualidade JPG (0 a 1)
+    }, 'image/jpeg', 0.95); 
   });
 }

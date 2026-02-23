@@ -1,4 +1,3 @@
-// src/components/ReviewSection.jsx
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";

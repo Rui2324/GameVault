@@ -1,10 +1,9 @@
-// backend/src/controllers/externalGamesController.js
 const pool = require("../config/db");
 const externalGamesService = require("../services/externalGamesService");
 const axios = require("axios");
 
 /**
- * Normaliza um jogo (RAWG ou já mapeado) para campos que guardamos na DB.
+ * Normaliza um jogo (RAWG ou já mapeado)
  */
 function normalizeGameForDb(raw, externalIdFallback) {
   const external_id =
@@ -297,7 +296,7 @@ async function getRealSteamGameName(steamAppid) {
 }
 
 /**
- * ✅ POST /external-games/link-rawg
+ * POST /external-games/link-rawg
  * body: { game_id }  (ou { wishlist_entry_id })
  *
  * - se o jogo já tiver external_id/rawg_id, devolve logo
@@ -338,7 +337,7 @@ async function linkRawg(req, res) {
 
     const game = rows[0];
 
-    // 2) já ligado?
+    // 2) se já tiver external_id/rawg_id, devolve logo
     const already = Number(game.external_id || game.rawg_id);
     if (already) {
       return res.json({ external_id: already, rawg_id: already, linked: true });
@@ -417,6 +416,7 @@ async function linkRawg(req, res) {
  * GET /external-games/game-id/:externalId
  * Retorna apenas o game_id interno, mesmo que o user não tenha o jogo na coleção
  */
+
 async function getGameIdByExternalId(req, res) {
   try {
     const { externalId } = req.params;
@@ -456,6 +456,6 @@ module.exports = {
   getExternalGameDetails,
   importExternalToCollection,
   importExternalToWishlist,
-  linkRawg, // ✅ IMPORTANTE
+  linkRawg, 
   getGameIdByExternalId,
 };

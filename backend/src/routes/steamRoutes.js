@@ -1,4 +1,3 @@
-// /GameVault/backend/src/routes/steamRoutes.js
 const express = require("express");
 const router = express.Router();
 

@@ -1,4 +1,3 @@
-// src/pages/ExternalGameDetailsPage.jsx
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../services/api";
@@ -63,7 +62,6 @@ export default function ExternalGameDetailsPage() {
 
   const [descricaoExpandida, setDescricaoExpandida] = useState(false);
 
-  // --- ALTERAÇÃO IMPORTANTE: Guardar o ID da coleção ---
   const [collectionId, setCollectionId] = useState(null); // Guarda o ID interno (ex: 30) se existir
   const [jaNaWishlist, setJaNaWishlist] = useState(false);
   const [userCollectionData, setUserCollectionData] = useState(null); // Dados do jogo na coleção do user
@@ -89,7 +87,7 @@ export default function ExternalGameDetailsPage() {
         api.get("/wishlist")
       ]);
 
-      // --- LÓGICA DE COLEÇÃO SUPER ROBUSTA ---
+      // --- LÓGICA DE COLEÇÃO ---
       if (resCol.status === "fulfilled") {
         const dados = resCol.value?.data;
         const listaColecao = dados?.colecao || dados?.items || dados?.data || (Array.isArray(dados) ? dados : []);
@@ -103,7 +101,7 @@ export default function ExternalGameDetailsPage() {
           // Tenta encontrar o ID externo em TODOS os sítios possíveis
           const idNoItem = item.external_id;
           const idNoGame = item.game?.external_id; // Caso venha aninhado
-          const idComoGameId = item.game_id; // Às vezes o backend guarda assim
+          const idComoGameId = item.game_id; 
 
           // Converte tudo para número para comparar
           return Number(idNoItem) === extId || 
@@ -264,7 +262,7 @@ export default function ExternalGameDetailsPage() {
 
   async function importarParaColecao() {
     if (!jogo) return;
-    if (collectionId) return; // Já tem, não faz nada
+    if (collectionId) return; 
 
     try {
       setAImportar(true);
@@ -288,7 +286,6 @@ export default function ExternalGameDetailsPage() {
       console.error(e);
       if (e?.response?.status === 409) {
         toast.info("Este jogo já está na tua coleção.");
-        // Opcional: Podíamos fazer carregar() de novo aqui para apanhar o ID
       } else {
         toast.error("Falhou ao adicionar à coleção.");
       }
@@ -411,7 +408,7 @@ export default function ExternalGameDetailsPage() {
 
             <div className="flex flex-wrap items-center gap-2">
               
-              {/* O BOTÃO DE WISHLIST AGORA SÓ APARECE SE O JOGO NÃO ESTIVER NA COLEÇÃO */}
+              {/* O BOTÃO DE WISHLIST */}
               {!collectionId && (
                 <button
                   type="button"
@@ -427,11 +424,11 @@ export default function ExternalGameDetailsPage() {
                 </button>
               )}
 
-              {/* --- BOTÃO DINÂMICO AQUI --- */}
+              {/* --- BOTÃO DINÂMICO --- */}
               {collectionId ? (
                 <button
                   type="button"
-                  onClick={() => navigate(`/app/jogo/${collectionId}`)} // Usa o ID da BD
+                  onClick={() => navigate(`/app/jogo/${collectionId}`)} 
                   className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white bg-emerald-500 hover:bg-emerald-600 shadow-lg hover:scale-105 transition-all"
                 >
                   <Pencil size={16} /> Editar na Coleção

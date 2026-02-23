@@ -1,4 +1,3 @@
-// src/routes/gameRoutes.js
 const express = require("express");
 const {
   createGameHandler,
@@ -8,7 +7,6 @@ const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-// proteger tudo com auth
 router.use(authMiddleware);
 
 router.post("/", createGameHandler);

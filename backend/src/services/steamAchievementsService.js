@@ -1,6 +1,3 @@
-// backend/src/services/steamAchievementsService.js
-// Sync de conquistas da Steam para a tua tabela collection_entries.
-
 const axios = require("axios");
 
 async function fetchPlayerAchievements({ steamKey, steamid, appid }) {
@@ -19,7 +16,6 @@ async function fetchPlayerAchievements({ steamKey, steamid, appid }) {
 
   const ps = res?.data?.playerstats;
 
-  // Se a Steam não devolver achievements, tratamos como 0/0.
   const ach = Array.isArray(ps?.achievements) ? ps.achievements : [];
   const total = ach.length;
   const unlocked = ach.reduce((acc, a) => acc + (Number(a.achieved) === 1 ? 1 : 0), 0);
@@ -78,7 +74,6 @@ async function syncManyCollectionEntries({
     try {
       const stats = await fetchPlayerAchievements({ steamKey, steamid, appid });
 
-      // ✅ chama o método certo do teu model
       const ok = await collectionModel.updateAchievements(entryId, userId, {
         total: stats.total,
         unlocked: stats.unlocked,

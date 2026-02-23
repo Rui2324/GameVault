@@ -1,4 +1,3 @@
-// src/controllers/achievementController.js
 const achievementModel = require("../models/achievementModel");
 const achievementService = require("../services/achievementService");
 
@@ -56,7 +55,7 @@ async function getUserAchievements(req, res) {
     const level = Math.floor(totalXP / 100) + 1;
     
     res.json({
-      achievements: achievements.filter(a => a.unlocked_at !== null), // Só as desbloqueadas
+      achievements: achievements.filter(a => a.unlocked_at !== null), 
       stats: {
         totalXP,
         level,
@@ -86,13 +85,10 @@ async function checkAchievements(req, res) {
   try {
     const userId = req.userId;
     
-    // Buscar conquistas antes
     const beforeCount = await achievementModel.countUserAchievements(userId);
     
-    // Verificar todas as conquistas
     await achievementService.checkAllAchievements(userId);
     
-    // Buscar conquistas depois
     const afterCount = await achievementModel.countUserAchievements(userId);
     const newUnlocks = afterCount - beforeCount;
     

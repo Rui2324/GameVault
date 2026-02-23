@@ -1,4 +1,3 @@
-// src/models/gameModel.js
 const pool = require("../config/db");
 
 async function createGame(data) {

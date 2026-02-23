@@ -1,8 +1,8 @@
 -- Tabela para sistema de seguir utilizadores
 CREATE TABLE IF NOT EXISTS follows (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  follower_id INT NOT NULL,           -- quem segue
-  following_id INT NOT NULL,          -- quem é seguido
+  follower_id INT NOT NULL,           
+  following_id INT NOT NULL,          
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   
   -- Chaves estrangeiras

@@ -1,4 +1,3 @@
-// src/controllers/collectionController.js
 const {
   addToCollection,
   listCollectionForUser,

@@ -1,4 +1,3 @@
-// src/controllers/profileController.js
 const profileModel = require("../models/profileModel");
 const achievementModel = require("../models/achievementModel");
 const reviewModel = require("../models/reviewModel");

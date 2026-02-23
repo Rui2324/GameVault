@@ -29,7 +29,7 @@ export default function SteamImportPage() {
   const toast = useToast();
 
   const [steamInput, setSteamInput] = useState("");
-  const [steamId64, setSteamId64] = useState(""); // ✅ guardar steamId devolvido
+  const [steamId64, setSteamId64] = useState(""); // 
   const [loading, setLoading] = useState(false);
   const [gamesFound, setGamesFound] = useState([]);
   const [selectedGames, setSelectedGames] = useState(new Set());
@@ -44,7 +44,7 @@ export default function SteamImportPage() {
       const res = await api.get("/steam/library", { params: { steamUrl: steamInput } });
 
       setGamesFound(res.data.games || []);
-      setSteamId64(res.data.steamId || ""); // ✅ aqui
+      setSteamId64(res.data.steamId || ""); 
 
       setSelectedGames(new Set((res.data.games || []).map((g) => g.steam_appid)));
       toast.success(`${res.data.count} jogos encontrados!`);
@@ -72,7 +72,6 @@ export default function SteamImportPage() {
     try {
       setLoading(true);
 
-      // ✅ manda steamId junto
       const res = await api.post("/steam/import", {
         steamId: steamId64,
         games: gamesToImport,

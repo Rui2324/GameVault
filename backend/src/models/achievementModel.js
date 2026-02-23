@@ -1,4 +1,3 @@
-// src/models/achievementModel.js
 const pool = require("../config/db");
 
 // Buscar todas as conquistas disponíveis

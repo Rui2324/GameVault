@@ -1,4 +1,3 @@
-// src/pages/CollectionPage.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
@@ -19,7 +18,7 @@ import {
   Calendar
 } from "lucide-react";
 
-// ============ COMPONENTES VISUAIS (RETRO) ============
+// ============ COMPONENTES VISUAIS  ============
 
 function RetroCard({ children, color = "fuchsia", className = "" }) {
   const colors = {
@@ -388,7 +387,6 @@ export default function CollectionPage() {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-2 shrink-0">
-            {/* BOTÃO DA STEAM MOVIDO PARA DIREITA */}
             <RetroButton color="slate" onClick={() => navigate("/app/steam-import")} className="text-xs sm:text-sm">
                 <Cloud size={14} /> Steam
             </RetroButton>
@@ -765,4 +763,3 @@ export default function CollectionPage() {
   );
 }
 
-// Fim src/page.jsx

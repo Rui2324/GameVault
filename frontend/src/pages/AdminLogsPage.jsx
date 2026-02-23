@@ -1,4 +1,3 @@
-// src/pages/AdminLogsPage.jsx
 import { useEffect, useState } from "react";
 import { Clock, User, FileText, Filter, Download, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";

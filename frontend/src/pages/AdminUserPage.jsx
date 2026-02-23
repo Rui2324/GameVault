@@ -1,4 +1,3 @@
-// src/pages/AdminUserPage.jsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "../components/Toast";
@@ -40,7 +39,6 @@ function AddGameModal({ isOpen, onClose, userId, onGameAdded }) {
       setSearching(true);
       setSearchResults([]);
       const res = await api.get(`/external-games/search?query=${encodeURIComponent(searchTerm)}`);
-      // A API retorna { jogos: [...] }
       const jogos = res.data.jogos || [];
       setSearchResults(jogos.slice(0, 10));
       if (jogos.length === 0) {
@@ -774,7 +772,6 @@ export default function AdminUserPage() {
       await api.post(`/admin/wishlist/${entryId}/move-to-collection`);
       toast.success("Movido para a coleção");
       setWishlist(prev => prev.filter(w => w.id !== entryId));
-      // Reload collection se já tiver carregada
       if (collection.length > 0) {
         loadCollection();
       }

@@ -1,10 +1,9 @@
-// src/routes/profileRoutes.js
 const express = require("express");
 const router = express.Router();
 const profileController = require("../controllers/profileController");
 const { verifyToken, optionalAuth } = require("../middleware/authMiddleware");
 
-// Descobrir utilizadores para seguir (deve vir ANTES de /:identifier)
+// Descobrir utilizadores para seguir 
 router.get("/users/discover", optionalAuth, profileController.discoverUsers);
 
 // Pesquisar utilizadores

@@ -1,4 +1,3 @@
-// backend/src/services/externalGamesService.js
 const axios = require("axios");
 
 const RAWG_BASE_URL = process.env.RAWG_BASE_URL || "https://api.rawg.io/api";
@@ -14,7 +13,7 @@ function toISODate(d) {
   return d.toISOString().slice(0, 10);
 }
 
-// Normaliza um jogo vindo do RAWG para o formato que queremos
+// Mapeia resposta do RAWG para formato mais simples usado no frontend
 function mapRawgGame(game) {
   return {
     external_id: game.id,
@@ -37,10 +36,8 @@ function mapRawgGame(game) {
     website: game.website || null,
     reddit_url: game.reddit_url || null,
 
-    // só vem no endpoint de detalhes
     description: game.description_raw?.slice(0, 2000) || null,
 
-    // às vezes vem no details
     tags: Array.isArray(game.tags) ? game.tags.map((t) => t?.name).filter(Boolean) : null,
     developers: Array.isArray(game.developers)
       ? game.developers.map((d) => d?.name).filter(Boolean)
@@ -49,7 +46,6 @@ function mapRawgGame(game) {
       ? game.publishers.map((p) => p?.name).filter(Boolean)
       : null,
 
-    // screenshots podem vir em alguns endpoints
     screenshots: Array.isArray(game.short_screenshots)
       ? game.short_screenshots.map((s) => s?.image).filter(Boolean)
       : null,
@@ -156,7 +152,7 @@ async function getGameDetails(externalId) {
   return game;
 }
 
-// ✅ Destaques (ex: ordering=-metacritic)
+// Destaca jogos (ex: para dashboard) - ordenados por metacritic
 async function getFeaturedGames(page = 1, pageSize = 6) {
   const res = await axios.get(`${RAWG_BASE_URL}/games`, {
     params: {
@@ -168,11 +164,10 @@ async function getFeaturedGames(page = 1, pageSize = 6) {
   });
 
   const results = res.data.results || [];
-  // filtra os que não têm imagem para ficar bonito no dashboard
   return results.filter((g) => !!g.background_image).map(mapRawgGame);
 }
 
-// ✅ Próximos lançamentos (próximos ~6 meses)
+// Próximos lançamentos (próximos ~6 meses)
 async function getUpcomingGames(page = 1, pageSize = 6) {
   const from = new Date();
   const to = new Date();

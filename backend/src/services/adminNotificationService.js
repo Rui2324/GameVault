@@ -1,4 +1,3 @@
-// src/services/adminNotificationService.js
 const pool = require("../config/db");
 
 /**
@@ -96,8 +95,6 @@ async function checkSuspiciousActivity() {
       );
     }
     
-    // Logins falhados múltiplos (precisa de tabela de login_attempts)
-    // Registo massivo de users
     const [massSignups] = await pool.query(`
       SELECT COUNT(*) as count
       FROM users

@@ -1,4 +1,3 @@
-// src/services/achievementService.js
 const pool = require("../config/db");
 const achievementModel = require("../models/achievementModel");
 
@@ -90,10 +89,9 @@ async function checkReviewAchievements(userId) {
   }
 }
 
-// Verificar conquistas de likes recebidos (para o autor da review)
+// Verificar conquistas de likes recebidos 
 async function checkLikeAchievements(reviewId) {
   try {
-    // Buscar o autor da review
     const [reviewResult] = await pool.query(
       "SELECT user_id FROM reviews WHERE id = ?",
       [reviewId]

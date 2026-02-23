@@ -1,4 +1,3 @@
-// src/pages/AdminDashboardPage.jsx
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -98,7 +97,6 @@ function UserRow({ user, currentUserId, onRoleChange, onDeleteClick, onManage })
 
   const renderAvatar = () => {
     if (user.avatar_url && !imageError) {
-      // Construir URL completo se for um caminho relativo
       const avatarUrl = user.avatar_url.startsWith('http') 
         ? user.avatar_url 
         : `http://localhost:4000${user.avatar_url}`;

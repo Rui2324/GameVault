@@ -1,4 +1,3 @@
-// src/pages/LoginPage.jsx
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -6,7 +5,7 @@ import { useToast } from "../components/Toast";
 import ThemeToggle from "../components/ThemeToggle";
 import { Gamepad2, Eye, EyeOff, AlertTriangle, ChevronLeft, LogIn } from "lucide-react";
 
-// Componentes Retro Locais
+// Componentes Locais
 function RetroCard({ children, className = "", color = "fuchsia" }) {
   const colors = {
     fuchsia: "border-fuchsia-500 shadow-[4px_4px_0px_0px_rgba(217,70,239,0.8)]",
@@ -62,14 +61,13 @@ export default function LoginPage() {
   }
 
   return (
-    // Fundo alterado para bg-slate-200 no modo claro para reduzir o brilho
     <div className="min-h-screen flex items-center justify-center bg-slate-200 dark:bg-slate-950 relative overflow-hidden font-sans transition-colors duration-300 px-4">
       
       <div className="absolute top-4 right-4 z-50">
         <ThemeToggle />
       </div>
 
-      {/* Grelha mais escura no modo claro (preto com 10% opacidade) para contraste */}
+      {/* Grelha mais escura no modo claro */}
       <div className="absolute inset-0 
         bg-[linear-gradient(rgba(0,0,0,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.1)_1px,transparent_1px)] 
         dark:bg-[linear-gradient(rgba(217,70,239,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(217,70,239,0.05)_1px,transparent_1px)] 

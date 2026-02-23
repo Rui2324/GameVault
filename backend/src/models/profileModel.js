@@ -1,4 +1,3 @@
-// src/models/profileModel.js
 const pool = require("../config/db");
 
 // Buscar perfil público de um utilizador

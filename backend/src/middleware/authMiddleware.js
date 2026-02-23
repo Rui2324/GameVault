@@ -1,4 +1,3 @@
-// backend/src/middleware/authMiddleware.js
 const jwt = require("jsonwebtoken");
 const pool = require("../config/db");
 
@@ -19,10 +18,8 @@ async function verifyToken(req, res, next) {
 
     const payload = jwt.verify(token, secret);
 
-    // id pode vir em campos diferentes dependendo de quem gerou o token
     const userId = payload.id ?? payload.userId ?? payload.sub;
 
-    // Buscar dados completos do user da base de dados (incluindo role)
     const [rows] = await pool.query(
       "SELECT id, name, email, role FROM users WHERE id = ?",
       [userId]
@@ -32,9 +29,8 @@ async function verifyToken(req, res, next) {
       return res.status(401).json({ message: "User não encontrado." });
     }
 
-    // Colocar user completo em req.user
     req.user = rows[0];
-    req.userId = userId; // Manter compatibilidade
+    req.userId = userId; 
 
     if (!req.user.id) {
       return res.status(401).json({ message: "Token inválido." });
@@ -47,7 +43,7 @@ async function verifyToken(req, res, next) {
   }
 }
 
-// Middleware de autenticação opcional (não falha se não houver token)
+// Middleware de autenticação opcional
 async function optionalAuth(req, res, next) {
   try {
     const auth = req.headers.authorization || "";
@@ -73,12 +69,10 @@ async function optionalAuth(req, res, next) {
     }
   } catch (err) {
     console.error("Erro no optionalAuth:", err);
-    // Token inválido, mas não bloqueamos - apenas não definimos req.user
   }
   return next();
 }
 
-// Exportar ambos os middlewares
 module.exports = verifyToken;
 module.exports.verifyToken = verifyToken;
 module.exports.optionalAuth = optionalAuth;

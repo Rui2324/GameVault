@@ -1,4 +1,3 @@
-// src/controllers/adminController.js
 const userModel = require("../models/userModel");
 const pool = require("../config/db");
 const { logAdminAction, getAdminLogs, getLogStats } = require("../services/adminLogService");
@@ -246,11 +245,9 @@ async function getUserWishlist(req, res) {
   }
 }
 
-// Atualizar item na wishlist (não há campos editáveis atualmente)
+// Atualizar item na wishlist 
 async function updateWishlistEntry(req, res) {
   try {
-    // A tabela wishlist_entries só tem id, user_id, game_id, created_at, updated_at
-    // Não há campos editáveis, retornar sucesso
     res.json({ message: "Item atualizado" });
   } catch (error) {
     console.error("Erro ao atualizar item:", error);
@@ -341,7 +338,6 @@ async function addGameToCollection(req, res) {
     let gameId;
     
     if (existingGame.length === 0) {
-      // Criar slug a partir do título
       const slug = title
         .toLowerCase()
         .normalize('NFD')

@@ -1,4 +1,3 @@
-// backend/src/controllers/steamController.js
 const axios = require("axios");
 const pool = require("../config/db");
 const steamAchievementsService = require("../services/steamAchievementsService");
@@ -33,8 +32,7 @@ async function resolveSteamId(input) {
   }
 }
 
-// Tenta mapear um título Steam para um id da RAWG (best effort).
-// Devolve { id, cover_url, platforms, genres } ou null se não encontrar.
+
 async function findRawgByTitle(title) {
   const q = String(title || "").trim();
   if (!q) return null;
@@ -44,7 +42,6 @@ async function findRawgByTitle(title) {
     const list = Array.isArray(results) ? results : [];
     if (!list.length) return null;
 
-    // tenta match mais exato pelo nome (case-insensitive) antes do 1º
     const norm = (s) => String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
     const target = norm(q);
     const exact = list.find((g) => norm(g.title || g.name) === target);
@@ -61,31 +58,22 @@ async function findRawgByTitle(title) {
   }
 }
 
-// Wrapper para manter compatibilidade
 async function findRawgIdByTitle(title) {
   const result = await findRawgByTitle(title);
   return result?.id || null;
 }
 
-/**
- * ✅ Garante que existe game na BD com steam_appid.
- *
- * REGRAS IMPORTANTES:
- * - NÃO meter rawg_id nem external_id com appid da steam.
- * - rawg_id/external_id só vêm da RAWG.
- */
+
 async function ensureSteamGame(conn, { steam_appid, title, cover_url }) {
   const appid = Number(steam_appid);
   if (!appid) throw new Error("steam_appid inválido");
 
-  // 1) Já existe por steam_appid?
   const [bySteam] = await conn.query(
     "SELECT id FROM games WHERE steam_appid = ? LIMIT 1",
     [appid]
   );
   if (bySteam.length) return bySteam[0].id;
 
-  // 2) Tenta por slug (para reaproveitar um jogo que já existia da RAWG/manual)
   const slug = createSlug(title || `steam-${appid}`);
   const [bySlug] = await conn.query(
     "SELECT id, steam_appid FROM games WHERE slug = ? LIMIT 1",
@@ -95,7 +83,6 @@ async function ensureSteamGame(conn, { steam_appid, title, cover_url }) {
   if (bySlug.length) {
     const gameId = bySlug[0].id;
 
-    // Só mete steam_appid se ainda não tiver
     await conn.query(
       `
       UPDATE games
@@ -133,7 +120,7 @@ async function ensureSteamGame(conn, { steam_appid, title, cover_url }) {
     }
   }
 
-  // ✅ NOTA: external_id/rawg_id ficam preenchidos se encontrou na RAWG.
+  // external_id/rawg_id ficam preenchidos se encontrou na RAWG.
   const [ins] = await conn.query(
     `
     INSERT INTO games (steam_appid, source, title, slug, platform, genre, cover_url, external_id, rawg_id)
@@ -232,9 +219,6 @@ exports.importGames = async (req, res) => {
       );
 
       if (!existingEntry.length) {
-        // Status inicial baseado nas horas jogadas
-        // > 0 horas = a_jogar, 0 horas = por_jogar
-        // O status será atualizado para "concluido" depois se tiver todas as conquistas
         const hoursPlayed = game.hours_played ?? 0;
         const status = hoursPlayed > 0 ? "a_jogar" : "por_jogar";
 
@@ -247,7 +231,6 @@ exports.importGames = async (req, res) => {
         entriesParaSync.push({ id: ins.insertId, steam_appid });
         importados++;
       } else {
-        // Jogo já existe - atualizar horas se forem maiores
         const hoursPlayed = game.hours_played ?? 0;
         if (hoursPlayed > 0) {
           await conn.query(
@@ -266,7 +249,6 @@ exports.importGames = async (req, res) => {
 
     await conn.commit();
 
-    // ✅ Sync das conquistas (atualiza status para "concluido" se 100%)
     let sync = { updated: 0, completed: 0, errors: 0 };
     if (entriesParaSync.length > 0) {
       const results = await steamAchievementsService.syncManyCollectionEntries({
@@ -297,7 +279,7 @@ exports.importGames = async (req, res) => {
   }
 };
 
-// 3) Obter Wishlist Steam (como tinhas)
+// 3) Obter Wishlist Steam 
 exports.getSteamWishlist = async (req, res) => {
   const { steamUrl } = req.query;
 
@@ -305,19 +287,70 @@ exports.getSteamWishlist = async (req, res) => {
   if (!steamUrl) return res.status(400).json({ mensagem: "Indica o teu Steam ID." });
 
   try {
+    console.log("[STEAM WISHLIST] Request received", { steamUrl });
     const steamId = await resolveSteamId(steamUrl);
+    console.log("[STEAM WISHLIST] Resolved steamId", { steamId });
     if (!steamId) return res.status(404).json({ mensagem: "Utilizador Steam não encontrado." });
 
     let gamesList = [];
+    
+    const fetchStoreTitles = async (appids) => {
+      const titleMap = new Map();
+      if (!appids || appids.length === 0) return titleMap;
 
-    // Endpoint "mágico"
+      console.log("[STEAM WISHLIST] Fetching titles for", appids.length, "games");
+
+      for (const appid of appids) {
+        try {
+          const res = await axios.get(`https://store.steampowered.com/api/appdetails`, {
+            params: {
+              appids: String(appid),
+              filters: "basic",
+            },
+            headers: {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+            },
+            timeout: 5000,
+          });
+
+          const entry = res.data?.[appid];
+          if (entry?.success && entry?.data?.name) {
+            titleMap.set(Number(appid), entry.data.name);
+            console.log("[STEAM WISHLIST] Found", { appid, name: entry.data.name });
+          }
+        } catch (e) {
+        }
+        
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+
+      console.log("[STEAM WISHLIST] Found", titleMap.size, "titles total");
+      return titleMap;
+    };
+
     try {
       const magicRes = await axios.get(
         `https://store.steampowered.com/wishlist/profiles/${steamId}/wishlistdata/`
       );
 
-      if (magicRes.data && typeof magicRes.data === "object" && !Array.isArray(magicRes.data)) {
-        gamesList = Object.values(magicRes.data).map((g) => ({
+      let magicData = magicRes.data;
+      if (typeof magicData === "string") {
+        try {
+          magicData = JSON.parse(magicData);
+        } catch (parseErr) {
+          magicData = null;
+        }
+      }
+
+      const isObj = magicData && typeof magicData === "object" && !Array.isArray(magicData);
+      console.log("[STEAM WISHLIST] Magic endpoint response", {
+        ok: Boolean(magicRes?.data),
+        isObject: isObj,
+        keys: isObj ? Object.keys(magicData).length : 0,
+      });
+
+      if (isObj) {
+        gamesList = Object.values(magicData).map((g) => ({
           steam_appid: g.appid || g.id,
           title: g.name,
           cover_url:
@@ -325,8 +358,15 @@ exports.getSteamWishlist = async (req, res) => {
             `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${g.appid || g.id}/header.jpg`,
           hours_played: 0,
         }));
+
+        console.log("[STEAM WISHLIST] Magic titles sample", {
+          count: gamesList.length,
+          sample: gamesList.slice(0, 3).map((g) => ({ appid: g.steam_appid, title: g.title })),
+        });
       }
-    } catch (e) {}
+    } catch (e) {
+      console.log("[STEAM WISHLIST] Magic endpoint failed", { message: e.message });
+    }
 
     // API oficial
     if (gamesList.length === 0) {
@@ -336,16 +376,34 @@ exports.getSteamWishlist = async (req, res) => {
         });
 
         const items = officialRes.data.response.items || [];
+        console.log("[STEAM WISHLIST] Official endpoint response", {
+          items: items.length,
+          sample: items.slice(0, 3).map((i) => ({ appid: i.appid })),
+        });
         if (items.length > 0) {
-          gamesList = items.map((item) => ({
-            steam_appid: item.appid,
-            title: `Steam Game ${item.appid}`,
-            cover_url: `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${item.appid}/header.jpg`,
-            hours_played: 0,
-          }));
+          const appids = items.map((item) => Number(item.appid)).filter(Boolean);
+          console.log("[STEAM WISHLIST] Calling fetchStoreTitles with appids:", appids);
+          const titleMap = await fetchStoreTitles(appids);
+          gamesList = items.map((item) => {
+            const title = titleMap.get(Number(item.appid));
+            console.log("[STEAM WISHLIST] Game", item.appid, "->", title || `fallback`);
+            return {
+              steam_appid: item.appid,
+              title: title || `Steam Game ${item.appid}`,
+              cover_url: `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${item.appid}/header.jpg`,
+              hours_played: 0,
+            };
+          });
         }
-      } catch (officialErr) {}
+      } catch (officialErr) {
+        console.log("[STEAM WISHLIST] Official endpoint failed", { message: officialErr.message });
+      }
     }
+
+    console.log("[STEAM WISHLIST] Final list", {
+      count: gamesList.length,
+      sample: gamesList.slice(0, 3).map((g) => ({ appid: g.steam_appid, title: g.title })),
+    });
 
     if (gamesList.length > 0) {
       return res.json({ steamId, count: gamesList.length, games: gamesList });
@@ -361,7 +419,7 @@ exports.getSteamWishlist = async (req, res) => {
   }
 };
 
-// 4) Importar Wishlist para BD (por steam_appid) ✅ sem rawg_id/external_id
+// 4) Importar Wishlist para BD (por steam_appid) 
 exports.importWishlistToDb = async (req, res) => {
   const userId = req.userId;
   const { games } = req.body;
@@ -415,8 +473,7 @@ exports.importWishlistToDb = async (req, res) => {
   }
 };
 
-// 5) Corrigir Metadados (Nomes e Capas) + ✅ ligar à RAWG (rawg_id/external_id)
-// Agora também corrige jogos da wishlist e atualiza capas!
+// 5) Corrigir Metadados (Nomes e Capas) +  ligar à RAWG (rawg_id/external_id)
 exports.fixMetadata = async (req, res) => {
   const userId = req.userId;
   const conn = await pool.getConnection();
@@ -468,7 +525,7 @@ exports.fixMetadata = async (req, res) => {
           const realTitle = data.data.name;
           const realSlug = createSlug(realTitle);
 
-          // ✅ ligar à RAWG e obter capa
+          // ligar à RAWG e obter capa
           const rawgData = await findRawgByTitle(realTitle);
           const rawgId = rawgData?.id || null;
           // Preferir capa da RAWG, senão usa a da Steam

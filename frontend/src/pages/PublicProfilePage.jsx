@@ -1,4 +1,3 @@
-// src/pages/PublicProfilePage.jsx
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -67,6 +66,7 @@ export default function PublicProfilePage() {
   
   // Estado para mostrar todos os recentes
   const [showAllRecents, setShowAllRecents] = useState(false);
+  const [showAllFavorites, setShowAllFavorites] = useState(false);
   
   const [isFollowing, setIsFollowing] = useState(false);
   const [followCounts, setFollowCounts] = useState({ followers: 0, following: 0 });
@@ -184,7 +184,6 @@ export default function PublicProfilePage() {
         <div className="px-5 pb-5">
           <div className="flex flex-col md:flex-row md:items-end gap-5 -mt-12 md:-mt-14">
             
-            {/* AVATAR: object-cover object-center para preencher sem deformar */}
             <div className="relative shrink-0">
               <div className="w-24 h-24 md:w-32 md:h-32 border-4 border-cyan-400 bg-white dark:bg-slate-950 p-1 shadow-[4px_4px_0px_0px_rgba(34,211,238,0.8)]">
                 <div className="w-full h-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-4xl font-bold text-cyan-500 dark:text-cyan-400 overflow-hidden">
@@ -283,11 +282,40 @@ export default function PublicProfilePage() {
       {activeTab === "overview" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <RetroCard color="yellow" className="p-5">
-            <h2 className="text-sm font-bold text-yellow-600 dark:text-yellow-400 mb-4 flex items-center gap-2 uppercase tracking-wide">
-              <span className="w-8 h-8 border-2 border-yellow-400 bg-yellow-50 dark:bg-yellow-400/20 flex items-center justify-center text-base">⭐</span> Jogos Favoritos
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-bold text-yellow-600 dark:text-yellow-400 flex items-center gap-2 uppercase tracking-wide">
+                <span className="w-8 h-8 border-2 border-yellow-400 bg-yellow-50 dark:bg-yellow-400/20 flex items-center justify-center text-base">⭐</span> Jogos Favoritos
+              </h2>
+              {!showAllFavorites && favoriteGames.length > 4 && (
+                <button 
+                  onClick={() => setShowAllFavorites(true)} 
+                  className="text-xs font-bold text-yellow-600 dark:text-yellow-400 hover:underline"
+                >
+                  Ver mais →
+                </button>
+              )}
+              {showAllFavorites && favoriteGames.length > 4 && (
+                <button 
+                  onClick={() => setShowAllFavorites(false)} 
+                  className="text-xs font-bold text-yellow-600 dark:text-yellow-400 hover:underline"
+                >
+                  Mostrar menos ↑
+                </button>
+              )}
+            </div>
             {favoriteGames.length === 0 ? <p className="text-slate-500 text-sm text-center py-6 font-mono">Sem jogos favoritos</p> : 
-              <div className="space-y-2">{favoriteGames.map(g => <GameCard key={g.id} game={g} navigate={navigate} />)}</div>}
+              <div className="space-y-2">{(showAllFavorites ? favoriteGames : favoriteGames.slice(0, 4)).map(g => <GameCard key={g.id} game={g} navigate={navigate} />)}</div>}
+            
+            {!showAllFavorites && favoriteGames.length > 4 && (
+              <div className="text-center mt-4">
+                <button 
+                  onClick={() => setShowAllFavorites(true)} 
+                  className="px-4 py-2 border-2 border-yellow-400 text-yellow-600 dark:text-yellow-400 font-bold text-xs hover:bg-yellow-400 hover:text-slate-900 transition-all"
+                >
+                  Ver todos os {favoriteGames.length} favoritos
+                </button>
+              </div>
+            )}
           </RetroCard>
 
           <RetroCard color="cyan" className="p-5">
@@ -554,7 +582,6 @@ function TabButton({ children, active, onClick }) {
   );
 }
 
-// CORREÇÃO: Função atualizada para usar /explorar
 function GameCard({ game, navigate, showDate }) {
   // Tenta usar external_id primeiro (jogos API), senão usa o id (jogos BD)
   // E navega para /app/explorar/:id

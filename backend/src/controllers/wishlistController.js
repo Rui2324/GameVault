@@ -1,4 +1,3 @@
-// backend/src/controllers/wishlistController.js
 const wishlistModel = require("../models/wishlistModel");
 
 // GET /api/wishlist
@@ -32,7 +31,6 @@ async function adicionarWishlist(req, res) {
   } catch (err) {
     console.error("ERRO adicionarWishlist:", err.sqlMessage || err);
 
-    // duplicado (se tiveres unique(user_id, game_id))
     if (err.code === "ER_DUP_ENTRY") {
       return res.status(409).json({ mensagem: "Já está na wishlist." });
     }

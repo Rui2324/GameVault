@@ -8,9 +8,10 @@ function RetroCard({ children, className = "" }) {
   return <div className={`bg-white dark:bg-slate-900 border-2 border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.2)] p-6 ${className}`}>{children}</div>;
 }
 
-function RetroButton({ children, onClick, disabled, className="" }) {
+function RetroButton({ children, onClick, disabled, type = "button", className="" }) {
   return (
     <button 
+      type={type}
       onClick={onClick} disabled={disabled}
       className={`px-6 py-2 border-2 border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-400 font-bold uppercase hover:bg-rose-500 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     >
@@ -106,7 +107,7 @@ export default function SteamWishlistImportPage() {
                 value={steamInput}
                 onChange={e => setSteamInput(e.target.value)}
             />
-            <RetroButton onClick={fetchSteamWishlist} disabled={loading}>
+            <RetroButton type="submit" disabled={loading}>
                 {loading ? "A carregar..." : "Procurar Wishlist"}
             </RetroButton>
         </form>
@@ -118,7 +119,6 @@ export default function SteamWishlistImportPage() {
       {/* Resultados */}
       {gamesFound.length > 0 && (
         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            
             {/* Barra de Ações */}
           <div className="sticky top-4 z-10 flex items-center justify-between bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 border-2 border-slate-200 dark:border-slate-700 shadow-xl">
             <span className="text-rose-700 dark:text-rose-400 font-bold">{selectedGames.size} jogos selecionados</span>
@@ -139,6 +139,9 @@ export default function SteamWishlistImportPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                 {gamesFound.map(game => {
                     const isSelected = selectedGames.has(game.steam_appid);
+                    const displayTitle = game.title && !game.title.includes("Steam Game") 
+                      ? game.title 
+                      : `🎮 Game #${game.steam_appid}`;
                     return (
                         <div 
                             key={game.steam_appid}
@@ -150,10 +153,10 @@ export default function SteamWishlistImportPage() {
                       }`}
                         >
                       <div className="aspect-[16/9] bg-slate-900 relative">
-                                <img src={game.cover_url} alt={game.title} className="w-full h-full object-cover" />
+                                <img src={game.cover_url} alt={displayTitle} className="w-full h-full object-cover" />
                             </div>
                             <div className="p-3">
-                        <h4 className="font-bold text-slate-900 dark:text-white text-xs truncate leading-tight" title={game.title}>{game.title}</h4>
+                        <h4 className="font-bold text-slate-900 dark:text-white text-xs truncate leading-tight" title={displayTitle}>{displayTitle}</h4>
                             </div>
                             {/* Checkmark */}
                             {isSelected && (

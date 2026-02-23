@@ -1,9 +1,7 @@
-// src/components/ImageCropper.jsx
 import { useState, useCallback } from "react";
 import Cropper from "react-easy-crop";
 import { getCroppedImg } from "../utils/cropUtils";
 
-// Botão Retro local para não dar erro de imports
 function RetroButton({ children, onClick, color = "cyan", className="" }) {
   const colors = {
     cyan: "border-cyan-400 bg-cyan-50 text-cyan-600 dark:bg-cyan-400/20 dark:text-cyan-400 hover:bg-cyan-400 hover:text-slate-900 shadow-[2px_2px_0px_0px_rgba(34,211,238,0.6)]",
@@ -64,12 +62,12 @@ export default function ImageCropper({ imageSrc, onCancel, onCropComplete }) {
             image={imageSrc}
             crop={crop}
             zoom={zoom}
-            aspect={1} // Força o quadrado (1:1)
+            aspect={1} 
             onCropChange={onCropChange}
             onZoomChange={onZoomChange}
             onCropComplete={onCropCompleteHandler}
             showGrid={true}
-            cropShape="rect" // Podes mudar para "round" se quiseres ver círculo
+            cropShape="rect" 
             style={{
                 containerStyle: { backgroundColor: "#0f172a" },
                 cropAreaStyle: { border: "2px solid #22d3ee", boxShadow: "0 0 0 9999px rgba(0, 0, 0, 0.7)" }

@@ -55,7 +55,6 @@ CREATE TABLE IF NOT EXISTS user_achievements (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Adicionar campos ao perfil do utilizador
--- (Se der erro de coluna duplicada, significa que já existe - pode ignorar)
 ALTER TABLE users ADD COLUMN is_public BOOLEAN DEFAULT TRUE;
 ALTER TABLE users ADD COLUMN total_xp INT DEFAULT 0;
 

@@ -1,4 +1,3 @@
-// src/context/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 import api from "../services/api";
 
@@ -56,7 +55,7 @@ export function AuthProvider({ children }) {
     setUser(null);
   }
 
-  // 🔧 novo: atualizar dados do perfil
+  // atualizar dados do perfil
   async function atualizarPerfil(dados) {
     const res = await api.put("/auth/profile", dados);
     setUser(res.data.user); // mantém header/nav sempre em sync

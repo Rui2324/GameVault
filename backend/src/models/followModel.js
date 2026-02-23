@@ -1,4 +1,3 @@
-// src/models/followModel.js
 const pool = require("../config/db");
 
 // Seguir um utilizador

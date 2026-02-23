@@ -1,4 +1,3 @@
-// src/models/reviewModel.js
 const pool = require("../config/db");
 
 // Buscar todas as reviews de um jogo
@@ -84,7 +83,7 @@ async function likeReview(userId, reviewId) {
     return true;
   } catch (err) {
     if (err.code === "ER_DUP_ENTRY") {
-      return false; // Já deu like
+      return false; 
     }
     throw err;
   }

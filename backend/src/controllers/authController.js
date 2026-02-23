@@ -1,4 +1,3 @@
-// src/controllers/authController.js
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const pool = require("../config/db");
@@ -140,10 +139,9 @@ async function me(req, res) {
 }
 
 // PUT /api/auth/profile
-// body: { name?, bio?, avatar_url? } + opcionalmente ficheiro "avatar"
 async function updateProfile(req, res) {
   try {
-    const userId = req.userId; // vem do authMiddleware
+    const userId = req.userId; 
 
     if (!userId) {
       return res.status(401).json({ mensagem: "Não autenticado." });
@@ -152,7 +150,6 @@ async function updateProfile(req, res) {
     const { name, bio } = req.body;
     let avatarUrl = req.body.avatar_url || null;
 
-    // se veio ficheiro, usamos esse como avatar
     if (req.file) {
       avatarUrl = `/uploads/avatars/${req.file.filename}`;
     }

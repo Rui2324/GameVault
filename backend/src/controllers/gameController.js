@@ -1,10 +1,9 @@
-// src/controllers/gameController.js
 const {
   createGame,
   listAllGames,
 } = require("../models/gameModel");
 
-// gera um slug técnico a partir do título (ninguém vê isto)
+// gera um slug técnico a partir do título 
 function slugify(titulo) {
   return titulo
     .toLowerCase()
@@ -14,7 +13,7 @@ function slugify(titulo) {
     .replace(/(^-|-$)+/g, "");
 }
 
-// POST /api/jogos  (a rota ainda está /api/games, já te explico em baixo se quiseres mudar)
+// POST /api/jogos  
 async function createGameHandler(req, res) {
   try {
     const {
@@ -33,7 +32,7 @@ async function createGameHandler(req, res) {
     const slug = slugify(titulo + "-" + (plataforma || ""));
 
     const game = await createGame({
-      title: titulo,                // mapeia para o campo técnico
+      title: titulo,                
       platform: plataforma,
       genre: genero,
       release_date: data_lancamento || null,
@@ -42,7 +41,6 @@ async function createGameHandler(req, res) {
       slug,
     });
 
-    // resposta em PT
     return res.status(201).json({
       jogo: {
         id: game.id,
@@ -62,7 +60,7 @@ async function createGameHandler(req, res) {
   }
 }
 
-// GET /api/games  (lista todos os jogos, resposta em PT)
+// GET /api/games  (lista todos os jogos)
 async function listGamesHandler(req, res) {
   try {
     const games = await listAllGames();

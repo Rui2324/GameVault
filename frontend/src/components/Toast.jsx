@@ -1,10 +1,8 @@
-// src/components/Toast.jsx
 import { createContext, useContext, useState, useCallback } from "react";
 import { Check, X, AlertTriangle, Info, Gamepad2, Trophy } from "lucide-react";
 
 export const ToastContext = createContext(null);
 
-// Hook movido para ser exportado separadamente - evita problema de Fast Refresh
 export const useToast = () => {
   const context = useContext(ToastContext);
   if (!context) {
@@ -139,17 +137,14 @@ function ToastItem({ toast, onRemove }) {
   );
 }
 
-// Provider que envolve a app
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
 
   const removeToast = useCallback((id) => {
-    // Primeiro marca como "removing" para animar saída
     setToasts((prev) =>
       prev.map((t) => (t.id === id ? { ...t, removing: true } : t))
     );
 
-    // Depois remove de vez
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 300);
@@ -172,7 +167,6 @@ export function ToastProvider({ children }) {
 
     setToasts((prev) => [...prev, newToast]);
 
-    // Auto-remove após duration
     setTimeout(() => {
       removeToast(id);
     }, duration);

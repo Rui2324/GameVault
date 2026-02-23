@@ -1,4 +1,3 @@
-// src/controllers/adminAdvancedController.js
 const pool = require("../config/db");
 const { logAdminAction, getAdminLogs, getLogStats } = require("../services/adminLogService");
 const { 
@@ -392,10 +391,7 @@ async function deleteNotificationById(req, res) {
 
 // ========== ENRIQUECER JOGOS STEAM COM RAWG ==========
 
-/**
- * Atualiza jogos importados da Steam que têm dados incompletos
- * (platform = 'PC', genre/external_id = NULL) com informações da RAWG.
- */
+
 async function enrichSteamGames(req, res) {
   try {
     // Buscar jogos Steam com dados incompletos
@@ -467,7 +463,6 @@ async function enrichSteamGames(req, res) {
 
         updated++;
 
-        // Delay para não sobrecarregar a API da RAWG
         await new Promise(resolve => setTimeout(resolve, 250));
 
       } catch (err) {
@@ -490,7 +485,7 @@ async function enrichSteamGames(req, res) {
       updated,
       failed,
       total: games.length,
-      errors: errors.slice(0, 20) // Mostrar só os primeiros 20 erros
+      errors: errors.slice(0, 20) 
     });
 
   } catch (error) {

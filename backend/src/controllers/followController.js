@@ -1,4 +1,3 @@
-// src/controllers/followController.js
 const {
   followUser,
   unfollowUser,

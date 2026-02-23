@@ -1,4 +1,3 @@
-// backend/src/controllers/dashboardController.js
 const axios = require("axios");
 
 const RAWG_BASE = "https://api.rawg.io/api";
@@ -21,7 +20,7 @@ exports.listForDashboard = async (req, res) => {
     }
 
     const pageSize = Number(req.query.page_size || 6);
-    const kind = String(req.query.kind || "featured"); // featured | upcoming
+    const kind = String(req.query.kind || "featured"); 
 
     const params = {
       key,

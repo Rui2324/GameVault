@@ -1,9 +1,8 @@
-// src/pages/SettingsPage.jsx
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useToast } from "../components/Toast";
-import ImageCropper from "../components/ImageCropper"; // <--- Importação do Cortador
+import ImageCropper from "../components/ImageCropper"; 
 import { 
   Settings as SettingsIcon, 
   User, 
@@ -72,7 +71,7 @@ export default function SettingsPage() {
   const [showInRanking, setShowInRanking] = useState(true);
 
   // --- NOVOS ESTADOS PARA O CROPPER ---
-  const [imageSrc, setImageSrc] = useState(null); // A imagem crua original
+  const [imageSrc, setImageSrc] = useState(null); 
   const [showCropper, setShowCropper] = useState(false);
 
   // --- 1. Quando escolhes o ficheiro, ABRE O CROPPER ---
@@ -86,7 +85,6 @@ export default function SettingsPage() {
       });
       reader.readAsDataURL(file);
     }
-    // Limpa o input para poderes selecionar a mesma foto se cancelares
     e.target.value = null;
   }
 

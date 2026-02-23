@@ -1,4 +1,3 @@
-// src/pages/StatsPage.jsx
 import { useEffect, useState, useMemo } from "react";
 import api from "../services/api";
 import {
@@ -178,8 +177,18 @@ export default function StatsPage() {
                     <BarChart data={dataEstado}>
                       <XAxis dataKey="estado" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                       <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                      <Tooltip contentStyle={{ fontSize: 11, borderRadius: 0, border: '2px solid #22d3ee', backgroundColor: '#0f172a', color: '#fff' }} />
-                      <Bar dataKey="quantidade" radius={0}>
+                      <Tooltip 
+                        contentStyle={{ 
+                          fontSize: 12, 
+                          borderRadius: 0, 
+                          border: '2px solid #22d3ee', 
+                          backgroundColor: '#0f172a', 
+                          color: '#fff',
+                          fontWeight: 'bold'
+                        }} 
+                        cursor={{ fill: 'rgba(255, 255, 255, 0.1)' }} 
+                      />
+                      <Bar dataKey="quantidade" radius={0} activeBar={{ fill: 'rgba(255, 255, 255, 0.9)' }}>
                         {dataEstado.map((_, index) => <Cell key={`cell-estado-${index}`} fill={CORES_ESTADO[index % CORES_ESTADO.length]} />)}
                       </Bar>
                     </BarChart>

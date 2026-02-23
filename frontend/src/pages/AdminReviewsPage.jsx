@@ -1,4 +1,3 @@
-// src/pages/AdminReviewsPage.jsx
 import { useEffect, useState } from "react";
 import { Trash2, User, Gamepad2, Star, MessageSquare, AlertCircle, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";

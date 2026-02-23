@@ -1,10 +1,9 @@
-// src/routes/reviewRoutes.js
 const express = require("express");
 const router = express.Router();
 const reviewController = require("../controllers/reviewController");
 const { verifyToken, optionalAuth } = require("../middleware/authMiddleware");
 
-// Reviews de um jogo específico (público, mas com info extra se autenticado)
+// Reviews de um jogo específico 
 router.get("/games/:gameId/reviews", optionalAuth, reviewController.getGameReviews);
 
 // Reviews de um utilizador específico (público)
@@ -13,10 +12,10 @@ router.get("/user/:userId", reviewController.getUserReviews);
 // Criar review (autenticado)
 router.post("/games/:gameId/reviews", verifyToken, reviewController.createReview);
 
-// Atualizar review (autenticado, só dono)
+// Atualizar review 
 router.put("/:reviewId", verifyToken, reviewController.updateReview);
 
-// Eliminar review (autenticado, só dono)
+// Eliminar review 
 router.delete("/:reviewId", verifyToken, reviewController.deleteReview);
 
 // Like/Unlike numa review (autenticado)

@@ -1,4 +1,3 @@
-// src/pages/RegistoPage.jsx
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -91,7 +90,6 @@ export default function RegistoPage() {
   }
 
   return (
-    // Fundo alterado para bg-slate-200 no modo claro
     <div className="min-h-screen flex items-center justify-center bg-slate-200 dark:bg-slate-950 relative overflow-hidden font-sans py-6 sm:py-10 transition-colors duration-300 px-4">
       
       <div className="absolute top-4 right-4 z-50">

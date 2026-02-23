@@ -1,4 +1,3 @@
-// src/pages/GameDetailsPage.jsx
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../services/api";
@@ -142,7 +141,6 @@ export default function GameDetailsPage() {
     fetchDetalhes();
   }, [fetchDetalhes]);
 
-  // Ctrl+S para guardar
   useEffect(() => {
     const onKey = (e) => {
       const isSave =

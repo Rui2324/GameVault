@@ -1,4 +1,3 @@
-// src/layout/AppLayout.jsx
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
@@ -32,7 +31,6 @@ export default function AppLayout() {
     navigate("/login");
   }
 
-  // Fechar menu do utilizador ao clicar fora
   useEffect(() => {
     function handleClickOutside(event) {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
@@ -43,7 +41,6 @@ export default function AppLayout() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Fechar menu mobile quando navegar
   useEffect(() => {
     setShowMobileMenu(false);
   }, [navigate]);
@@ -58,7 +55,6 @@ export default function AppLayout() {
     return () => { document.body.style.overflow = 'unset'; };
   }, [showMobileMenu]);
 
-  // Resolver URL do avatar
   let avatarSrc = null;
   if (user?.avatar_url) {
     if (
@@ -118,7 +114,6 @@ export default function AppLayout() {
   }
 
   return (
-    // MUDANÇA: bg-slate-50 (mais claro) em vez de bg-slate-100 para o modo claro
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors font-sans">
       {/* Modal global RAWG */}
       <AddGameModal
@@ -128,10 +123,8 @@ export default function AppLayout() {
         onAddedToCollection={onAddedToCollection}
       />
 
-      {/* TOP BAR - RETRO STYLE */}
-      {/* MUDANÇA: bg-white forçado no header */}
+      {/* TOP BAR */}
       <header className="relative border-b-4 border-fuchsia-500 bg-white dark:bg-slate-900 z-50">
-        {/* Grid pattern - Aumentei opacidade no light mode para ver melhor o efeito retro */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(217,70,239,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(217,70,239,0.05)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(217,70,239,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(217,70,239,0.05)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
         
         <div className="relative flex items-center justify-between px-4 sm:px-6 py-3">
@@ -326,18 +319,18 @@ export default function AppLayout() {
         )}
       </header>
 
-      {/* CONTEÚDO PRINCIPAL - RETRO */}
+      {/* CONTEÚDO PRINCIPAL*/}
       <main className="flex-1 px-3 sm:px-4 md:px-6 py-4 sm:py-6 bg-slate-100 dark:bg-slate-950">
-        {/* Scanline effect (mais subtil no claro) */}
+        {/* Scanline effect  */}
         <div className="fixed inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.01)_2px,rgba(0,0,0,0.01)_4px)] dark:bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.03)_2px,rgba(0,0,0,0.03)_4px)] pointer-events-none z-10" />
         
-        {/* Container Principal: Branco Puro no Light Mode com borda definida */}
+        {/* Container Principal: */}
         <div className="relative z-0 w-full border-2 border-slate-200 dark:border-cyan-500/30 bg-white dark:bg-slate-900 p-3 sm:p-5 shadow-sm dark:shadow-[0_0_30px_rgba(34,211,238,0.1)] rounded-xl">
           <Outlet />
         </div>
       </main>
 
-      {/* FOOTER - RETRO */}
+      {/* FOOTER */}
       <footer className="mt-0">
         <div className="h-1 bg-gradient-to-r from-fuchsia-500 via-cyan-400 to-yellow-400" />
         <div className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700">

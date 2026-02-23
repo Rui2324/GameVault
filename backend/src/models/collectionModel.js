@@ -1,4 +1,3 @@
-// src/models/collectionModel.js
 const pool = require("../config/db");
 
 // Lista completa da coleção de um utilizador

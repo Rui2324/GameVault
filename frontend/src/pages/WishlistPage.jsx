@@ -1,10 +1,9 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { useToast } from "../components/Toast";
 import { 
   Heart, 
-  Wrench, 
   Cloud, 
   Plus, 
   Search, 
@@ -57,6 +56,7 @@ function RetroButton({ children, color = "fuchsia", onClick, className = "", dis
 export default function WishlistPage() {
   const navigate = useNavigate();
   const toast = useToast();
+  const resultadosRef = useRef(null);
 
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -91,6 +91,13 @@ export default function WishlistPage() {
     return () => { document.body.style.overflow = "unset"; };
   }, [mostrarModal]);
 
+  // Scroll para topo quando mudam os resultados
+  useEffect(() => {
+    if (resultadosRef.current && resultadosExternos.length > 0) {
+      resultadosRef.current.scrollTop = 0;
+    }
+  }, [resultadosExternos]);
+
   useEffect(() => {
     carregarWishlist();
   }, []);
@@ -117,23 +124,6 @@ export default function WishlistPage() {
     }
   }
 
-  // --- Reparar Nomes (Fetch Metadata) ---
-  async function handleFix() {
-    try {
-      setLoading(true);
-      toast.info("A contactar a loja Steam... isto pode demorar uns segundos.");
-
-      const res = await api.post("/steam/fix-metadata");
-      toast.success(res.data.mensagem);
-      await carregarWishlist();
-    } catch (err) {
-      console.error(err);
-      toast.error("Erro ao corrigir dados.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
   // --- Live Search ---
   async function executarPesquisa(termo, pagina = 1) {
     if (!termo || termo.trim().length < 2) return;
@@ -144,7 +134,7 @@ export default function WishlistPage() {
       setPesquisaEfetuada(true);
 
       const res = await api.get("/external-games/search", {
-        params: { q: termo.trim(), page }
+        params: { q: termo.trim(), page: pagina }
       });
 
       const data = res.data || {};
@@ -252,14 +242,12 @@ export default function WishlistPage() {
     }
   }
 
-  // ✅ AQUI ESTÁ A CORREÇÃO
   async function irParaDetalhes(item) {
     const game = item.game || item;
 
-    // tenta rawg_id primeiro (é o que a tua página /explorar quer)
+  
     let rawgId =
       Number(item.rawg_id || game.rawg_id) ||
-      // se for rawg e não tiver rawg_id, o external_id costuma ser rawg
       ((item.source === "rawg" || game.source === "rawg") ? Number(item.external_id || game.external_id) : null);
 
     if (rawgId) {
@@ -267,7 +255,6 @@ export default function WishlistPage() {
       return;
     }
 
-    // se não tem rawg_id, tenta ligar automaticamente à RAWG
     const localGameId = Number(item.game_id || game.game_id || game.id);
 
     if (localGameId) {
@@ -297,7 +284,6 @@ export default function WishlistPage() {
       }
     }
 
-    // fallback: não dá para abrir detalhes RAWG
     toast.error("Este jogo ainda não tem ligação à RAWG (rawg_id).");
   }
 
@@ -323,10 +309,6 @@ export default function WishlistPage() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-2 shrink-0">
-            <RetroButton color="yellow" onClick={handleFix} disabled={loading} className="text-xs sm:text-sm">
-              <Wrench size={14} /> <span className="hidden sm:inline">Reparar</span> <span className="sm:hidden">Fix</span>
-            </RetroButton>
-
             <RetroButton color="slate" onClick={() => navigate("/app/steam-wishlist-import")} className="text-xs sm:text-sm">
               <Cloud size={14} /> Steam
             </RetroButton>
@@ -417,9 +399,9 @@ export default function WishlistPage() {
       {/* MODAL PESQUISA */}
       {mostrarModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/90 backdrop-blur-sm p-2 sm:p-4 animate-in fade-in duration-200">
-          <RetroCard color="cyan" className="w-full max-w-4xl max-h-[90vh] sm:max-h-[85vh] flex flex-col relative shadow-2xl">
+          <RetroCard color="rose" className="w-full max-w-4xl max-h-[90vh] sm:max-h-[85vh] flex flex-col relative shadow-2xl">
             <div className="p-3 sm:p-4 border-b-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
-              <h3 className="text-base sm:text-xl font-black text-cyan-600 dark:text-cyan-400 flex items-center gap-2 uppercase tracking-wide">
+              <h3 className="text-base sm:text-xl font-black text-rose-600 dark:text-rose-400 flex items-center gap-2 uppercase tracking-wide">
                 <Search size={18} /> <span className="hidden sm:inline">Adicionar à</span> Wishlist
               </h3>
               <button onClick={() => setMostrarModal(false)} className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-100 dark:hover:bg-rose-900/20 font-bold text-xl transition-colors"><X size={20} /></button>
@@ -435,7 +417,7 @@ export default function WishlistPage() {
                   value={termoPesquisa}
                   onChange={e => setTermoPesquisa(e.target.value)}
                 />
-                <RetroButton type="submit" color="cyan" disabled={loadingPesquisa}>
+                <RetroButton type="submit" color="rose" disabled={loadingPesquisa}>
                   {loadingPesquisa ? "..." : "PESQUISAR"}
                 </RetroButton>
               </form>
@@ -447,7 +429,7 @@ export default function WishlistPage() {
                 )}
               </div>
 
-              <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3">
+              <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3" ref={resultadosRef}>
                 {erroPesquisa && <div className="p-3 bg-rose-50 dark:bg-rose-900/30 border-2 border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 mb-2 font-bold text-sm">⚠️ {erroPesquisa}</div>}
 
                 {!podePesquisar && (

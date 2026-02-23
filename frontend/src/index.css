@@ -4,8 +4,6 @@
 
 @layer base {
   body {
-    /* REMOVI TODAS AS CORES DAQUI.
-       Agora a cor é controlada apenas pelo AppLayout.jsx e pelas classes dark: */
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
 }

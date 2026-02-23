@@ -1,4 +1,3 @@
-// src/pages/AdminAnalyticsPage.jsx
 import { useEffect, useState } from "react";
 import { TrendingUp, Users, Gamepad2, MessageSquare, Award, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";

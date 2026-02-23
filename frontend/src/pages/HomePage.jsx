@@ -1,4 +1,3 @@
-// src/pages/HomePage.jsx
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -73,7 +72,7 @@ function useInView(options = {}) {
   return [ref, isInView];
 }
 
-// ============ COMPONENTES RETRO ============
+// ============ COMPONENTES ============
 
 function RetroCard({ children, color = "fuchsia", className = "" }) {
   const colors = {
@@ -256,8 +255,6 @@ function ActivityItem({ activity, onNavigate }) {
     if (game?.external_id) {
         onNavigate(`/app/explorar/${game.external_id}`);
     } else if (game?.id) {
-        // Se só tiver ID interno, tenta ir, mas pode falhar se o user não tiver o jogo
-        // O ideal é o backend enviar external_id nas atividades
         onNavigate(`/app/explorar/${game.id}`); 
     }
   };
@@ -421,7 +418,6 @@ export default function HomePage() {
 
         if (collection.status === "fulfilled") {
           const colecao = collection.value?.data?.colecao || [];
-          // Sort by most recently added and take first 10
           const sorted = [...colecao].sort((a, b) => {
             const da = new Date(a.criado_em || 0).getTime();
             const db = new Date(b.criado_em || 0).getTime();
@@ -430,7 +426,6 @@ export default function HomePage() {
           setRecentGames(sorted.slice(0, 10));
         }
 
-        // Load existing wishlist to know which upcoming games are already wishlisted
         try {
           const wlRes = await api.get("/wishlist");
           const wlExternalIds = new Set(
@@ -465,7 +460,6 @@ export default function HomePage() {
       setWishlistedIds(prev => new Set([...prev, externalId]));
     } catch (err) {
       if (err?.response?.status === 409) {
-        // Already in wishlist
         setWishlistedIds(prev => new Set([...prev, externalId]));
       }
       console.error("Erro ao adicionar à wishlist:", err);

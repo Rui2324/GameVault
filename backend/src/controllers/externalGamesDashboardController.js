@@ -1,4 +1,3 @@
-// backend/src/controllers/externalGamesDashboardController.js
 const axios = require("axios");
 
 const RAWG_BASE = "https://api.rawg.io/api";
@@ -22,7 +21,7 @@ function mapGame(g) {
     background_image: g.background_image || null,
     cover_url: g.background_image || null,
 
-    // extras (às vezes o front também usa isto)
+    // extras 
     metacritic: g.metacritic ?? null,
     playtime: g.playtime ?? null,
 
@@ -40,7 +39,6 @@ async function rawgGet(path, params = {}) {
   const key = process.env.RAWG_API_KEY || process.env.RAWG_KEY;
 
   if (!key) {
-    // sem key: não rebenta o dashboard, só devolve vazio
     return { results: [] };
   }
 

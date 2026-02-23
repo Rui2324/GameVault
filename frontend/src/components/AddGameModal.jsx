@@ -1,4 +1,3 @@
-// src/components/AddGameModal.jsx
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Calendar, Star } from "lucide-react";
@@ -86,14 +85,12 @@ export default function AddGameModal({
 
   const podePesquisar = q.trim().length >= 2;
 
-  // limpar estado quando abre/fecha
   useEffect(() => {
     if (!open) return;
     setErro("");
     setResultados([]);
     setCount(0);
     setPage(1);
-    // não limpo q para poderes abrir e continuar a pesquisa
   }, [open]);
 
   useEffect(() => {
@@ -113,11 +110,9 @@ export default function AddGameModal({
       setErro("");
 
       const res = await api.get("/external-games/search", {
-        // backend espera "query" (também aceita "q" após ajuste)
         params: { query: q.trim(), page: p },
       });
 
-      // tenta apanhar vários formatos (depende do teu backend)
       const data = res.data || {};
       const list =
         data.jogos ||
@@ -146,7 +141,6 @@ export default function AddGameModal({
     }
   }
 
-  // pesquisa “live” com debounce simples
   useEffect(() => {
     if (!open) return;
 
@@ -162,7 +156,6 @@ export default function AddGameModal({
     }, 350);
 
     return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q, open]);
 
   const totalResultadosTexto = useMemo(() => {
@@ -210,10 +203,8 @@ export default function AddGameModal({
         notes: null,
       });
 
-      // callback para o AppLayout dar toast/refresh de ids
       onAddedToCollection?.({ title: getTitle(item), external_id: externalId });
 
-      // se o backend devolver o id da entry, manda para o detalhe da tua coleção
       const entryId = res?.data?.collection_entry_id;
       if (entryId) {
         onClose?.();
@@ -221,7 +212,6 @@ export default function AddGameModal({
         return;
       }
 
-      // fallback: fecha e vai para a coleção
       onClose?.();
       navigate("/app/colecao");
     } catch (e) {

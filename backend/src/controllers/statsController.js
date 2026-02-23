@@ -1,4 +1,3 @@
-// backend/src/controllers/statsController.js
 const db = require("../config/db");
 
 const TABLE = "collection_entries";
@@ -48,7 +47,7 @@ exports.getStats = async (req, res) => {
     );
     const total_horas_jogadas = Number(hoursRows?.[0]?.hours ?? 0);
 
-    // 4) média rating (ignora null)
+    // 4) média rating 
     const ratingRows = await safeQuery(
       `SELECT COALESCE(AVG(rating), NULL) AS avgRating
        FROM \`${TABLE}\`
@@ -64,7 +63,7 @@ exports.getStats = async (req, res) => {
       ? Math.round((completosCount / total_jogos) * 100) 
       : 0;
 
-    // 6) Jogos por género (precisa de JOIN com games)
+    // 6) Jogos por género 
     let jogos_por_genero = {};
     try {
       const genreRows = await safeQuery(
@@ -106,7 +105,7 @@ exports.getStats = async (req, res) => {
         [userId]
       );
 
-      // Processar plataformas (podem ser separadas por vírgula)
+      // Processar plataformas 
       const platCount = {};
       for (const row of platRows) {
         const platforms = (row.platform || "").split(",").map((s) => s.trim()).filter(Boolean);
@@ -121,7 +120,7 @@ exports.getStats = async (req, res) => {
           .slice(0, 5)
       );
     } catch {
-      // Se falhar, ignora
+      
     }
 
     return res.json({

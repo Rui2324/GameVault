@@ -1,4 +1,3 @@
-// backend/src/models/wishlistModel.js
 const pool = require("../config/db");
 
 // Lista a wishlist de um utilizador
@@ -84,7 +83,7 @@ async function adicionarWishlist(userId, gameId) {
   return rows[0];
 }
 
-// Remove da wishlist (garantir que pertence ao user)
+// Remove da wishlist 
 async function removerWishlist(id, userId) {
   await pool.query("DELETE FROM wishlist_entries WHERE id = ? AND user_id = ?", [
     id,

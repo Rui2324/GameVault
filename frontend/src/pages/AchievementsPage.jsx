@@ -1,4 +1,3 @@
-// src/pages/AchievementsPage.jsx
 import { useState, useEffect } from "react";
 import api from "../services/api";
 import { useToast } from "../components/Toast";
@@ -11,7 +10,7 @@ import {
   X
 } from "lucide-react";
 
-// ============ COMPONENTES RETRO ADAPTADOS ============
+// ============ COMPONENTES  ============
 
 function RetroCard({ children, color = "fuchsia", className = "" }) {
   const colors = {
@@ -126,7 +125,7 @@ export default function AchievementsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header Retro com Stats */}
+      {/* Header */}
       <RetroCard color="yellow" className="p-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(rgba(250,204,21,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(250,204,21,0.1)_1px,transparent_1px)] bg-[size:20px_20px]" />
         

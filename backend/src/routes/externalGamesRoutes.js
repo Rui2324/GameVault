@@ -1,4 +1,3 @@
-// backend/src/routes/externalGamesRoutes.js
 const express = require("express");
 const router = express.Router();
 

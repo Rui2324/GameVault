@@ -1,4 +1,3 @@
-// src/services/adminLogService.js
 const pool = require("../config/db");
 
 /**
@@ -12,7 +11,6 @@ async function logAdminAction(adminId, action, targetType = null, targetId = nul
     );
   } catch (error) {
     console.error("Erro ao registar log de admin:", error);
-    // Não lançar erro para não afetar a operação principal
   }
 }
 

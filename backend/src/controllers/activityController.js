@@ -1,4 +1,3 @@
-// src/controllers/activityController.js
 const pool = require("../config/db");
 
 // GET /api/activity/feed - Feed de atividade da comunidade
@@ -11,13 +10,11 @@ async function getFeed(req, res) {
     let followingFilter = "";
     const params = [];
 
-    // Se quiser ver apenas de quem segue - precisamos passar o parâmetro 3 vezes (uma por cada UNION)
     if (onlyFollowing && currentUserId) {
       followingFilter = `AND user_id IN (SELECT following_id FROM follows WHERE follower_id = ?)`;
-      params.push(currentUserId, currentUserId, currentUserId); // 3 vezes para os 3 UNIONs
+      params.push(currentUserId, currentUserId, currentUserId); 
     }
 
-    // Agregar atividades de várias fontes
     const query = `
       (
         SELECT 
@@ -83,12 +80,10 @@ async function getFeed(req, res) {
 
     const [activities] = await pool.query(query, params);
 
-    // Filtrar atividades duplicadas e formatar
     const seen = new Set();
     const uniqueActivities = [];
 
     for (const act of activities) {
-      // Criar chave única para evitar duplicados
       const key = `${act.type}-${act.user_id}-${act.game_id}-${act.activity_date}`;
       if (!seen.has(key)) {
         seen.add(key);
